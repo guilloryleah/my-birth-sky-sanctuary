@@ -3,25 +3,27 @@ from flatlib.chart import Chart
 from flatlib.datetime import Datetime
 from flatlib.geopos import GeoPos
 
-# 1. Set your birth data
-# Replace these with your exact birth time and coordinates
-date = Datetime('19XX/XX/XX', 'HH:MM', '+00:00') # YYYY/MM/DD and Time
-pos = GeoPos('29n45', '95w21') # Coordinates for Houston, TX
+# 1. THE DATA
+# Enter your Birth Date (YYYY/MM/DD), Time (24hr), and UTC Offset
+# Enter your Location (Houston is approximately 29n45, 95w21)
+birth_date = Datetime('19XX/XX/XX', 'HH:MM', '-06:00') 
+location = GeoPos('29n45', '95w21')
 
-# 2. Generate the Chart using Sidereal (Lahiri) Ayanamsa
-# This ensures it aligns with pure astronomical data
-chart = Chart(date, pos, hsys=const.HOUSES_PLACIDUS, ayanamsa=const.AYAN_LAHIRI)
+# 2. THE CALCULATION
+# We use AYAN_LAHIRI to ensure it is Sidereal/Vedic, not Western Tropical.
+chart = Chart(birth_date, location, ayanamsa=const.AYAN_LAHIRI)
 
-# 3. Output your core placements
-print(f"{'Planet':<10} | {'Sign':<12} | {'Degree'}")
-print("-" * 35)
+# 3. THE OUTPUT
+print(f"{'PLANET':<12} | {'SIGN':<15} | {'DEGREE'}")
+print("-" * 40)
 
-planets = [
+# List of bodies to check
+bodies = [
     const.SUN, const.MOON, const.MERCURY, 
     const.VENUS, const.MARS, const.JUPITER, 
-    const.SATURN
+    const.SATURN, const.RAHU, const.KETU
 ]
 
-for p in planets:
-    obj = chart.get(p)
-    print(f"{obj.id:<10} | {obj.sign:<12} | {obj.signlon:.2f}°")
+for body in bodies:
+    p = chart.get(body)
+    print(f"{p.id:<12} | {p.sign:<15} | {p.signlon:.2f}°")
