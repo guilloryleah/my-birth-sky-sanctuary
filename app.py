@@ -7,15 +7,9 @@ import numpy as np
 # --- SANCTUARY CONFIG ---
 st.set_page_config(page_title="My Birth Sky", layout="wide")
 
-st.markdown("""
-    <style>
-    .main { background-color: #004d40; color: #ffffff; }
-    h1 { color: #ffca28; font-family: 'Playfair Display', serif; }
-    .stButton>button { background-color: #ffca28; color: #004d40; border-radius: 20px; font-weight: bold; }
-    .report-box { background-color: #00241f; padding: 20px; border-radius: 15px; border-left: 5px solid #ffca28; margin-bottom: 20px; }
-    .poem-box { background-color: #001a17; padding: 30px; border-radius: 20px; border: 1px solid #ffca28; font-style: italic; text-align: center; margin: 20px 0; line-height: 1.6; }
-    </style>
-    """, unsafe_allow_name_with_html=True)
+# Simplified Style to prevent TypeErrors
+st.markdown("<style>.main { background-color: #004d40; color: #ffffff; }</style>", unsafe_allow_name_with_html=True)
+st.markdown("<style>h1 { color: #ffca28; font-family: 'serif'; }</style>", unsafe_allow_name_with_html=True)
 
 st.title("✨ Your Birth Sky Blueprint")
 
@@ -54,21 +48,19 @@ if st.button("Generate My Blueprint"):
     planets_data = load('de421.bsp')
     earth = planets_data['earth']
     
-    # Calculation Engine
+    # Calc Ascendant
     sidereal_time = t.gmst + (lon / 15.0)
     asc_deg = (sidereal_time * 15 + 90) % 360 
     asc_s = get_sign(asc_deg)
     
-    # Celestial Positions
-    bodies = {'Sun': 'sun', 'Moon': 'moon', 'Mercury': 'mercury', 'Venus': 'venus', 'Mars': 'mars', 'Jupiter': 'jupiter_barycenter', 'Saturn': 'saturn_barycenter'}
-    results = {}
-    for name, key in bodies.items():
-        p_pos = earth.at(t).observe(planets_data[key]).ecliptic_latlon()[1].degrees
-        results[name] = {"deg": p_pos, "sign": get_sign(p_pos)}
-
-    # Nodes
-    rahu_s = get_sign((results['Moon']['deg'] + 45) % 360)
-    ketu_s = get_sign((rahu_s_deg := (results['Moon']['deg'] + 45) % 360) + 180 % 360)
+    # Calc Positions
+    sun_pos = earth.at(t).observe(planets_data['sun']).ecliptic_latlon()[1].degrees
+    moon_pos = earth.at(t).observe(planets_data['moon']).ecliptic_latlon()[1].degrees
+    
+    sun_s = get_sign(sun_pos)
+    moon_s = get_sign(moon_pos)
+    rahu_s = get_sign((moon_pos + 45) % 360)
+    ketu_s = get_sign((moon_pos + 225) % 360)
 
     # 1. Visualization
     fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={'projection': 'polar'})
@@ -76,37 +68,26 @@ if st.button("Generate My Blueprint"):
     ax.set_facecolor('#00241f')
     ax.text(0, 0, wisdom[asc_s]['symbol'], color='#ffca28', fontsize=65, ha='center', va='center')
     
-    for name, data in results.items():
-        rad = np.deg2rad(data['deg'])
+    # Planet dots
+    for deg, label in [(sun_pos, 'Sun'), (moon_pos, 'Moon')]:
+        rad = np.deg2rad(deg)
         ax.scatter(rad, 0.9, color='#ffca28', s=100)
-        ax.text(rad, 1.1, name, color='white', fontsize=8, ha='center')
+        ax.text(rad, 1.1, label, color='white', fontsize=8, ha='center')
 
     ax.set_yticklabels([]); ax.set_xticks([]); ax.grid(False)
     st.pyplot(fig)
 
-    # 2. The Nodal Poem
-    st.markdown(f"""
-    <div class='poem-box'>
-    <h3>A Song for {user_name}</h3>
-    In the ancient halls of <b>{ketu_s}</b>, your wisdom was deep,<br>
-    A treasure of silence you've chosen to keep.<br>
-    But the dragon now turns toward <b>{rahu_s}</b>’s new light,<br>
-    To wake up the spirit and dance in the white.<br>
-    The Mountain is poised, the blueprint is clear,<br>
-    The universe whispers: <i>You belong here.</i>
-    </div>
-    """, unsafe_allow_name_with_html=True)
-
-    # 3. Integral Analysis
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.subheader("🧘 Yoga")
-        st.write(f"**Pose:** {wisdom[asc_s]['pose']}")
-    with col2:
-        st.subheader("🌿 Ritual")
-        st.write(f"**Aroma:** {wisdom[results['Sun']['sign']]['aroma']}")
-    with col3:
-        st.subheader("🍲 Ayurveda")
-        st.write(f"**Focus:** {wisdom[results['Moon']['sign']]['focus']}")
-    
+    # 2. Output
     st.balloons()
+    st.markdown(f"### Hi {user_name},")
+    st.write(f"**Your Ascendant Rising:** {asc_s} {wisdom[asc_s]['symbol']}")
+    
+    st.markdown(f"**The Nodal Song:** In {ketu_s} your roots were sown; in {rahu_s} your light is shown.")
+    
+    st.markdown("---")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.write(f"🧘 **Yoga:** {wisdom[asc_s]['pose']}")
+        st.write(f"🌿 **Aroma:** {wisdom[sun_s]['aroma']}")
+    with c2:
+        st.write(f"🍲 **Ayurveda:** {wisdom[moon_s]['focus']}")
