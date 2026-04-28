@@ -2,75 +2,93 @@ import streamlit as st
 from skyfield.api import load, Topos
 from datetime import datetime
 
-# 1. Setup & Styling
+# 1. Page Setup
 st.set_page_config(page_title="My Birth Sky", layout="wide")
 
-# Initialize "memory" so the results don't disappear
-if 'generated' not in st.session_state:
-    st.session_state.generated = False
-
+# 2. Force the background and text colors
 st.markdown(
     """
     <style>
-    .main { background-color: #004d40; color: #ffffff; }
-    h1, h2, h3 { color: #ffca28 !important; }
-    p, span, label, .stMarkdown { color: #ffffff !important; }
-    .stButton>button {
-        background-color: #ffca28;
-        color: #004d40;
+    .stApp {
+        background-color: #004d40;
+        color: #ffffff;
+    }
+    h1, h2, h3, [data-testid="stMetricValue"] {
+        color: #ffca28 !important;
+    }
+    .stMarkdown, p, label {
+        color: #ffffff !important;
+    }
+    div.stButton > button {
+        background-color: #ffca28 !important;
+        color: #004d40 !important;
         font-weight: bold;
         width: 100%;
+        border-radius: 10px;
     }
     </style>
     """, 
     unsafe_allow_html=True
 )
 
-# 2. Header
-st.title("✨ My Birth Sky")
-st.subheader("High-Precision Astronomical Birth Map")
-
-# 3. User Inputs in Sidebar
+# 3. Sidebar Inputs
 with st.sidebar:
     st.header("Birth Details")
-    birth_date = st.date_input("Date of Birth", value=datetime(1970, 1, 1))
-    birth_time = st.time_input("Time of Birth", value=datetime.strptime("12:00", "%H:%M").time())
-    lat = st.number_input("Latitude", value=29.76)
-    lon = st.number_input("Longitude", value=-95.36)
+    b_date = st.date_input("Date of Birth", value=datetime(1970, 1, 1))
+    b_time = st.time_input("Time of Birth", value=datetime.strptime("12:00", "%H:%M").time())
+    lat = st.number_input("Latitude (e.g. 29.76)", value=29.76)
+    lon = st.number_input("Longitude (e.g. -95.36)", value=-95.36)
     
-    if st.button("Generate My Sky Map"):
-        st.session_state.generated = True
+    # We use a direct "if" check for the button here
+    generate = st.button("✨ Reveal My Birth Sky")
 
-# 4. Display Results
-if st.session_state.generated:
+# 4. Main Display
+st.title("✨ My Birth Sky")
+
+if generate:
     try:
-        ts = load.timescale()
-        eph = load('de421.bsp')
-        
-        dt = datetime.combine(birth_date, birth_time)
-        t = ts.utc(dt.year, dt.month, dt.day, dt.hour, dt.minute)
-        location = eph['earth'] + Topos(latitude_degrees=lat, longitude_degrees=lon)
-        
-        st.write(f"### Your Astronomical Blueprint: {birth_date}")
-        
-        planets = {
-            'Sun': eph['sun'], 'Moon': eph['moon'], 'Mars': eph['mars'],
-            'Jupiter': eph['jupiter_barycenter'], 'Venus': eph['venus'], 'Saturn': eph['saturn_barycenter']
-        }
+        with st.spinner("Consulting NASA JPL Data..."):
+            # Load timescale and ephemeris (The NASA Data)
+            ts = load.timescale()
+            # This line handles the download if the file is missing
+            eph = load('de421.bsp')
+            
+            # Create the specific moment in time
+            dt = datetime.combine(b_date, b_time)
+            t = ts.utc(dt.year, dt.month, dt.day, dt.hour, dt.minute)
+            
+            # Set the observer's location
+            location = eph['earth'] + Topos(latitude_degrees=lat, longitude_degrees=lon)
+            
+            st.write(f"## Your Astronomical Blueprint")
+            st.write(f"Positions for **{b_date}** at **{b_time}**")
+            
+            # Planets to track
+            bodies = {
+                'Sun': eph['sun'], 'Moon': eph['moon'], 'Mars': eph['mars'],
+                'Jupiter': eph['jupiter_barycenter'], 'Venus': eph['venus'], 
+                'Saturn': eph['saturn_barycenter'], 'Mercury': eph['mercury']
+            }
 
-        cols = st.columns(3)
-        for i, (name, body) in enumerate(planets.items()):
-            astrometric = location.at(t).observe(body)
-            ra, dec, distance = astrometric.radec()
-            with cols[i % 3]:
-                st.metric(label=name, value=f"{ra.hours:.2f}h RA")
-                st.write(f"Declination: {dec.degrees:.2f}°")
-
+            # Create columns for the results
+            cols = st.columns(3)
+            for i, (name, body) in enumerate(bodies.items()):
+                astrometric = location.at(t).observe(body)
+                ra, dec, distance = astrometric.radec()
+                
+                with cols[i % 3]:
+                    st.metric(label=name, value=f"{ra.hours:.2f}h RA")
+                    st.caption(f"Declination: {dec.degrees:.2f}°")
+                    
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"Something went wrong: {e}")
 else:
-    # This is the "Welcome" screen that shows until they hit the button
-    st.info("👈 Enter your birth details in the sidebar and click the gold button to reveal your map!")
+    # This is the "Welcome" screen
+    st.info("Everything is ready! Just enter your details in the sidebar and click the button to see your sky.")
     st.write("---")
-    st.write("### Why use astronomical data?")
-    st.write("Standard systems use fixed dates, but the sky is always moving. This app uses NASA data to show you where the planets *actually* were when you took your first breath.")
+    st.markdown("""
+    ### About this Blueprint
+    Unlike traditional systems, this app uses the **Skyfield** library and **NASA JPL** data to calculate exactly where the planets were relative to the stars. 
+    - **RA (Right Ascension):** The longitude of the sky.
+    - **Declination:** The latitude of the sky.
+    """)
