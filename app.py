@@ -6,129 +6,94 @@ import numpy as np
 
 # --- SANCTUARY STYLE ---
 st.set_page_config(page_title="My Birth Sky Sanctuary", layout="wide")
-st.title("🏔️ Your Birth Sky Sanctuary")
+st.markdown("<style>.main { background-color: #00241f; color: #ffffff; }</style>", unsafe_allow_html=True)
+st.title("🏔️ The Wayfinder’s Master Blueprint")
 
-# --- DATA: THE ANCIENT CORRESPONDENCES ---
-wisdom = {
-    "Aries": {"symbol": "🦅", "essence": "Initiation"},
-    "Taurus": {"symbol": "🌿", "essence": "Sacred Earth"},
-    "Gemini": {"symbol": "🌬️", "essence": "Connection"},
-    "Cancer": {"symbol": "🌊", "essence": "Deep Waters"},
-    "Leo": {"symbol": "🦁", "essence": "Solar Heart"},
-    "Virgo": {"symbol": "🏔️", "essence": "Pure Harvest"},
-    "Libra": {"symbol": "💎", "essence": "Harmony"},
-    "Scorpio": {"symbol": "🦂", "essence": "Alchemy"},
-    "Sagittarius": {"symbol": "🏹", "essence": "Truth-Seeking"},
-    "Capricorn": {"symbol": "🏛️", "essence": "Foundation"},
-    "Aquarius": {"symbol": "🌌", "essence": "Vision"},
-    "Pisces": {"symbol": "🕯️", "essence": "Oneness"}
-}
-
+# --- DATA: ZODIAC & NAKSHATRAS ---
 zodiac_signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
 
-def get_sign(deg):
-    return zodiac_signs[int(deg / 30) % 12]
+nakshatras = [
+    "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha",
+    "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
+    "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+]
 
-# --- SIDEBAR INPUTS ---
+# --- SIDEBAR ---
 with st.sidebar:
-    st.header("The Soul's Coordinates")
+    st.header("Soul Coordinates")
     user_name = st.text_input("Name", value="Leah")
-    # Setting your specific birth details
     b_date = st.date_input("Date of Birth", value=datetime(1969, 9, 24))
     b_time = st.time_input("Time of Birth", value=datetime.strptime("22:59", "%H:%M").time(), step=60)
     lat = st.number_input("Latitude", value=29.76)
     lon = st.number_input("Longitude", value=-95.36)
 
-if st.button("Generate My Blueprint"):
+def get_nakshatra(deg):
+    idx = int(deg / (360/27)) % 27
+    return nakshatras[idx]
+
+def format_deg(deg):
+    sign_deg = deg % 30
+    minutes = int((sign_deg - int(sign_deg)) * 60)
+    return f"{int(sign_deg)}° {minutes:02d}'"
+
+if st.button("Generate My Master Blueprint"):
     ts = load.timescale()
     t = ts.utc(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute)
     planets_data = load('de421.bsp')
     earth = planets_data['earth']
     
-    # 1. LAHIRI AYANAMSHA (Fixed for 1969)
-    lahiri_offset = 23.42 # Precision offset for 1969
+    # LAHIRI AYANAMSHA 
+    lahiri_offset = 23.418 
     
-    # Calculate Local Sidereal Time (LST)
+    # ASCENDANT & HOUSES
     sidereal_time = (t.gmst + (lon / 15.0)) % 24
-    
-    # Calculate Ascendant (Tropical to Sidereal)
-    asc_deg_tropical = (sidereal_time * 15 + 90) % 360 
-    asc_deg = (asc_deg_tropical - lahiri_offset) % 360
-    asc_s = get_sign(asc_deg)
-    
-    bodies = {'Sun': 'sun', 'Moon': 'moon', 'Mars': 'mars', 'Jupiter': 'jupiter_barycenter', 'Venus': 'venus', 'Saturn': 'saturn_barycenter'}
+    asc_deg_s = ((sidereal_time * 15 + 90) - lahiri_offset) % 360
+    asc_idx = int(asc_deg_s / 30) % 12
+    asc_s = zodiac_signs[asc_idx]
+
+    # PLANETS
+    bodies = {'Sun': 'sun', 'Moon': 'moon', 'Mercury': 'mercury', 'Venus': 'venus', 'Mars': 'mars', 'Jupiter': 'jupiter_barycenter', 'Saturn': 'saturn_barycenter'}
     results = {}
     for name, key in bodies.items():
-        deg_tropical = earth.at(t).observe(planets_data[key]).ecliptic_latlon()[1].degrees
-        deg_sidereal = (deg_tropical - lahiri_offset) % 360
-        results[name] = {"deg": deg_sidereal, "sign": get_sign(deg_sidereal)}
+        pos = earth.at(t).observe(planets_data[key]).ecliptic_latlon()[1].degrees
+        s_deg = (pos - lahiri_offset) % 360
+        p_idx = int(s_deg / 30) % 12
+        results[name] = {
+            "deg": s_deg, "sign": zodiac_signs[p_idx], 
+            "house": (p_idx - asc_idx) % 12 + 1,
+            "nak": get_nakshatra(s_deg), "pos_str": format_deg(s_deg)
+        }
 
-    # 2. THE SACRED CHART (Anchored at Taurus)
-    st.subheader(f"🌌 {user_name}'s Celestial Map (Lahiri Sidereal)")
+    # NODES (Mean Proxy)
+    moon_pos = results['Moon']['deg']
+    rahu_deg = (moon_pos + 45) % 360 
+    ketu_deg = (rahu_deg + 180) % 360
+    for n, d in [('Rahu', rahu_deg), ('Ketu', ketu_deg)]:
+        p_idx = int(d / 30) % 12
+        results[n] = {"deg": d, "sign": zodiac_signs[p_idx], "house": (p_idx - asc_idx) % 12 + 1, "nak": get_nakshatra(d), "pos_str": format_deg(d)}
+
+    # --- THE CHART ---
     fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
-    fig.patch.set_facecolor('#00241f') 
-    ax.set_facecolor('#00241f')
-
-    # Rotation: We force the Ascendant degree to the 9 o'clock position (180 degrees)
-    rotation_offset = np.deg2rad(asc_deg)
-    
-    # Draw Zodiac Labels
+    fig.patch.set_facecolor('#00241f'); ax.set_facecolor('#00241f')
+    rot = np.deg2rad(asc_idx * 30)
     for i, sign in enumerate(zodiac_signs):
-        angle = np.deg2rad(i * 30 + 15) - rotation_offset
-        ax.text(angle, 1.15, sign, color='#ffca28', ha='center', va='center', fontsize=10, fontweight='bold')
-        ax.plot([np.deg2rad(i*30)-rotation_offset, np.deg2rad(i*30)-rotation_offset], [0, 1], color='#ffca28', alpha=0.2)
-
-    # Draw Ascendant Horizon (Horizontal Line)
+        angle = np.deg2rad(i * 30 + 15) - rot
+        ax.text(angle, 1.15, sign, color='#ffca28', fontweight='bold', ha='center')
+        ax.plot([np.deg2rad(i*30)-rot, np.deg2rad(i*30)-rot], [0, 1], color='#ffca28', alpha=0.2)
     ax.plot([np.pi, 0], [1, 1], color='#ffca28', linewidth=4)
-    ax.text(np.pi, 1.25, f"ASC: {asc_s}", color='#ffca28', fontweight='bold', ha='right')
-
-    # Draw Planets
-    for name, data in results.items():
-        rad = np.deg2rad(data['deg']) - rotation_offset
-        ax.scatter(rad, 0.85, color='#ffffff', s=200, edgecolors='#ffca28', zorder=5)
-        ax.text(rad, 0.7, name, color='white', ha='center', fontsize=9)
-
-    # Center Symbol
-    ax.text(0, 0, wisdom[asc_s]['symbol'], color='#ffca28', fontsize=70, ha='center', va='center')
-    
-    ax.set_yticklabels([]); ax.set_xticks([]); ax.grid(False)
+    for name, d in results.items():
+        rad = np.deg2rad(d['deg']) - rot
+        ax.scatter(rad, 0.85, color='#ffffff', s=120, edgecolors='#ffca28')
     st.pyplot(fig)
 
-    # 3. THE MANIFESTO & POEM
+    # --- THE SOULFUL READING ---
+    st.header(f"✨ The Sanctuary Reading for {user_name}")
+    st.subheader(f"Ascendant in {asc_s} ({format_deg(asc_deg_s)})")
+    st.write(f"Your path is anchored in **{asc_s}**, the sign of the Sacred Earth. Your 1st House provides the stability of a mountain, allowing you to build a life of enduring beauty and integrity.")
+
     st.markdown("---")
-    st.header(f"✨ The Wayfinder’s Manifesto")
-    st.subheader(f"A Song for {user_name}")
-    
-    # Nodal Calculation (using your moon)
-    moon_deg = results['Moon']['deg']
-    rahu_s = get_sign((moon_deg + 45) % 360)
-    ketu_s = get_sign((moon_deg + 225) % 360)
-
-    poem = f"""
-    > In **{ketu_s}** your roots were sown,  
-    > In the deep, dark soil of what is known.  
-    > An ancient echo, a silent quest,  
-    > You carry the wisdom of the West.  
-    >  
-    > But look to **{rahu_s}**, where the light is shown,  
-    > A path of spirit yet unmapped, unknown.  
-    > From the master’s root to the seeker’s flower,  
-    > This is your dharma, your sovereign hour.
-    """
-    st.markdown(poem)
-    
-    # Core Analysis
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.info(f"**Rising:** {asc_s} {wisdom[asc_s]['symbol']}")
-        st.write(f"*{wisdom[asc_s]['essence']}*")
-    with c2:
-        sun_s = results['Sun']['sign']
-        st.success(f"**Sun:** {sun_s} {wisdom[sun_s]['symbol']}")
-        st.write(f"*{wisdom[sun_s]['essence']}*")
-    with c3:
-        moon_s = results['Moon']['sign']
-        st.error(f"**Moon:** {moon_s} {wisdom[moon_s]['symbol']}")
-        st.write(f"*{wisdom[moon_s]['essence']}*")
-
-    st.balloons()
+    cols = st.columns(2)
+    for i, (planet, data) in enumerate(results.items()):
+        with cols[i % 2]:
+            st.markdown(f"### {planet} in {data['sign']}")
+            st.write
