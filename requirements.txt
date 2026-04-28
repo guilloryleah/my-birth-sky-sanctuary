@@ -1,3 +1,4 @@
-skyfield
 streamlit
+skyfield
 matplotlib
+numpy
