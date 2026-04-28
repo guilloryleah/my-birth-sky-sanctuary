@@ -71,4 +71,63 @@ if st.button("Generate Master Blueprint"):
     # Add Rahu and Ketu (Calculated from Moon as a Mean Node proxy)
     moon_deg = results['Moon']['RawDeg']
     rahu_deg = (moon_deg + 45) % 360 
-    ketu_deg = (rahu_deg + 180)
+    ketu_deg = (rahu_deg + 180) % 360
+    for node_name, node_deg in [('Rahu', rahu_deg), ('Ketu', ketu_deg)]:
+        n_idx = int(node_deg / 30) % 12
+        results[node_name] = {
+            "Constellation": "N/A", # Nodes are points, not bodies
+            "Position": fmt_deg(node_deg),
+            "Nakshatra": get_nak(node_deg),
+            "RawDeg": node_deg,
+            "Sign": zodiac_signs[n_idx],
+            "House": (n_idx - asc_sign_idx) % 12 + 1
+        }
+
+    # --- THE LABELED CHART WHEEL ---
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
+    fig.patch.set_facecolor('#00241f'); ax.set_facecolor('#00241f')
+    
+    # Rotate the wheel so Taurus (House 1) is at 180° (Horizontal Left)
+    rot_offset = np.deg2rad(asc_sign_idx * 30)
+    
+    # Draw Zodiac Boundaries and Labels
+    for i, sign in enumerate(zodiac_signs):
+        angle = np.deg2rad(i * 30 + 15) - rot_offset
+        ax.text(angle, 1.15, sign, color='#ffca28', fontweight='bold', ha='center', fontsize=10)
+        ax.plot([np.deg2rad(i*30)-rot_offset, np.deg2rad(i*30)-rot_offset], [0, 1], color='#ffca28', alpha=0.2)
+    
+    # Draw the ASC Horizon line (Bold Gold)
+    ax.plot([np.pi, 0], [1, 1], color='#ffca28', linewidth=4, zorder=6) 
+    ax.text(np.pi, 1.25, "ASC: TAURUS", color='#ffca28', fontweight='bold', ha='right')
+
+    # Draw Planets WITH NAMED LABELS
+    for name, data in results.items():
+        rad = np.deg2rad(data['RawDeg']) - rot_offset
+        ax.scatter(rad, 0.85, color='white', s=160, edgecolors='#ffca28', zorder=5)
+        # The line below ensures planet names appear on the wheel
+        ax.text(rad, 0.73, name, color='white', fontsize=9, fontweight='bold', ha='center')
+
+    ax.set_yticklabels([]); ax.set_xticks([]); ax.grid(False)
+    st.pyplot(fig)
+
+    # --- THE MANIFESTO ANALYSIS ---
+    st.header(f"✨ The Wayfinder’s Reading: {user_name}")
+    st.info(f"Anchored in the literal stars of **Taurus**, your blueprint utilizes Whole Sign Houses and the Lahiri Ayanamsha.")
+
+    # Display readings in an organized grid
+    col1, col2 = st.columns(2)
+    for i, (planet, d) in enumerate(results.items()):
+        with (col1 if i % 2 == 0 else col2):
+            with st.expander(f"**{planet}** — House {d['House']} ({d['Sign']})"):
+                st.write(f"**Exact Degree:** {d['Position']}")
+                st.write(f"**Nakshatra:** {d['Nakshatra']}")
+                if planet == 'Sun':
+                    st.write("Your solar core in the 5th House drives a creative 'Pure Harvest' of the soul.")
+                elif planet == 'Moon':
+                    st.write("Your lunar mind in the 10th House seeks collective sanctuary and public integrity.")
+                elif planet == 'Rahu':
+                    st.write("The North Node: Your unmapped path of light.")
+                elif planet == 'Ketu':
+                    st.write("The South Node: Mastered roots and ancestral wisdom.")
+
+    st.balloons()
