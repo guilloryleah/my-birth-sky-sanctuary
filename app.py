@@ -5,31 +5,33 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
-# --- SANCTUARY STYLE ---
-st.set_page_config(page_title="The Literal Sky Sanctuary", layout="wide")
-st.markdown("<style>.main { background-color: #00241f; color: #ffffff; }</style>", unsafe_allow_html=True)
+# 1. SETUP & DATA LOADING
+st.set_page_config(page_title="Sky Sanctuary", layout="wide")
 st.title("🔭 The Wayfinder’s Master Blueprint")
 
-# --- DATA LOADER (Error Prevention) ---
 @st.cache_resource
-def load_sky_data():
-    # This automatically downloads the planet data if it isn't in your GitHub folder
+def get_data():
+    # Downloads the necessary NASA/JPL planetary data
     eph = load('de421.bsp')
     const = constellations.load_atliau()
     return eph, const
 
-planets_data, load_constellation = load_sky_data()
-ts = load.timescale()
-earth = planets_data['earth']
+try:
+    planets_data, load_constellation = get_data()
+    ts = load.timescale()
+    earth = planets_data['earth']
+except Exception as e:
+    st.error(f"Data loading error: {e}")
+    st.stop()
 
-# --- ZODIAC & NAKSHATRAS ---
+# 2. ZODIAC & NAKSHATRAS
 zodiac_signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
 nakshatras = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"]
 
 def get_nak(deg): return nakshatras[int(deg / (360/27)) % 27]
 def fmt_deg(deg): return f"{int(deg % 30)}° {int((deg % 30 - int(deg % 30)) * 60):02d}'"
 
-# --- SIDEBAR ---
+# 3. USER INPUTS
 with st.sidebar:
     st.header("Soul Coordinates")
     user_name = st.text_input("Name", value="Leah")
@@ -39,12 +41,12 @@ with st.sidebar:
 
 if st.button("Generate Master Blueprint"):
     t = ts.utc(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute)
+    # Lahiri Ayanamsha for 1969
     lahiri_ayan = 23.418
     
-    # 1. TAURUS ASCENDANT ANCHOR
-    asc_sign_idx = 1 # Taurus
+    # TAURUS ASCENDANT ANCHOR
+    asc_sign_idx = 1 
     
-    # 2. CALCULATE PLANETS
     bodies = {'Sun': 'sun', 'Moon': 'moon', 'Mercury': 'mercury', 'Venus': 'venus', 
               'Mars': 'mars', 'Jupiter': 'jupiter_barycenter', 'Saturn': 'saturn_barycenter'}
     
@@ -64,11 +66,12 @@ if st.button("Generate Master Blueprint"):
             "House": (p_idx - asc_sign_idx) % 12 + 1
         }
 
-    # --- THE LABELED CHART ---
+    # 4. CHART VISUAL
     fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
-    fig.patch.set_facecolor('#00241f'); ax.set_facecolor('#00241f')
-    rot = np.deg2rad(asc_sign_idx * 30)
+    fig.patch.set_facecolor('#00241f')
+    ax.set_facecolor('#00241f')
     
+    rot = np.deg2rad(asc_sign_idx * 30)
     for i, sign in enumerate(zodiac_signs):
         angle = np.deg2rad(i * 30 + 15) - rot
         ax.text(angle, 1.15, sign, color='#ffca28', fontweight='bold', ha='center')
@@ -79,18 +82,15 @@ if st.button("Generate Master Blueprint"):
 
     for name, data in results.items():
         rad = np.deg2rad(data['RawDeg']) - rot
-        ax.scatter(rad, 0.85, color='white', s=150, edgecolors='#ffca28', zorder=5)
-        # PLANET NAMES ARE HERE
-        ax.text(rad, 0.73, name, color='white', fontsize=9, fontweight='bold', ha='center')
+        ax.scatter(rad, 0.85, color='white', s=150, edgecolors='#ffca28')
+        # LABELS
+        ax.text(rad, 0.73, name, color='white', fontsize=10, fontweight='bold', ha='center')
 
     ax.set_yticklabels([]); ax.set_xticks([]); ax.grid(False)
     st.pyplot(fig)
 
+    # 5. ANALYSIS
     st.header(f"✨ Sanctuary Reading: {user_name}")
-    st.write(f"Your path is anchored in the literal stars of **Taurus**.")
-    
     for planet, d in results.items():
-        with st.expander(f"{planet} in {d['Constellation']}"):
+        with st.expander(f"{planet} in {d['Constellation']} ({d['Position']})"):
             st.write(f"**House {d['House']}** | **Nakshatra:** {d['Nakshatra']}")
-
-    st.balloons()
