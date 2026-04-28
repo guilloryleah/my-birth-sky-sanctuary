@@ -33,7 +33,8 @@ def get_sign(deg):
 with st.sidebar:
     st.header("The Soul's Coordinates")
     user_name = st.text_input("Name", value="Leah")
-    b_date = st.date_input("Date of Birth", value=datetime(1975, 1, 1))
+    # Setting your specific birth details
+    b_date = st.date_input("Date of Birth", value=datetime(1969, 9, 24))
     b_time = st.time_input("Time of Birth", value=datetime.strptime("22:59", "%H:%M").time(), step=60)
     lat = st.number_input("Latitude", value=29.76)
     lon = st.number_input("Longitude", value=-95.36)
@@ -44,12 +45,13 @@ if st.button("Generate My Blueprint"):
     planets_data = load('de421.bsp')
     earth = planets_data['earth']
     
-    # 1. LAHIRI AYANAMSHA CALCULATION
-    # The offset for Lahiri is roughly 24.2 degrees for the 1970s
-    lahiri_offset = 24.23 + (0.013 * (b_date.year - 1950))
+    # 1. LAHIRI AYANAMSHA (Fixed for 1969)
+    lahiri_offset = 23.42 # Precision offset for 1969
     
+    # Calculate Local Sidereal Time (LST)
     sidereal_time = (t.gmst + (lon / 15.0)) % 24
-    # Calculate Ascendant and shift it to Sidereal/Lahiri
+    
+    # Calculate Ascendant (Tropical to Sidereal)
     asc_deg_tropical = (sidereal_time * 15 + 90) % 360 
     asc_deg = (asc_deg_tropical - lahiri_offset) % 360
     asc_s = get_sign(asc_deg)
@@ -57,17 +59,17 @@ if st.button("Generate My Blueprint"):
     bodies = {'Sun': 'sun', 'Moon': 'moon', 'Mars': 'mars', 'Jupiter': 'jupiter_barycenter', 'Venus': 'venus', 'Saturn': 'saturn_barycenter'}
     results = {}
     for name, key in bodies.items():
-        # Get Tropical deg, then subtract Lahiri offset
         deg_tropical = earth.at(t).observe(planets_data[key]).ecliptic_latlon()[1].degrees
         deg_sidereal = (deg_tropical - lahiri_offset) % 360
         results[name] = {"deg": deg_sidereal, "sign": get_sign(deg_sidereal)}
 
-    # 2. THE SACRED CHART (Rotated to Ascendant)
-    st.subheader("🌌 The Celestial Map (Lahiri Sidereal)")
+    # 2. THE SACRED CHART (Anchored at Taurus)
+    st.subheader(f"🌌 {user_name}'s Celestial Map (Lahiri Sidereal)")
     fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
     fig.patch.set_facecolor('#00241f') 
     ax.set_facecolor('#00241f')
 
+    # Rotation: We force the Ascendant degree to the 9 o'clock position (180 degrees)
     rotation_offset = np.deg2rad(asc_deg)
     
     # Draw Zodiac Labels
@@ -76,9 +78,9 @@ if st.button("Generate My Blueprint"):
         ax.text(angle, 1.15, sign, color='#ffca28', ha='center', va='center', fontsize=10, fontweight='bold')
         ax.plot([np.deg2rad(i*30)-rotation_offset, np.deg2rad(i*30)-rotation_offset], [0, 1], color='#ffca28', alpha=0.2)
 
-    # Draw Ascendant Line (The 9 o'clock Position)
+    # Draw Ascendant Horizon (Horizontal Line)
     ax.plot([np.pi, 0], [1, 1], color='#ffca28', linewidth=4)
-    ax.text(np.pi, 1.25, "ASCENDANT", color='#ffca28', fontweight='bold', ha='right')
+    ax.text(np.pi, 1.25, f"ASC: {asc_s}", color='#ffca28', fontweight='bold', ha='right')
 
     # Draw Planets
     for name, data in results.items():
@@ -97,6 +99,7 @@ if st.button("Generate My Blueprint"):
     st.header(f"✨ The Wayfinder’s Manifesto")
     st.subheader(f"A Song for {user_name}")
     
+    # Nodal Calculation (using your moon)
     moon_deg = results['Moon']['deg']
     rahu_s = get_sign((moon_deg + 45) % 360)
     ketu_s = get_sign((moon_deg + 225) % 360)
@@ -115,13 +118,17 @@ if st.button("Generate My Blueprint"):
     st.markdown(poem)
     
     # Core Analysis
-    c1, c2 = st.columns(2)
+    c1, c2, c3 = st.columns(3)
     with c1:
-        st.info(f"**Ascendant:** {asc_s} {wisdom[asc_s]['symbol']}")
-        st.write(f"**Essence:** {wisdom[asc_s]['essence']}")
+        st.info(f"**Rising:** {asc_s} {wisdom[asc_s]['symbol']}")
+        st.write(f"*{wisdom[asc_s]['essence']}*")
     with c2:
         sun_s = results['Sun']['sign']
-        st.success(f"**Sun Sign:** {sun_s} {wisdom[sun_s]['symbol']}")
-        st.write(f"**Soul Focus:** {wisdom[sun_s]['essence']}")
+        st.success(f"**Sun:** {sun_s} {wisdom[sun_s]['symbol']}")
+        st.write(f"*{wisdom[sun_s]['essence']}*")
+    with c3:
+        moon_s = results['Moon']['sign']
+        st.error(f"**Moon:** {moon_s} {wisdom[moon_s]['symbol']}")
+        st.write(f"*{wisdom[moon_s]['essence']}*")
 
     st.balloons()
