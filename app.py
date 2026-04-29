@@ -2,53 +2,53 @@ import streamlit as st
 import pandas as pd
 import math
 from datetime import datetime, date, time
+from geopy.geocoders import Nominatim
+from timezonefinder import TimezoneFinder
+import pytz
 
-# 1. THE DEEP ALIGNMENT DATA (Analysis, Ayurveda, & Rituals)
+# 1. THE DEEP ALIGNMENT DATA
 NAK_ALIGNMENT = {
     "Krittika": {
         "Power": "Dahana Shakti (The Power to Burn/Purify)",
         "Analysis": "You are the 'Mental Scalpel.' You possess a sharp, penetrating intellect that cuts through fluff to find the core truth.",
         "Dosha": "Pitta (Fire). Needs cooling to avoid burnout.",
-        "Nourishment": "Cooling foods: Coconut, cucumber, sweet fruits, and mint. Avoid excessive heat/spice.",
+        "Nourishment": "Cooling foods: Coconut, cucumber, sweet fruits, and mint.",
         "Scent": "Sandalwood or Rose to soften your razor-sharp edge.",
-        "Ritual": "Trataka (Candle gazing) to focus your vision or Sitali Pranayama (cooling breath)."
+        "Ritual": "Trataka (Candle gazing) to focus your vision."
     },
     "Shatabhisha": {
-        "Power": "Bheshaja Shakti (The Power to Heal)",
+        "Power": "Bheshaja Shakti (The Power of Healing)",
         "Analysis": "The Visionary Healer. You see patterns others miss and look for the 'whole circle' of the cure.",
         "Dosha": "Vata (Air/Ether). Needs grounding and warm stability.",
-        "Nourishment": "Warm, oily, cooked foods. Root vegetables, ginger, and grounding herbal teas.",
-        "Scent": "Frankincense, Cedarwood, or Vetiver for grounding the mind.",
-        "Ritual": "Abhyanga (Warm oil massage) and intentional silence to process your deep thoughts."
+        "Nourishment": "Warm, oily, cooked foods. Root vegetables and ginger tea.",
+        "Scent": "Frankincense, Cedarwood, or Vetiver for grounding.",
+        "Ritual": "Abhyanga (Warm oil massage) and intentional silence."
     },
     "Bharani": {
         "Power": "Apabharani Shakti (The Power to Carry Away)",
-        "Analysis": "The Weight of Creation. Your words carry the power to transform and birth new realities.",
-        "Dosha": "Pitta/Kapha balance. Needs movement and healthy release.",
+        "Analysis": "The Weight of Creation. Your words carry the power to transform and birth new worlds.",
+        "Dosha": "Pitta/Kapha. Needs movement and healthy release.",
         "Nourishment": "Fiber-rich foods, bitter greens, and detoxifying broths.",
         "Scent": "Jasmine or Lotus for transformative grace.",
-        "Ritual": "Journaling to 'offload' heavy thoughts and Yin Yoga for deep release."
-    },
-    "Ardra": {
-        "Power": "Yatna Shakti (The Power of Effort)",
-        "Analysis": "The Storm Chaser. Like a diamond formed under pressure, your best work comes during deep effort.",
-        "Dosha": "Vata/Pitta. Needs emotional release and physical stability.",
-        "Nourishment": "Hydrating foods, melons, and sea salt to maintain electrolyte balance.",
-        "Scent": "Eucalyptus or Peppermint to clear the storm clouds.",
-        "Ritual": "Vigorous movement (Tandava style) followed by 10 minutes of complete stillness."
-    },
-    "Purva Phalguni": {
-        "Power": "Prajanana Shakti (The Power of Creativity)",
-        "Analysis": "The Royal Priest. You know that true wisdom is found in the balance of charisma and rest.",
-        "Dosha": "Kapha. Needs stimulation, warmth, and play.",
-        "Nourishment": "Light, spicy, and colorful foods. Berries, ginger, and honey.",
-        "Scent": "Ylang-Ylang or Sweet Orange for creative joy.",
-        "Ritual": "Creative expression (dance/art) and 'Divine Rest'—naps with intention."
+        "Ritual": "Journaling to 'offload' heavy thoughts and Yin Yoga."
     }
 }
 
 NAK_LIST = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"]
 ZODIAC_LIST = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+
+# 2. DYNAMIC LOCATION & OFFSET ENGINE
+def get_location_and_offset(city_name, birth_dt):
+    try:
+        geolocator = Nominatim(user_agent="nakshatra_sanctuary_v4")
+        loc = geolocator.geocode(city_name)
+        if not loc: return None, None, 0
+        tf = TimezoneFinder()
+        tz_name = tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
+        timezone = pytz.timezone(tz_name)
+        offset = timezone.utcoffset(birth_dt).total_seconds() / 3600
+        return loc.latitude, loc.longitude, offset
+    except: return None, None, 0
 
 def format_dms(deg_raw):
     deg_norm = deg_raw % 360
@@ -58,9 +58,8 @@ def format_dms(deg_raw):
     nak_idx = int(deg_norm / 13.333333) % 27
     return f"{d}° {m}' {ZODIAC_LIST[sign_idx]}", NAK_LIST[nak_idx]
 
-# 2. THE WELCOMING INTERFACE
+# 3. INTERFACE
 st.set_page_config(page_title="The Nakshatra Sanctuary", layout="wide")
-
 st.title("✨ The Nakshatra Sanctuary")
 st.markdown("### *You belong here. Let's find your place in the real sky.*")
 
@@ -78,17 +77,22 @@ with st.container():
         d = c_date[2].number_input("Day", 1, 31, 22)
         t_in = st.time_input("Exact Time", value=time(4, 10))
 
+# AUTO-CALCULATING THE OFFSET
+dt_obj = datetime.combine(date(y, m, d), t_in)
+lat, lon, auto_off = get_location_and_offset(place, dt_obj)
+
 with st.sidebar:
     st.header("🧭 The Compass")
-    off = st.number_input("UTC Offset (Danny's Sheet = -6.0)", value=-6.0)
+    st.write(f"Based on your birth in {place}, the stars were aligned at a **{auto_off}** hour offset from UTC.")
+    final_off = st.number_input("Calibrate Offset (Manual Override)", value=float(auto_off))
     st.divider()
     submit = st.button("✨ Reveal My Planetary Bliss")
 
-# 3. THE REVEAL
+# 4. THE REVEAL
 if submit:
     st.balloons()
     
-    # DATA MAPPING (Danny's Sheet)
+    # DANNY'S DATA (Placeholder for calculations)
     planets = {
         "Ascendant": 31.68, "Sun": 37.77, "Moon": 315.57,
         "Mercury": 17.15, "Venus": 47.75, "Mars": 77.88,
@@ -97,7 +101,7 @@ if submit:
 
     st.header(f"The Star-Map Celebration for {name}")
 
-    # RESTORED RAW & WONDERFUL SCRIPT
+    # THE RAW & WONDERFUL SCRIPT
     st.info("🪐 **Wait... I’m a WHAT now?**")
     st.markdown("""
     We get it. Seeing a new sign in your mirror can feel like a cosmic plot twist. But here’s the real, raw truth: 
@@ -110,32 +114,18 @@ if submit:
     We follow the sky as it actually exists *right now*. You haven't changed—the sky did. You’re just finally seeing the 
     precise stars that were actually cheering for you the moment you arrived. **Welcome to the real sky.**
     """)
+    
+    
+    
     st.divider()
 
-    # THE TRINITY ALIGNMENT
+    # TRINITY DISPLAY
     st.subheader("🌟 The Trinity of Your Being")
     t_cols = st.columns(3)
     for i, p in enumerate(["Ascendant", "Sun", "Moon"]):
         pos, nak = format_dms(planets[p])
-        align = NAK_ALIGNMENT.get(nak, {"Power": "Ancient Shakti", "Analysis": "Deepening...", "Dosha": "Balance", "Nourishment": "Whole foods", "Scent": "Natural essence", "Ritual": "Presence"})
+        align = NAK_ALIGNMENT.get(nak, {"Power": "Ancient Shakti", "Analysis": "Deepening...", "Dosha": "Balance", "Nourishment": "Vibrant foods", "Scent": "Natural essence", "Ritual": "Presence"})
         with t_cols[i]:
             st.metric(p, pos)
             st.write(f"### {nak}")
-            st.info(f"**{align['Power']}**\n\n{align['Analysis']}")
-            st.success(f"**🌿 Wellbeing Alignment**\n\n* **Dosha:** {align['Dosha']}\n* **Nourishment:** {align['Nourishment']}\n* **Scent:** {align['Scent']}\n* **Ritual:** {align['Ritual']}")
-
-    st.divider()
-
-    # THE FULL COUNCIL
-    st.subheader("🪐 The Planetary Council")
-    council_cols = st.columns(4)
-    council = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Rahu", "Ketu"]
-    for i, p in enumerate(council):
-        pos, nak = format_dms(planets[p])
-        align = NAK_ALIGNMENT.get(nak, {"Power": "Planetary Power", "Analysis": "Reading the stars...", "Dosha": "Balance", "Nourishment": "Vibrant foods", "Scent": "Earth essence", "Ritual": "Mindfulness"})
-        with council_cols[i % 4]:
-            with st.expander(f"✨ {p} in {nak}"):
-                st.write(f"**{pos}**")
-                st.write(f"**{align['Power']}**")
-                st.write(align['Analysis'])
-                st.caption(f"Suggested Ritual: {align['Ritual']}")
+            st.success(f"**{align['Power']}**\n\n{align['Analysis']}\n\n**🌿 Wellness:** {align['Dosha']} | {align['Scent']} | {align['Ritual']}")
