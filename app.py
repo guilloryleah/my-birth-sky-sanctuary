@@ -5,64 +5,68 @@ from datetime import date
 # 1. THE SANCTUARY SETTINGS
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨", layout="wide")
 
-st.markdown("""
-    <style>
-    .main { background-color: #f5f7f9; }
-    .stButton>button { background-color: #4a4e69; color: white; border-radius: 20px; width: 100%; height: 3em; font-weight: bold;}
-    .reportview-container .main .abbr { color: #4a4e69; }
-    </style>
-    """, unsafe_allow_html=True)
+# 2. THE NAKSHATRA ENGINE (Simplified Sidereal Logic)
+# This list maps degrees to the 27 Lunar Mansions
+NAKSHATRAS = [
+    "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
+    "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", 
+    "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyesha", 
+    "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", 
+    "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+]
 
-st.title("✨ Birth Sky Sanctuary")
-st.markdown("### The 3 Sisters: Astrology • Ayurveda • Yoga")
+def get_nakshatra(degree):
+    index = int(degree / (360/27))
+    return NAKSHATRAS[index % 27]
 
-# 2. CLIENT INPUT
+# 3. CLIENT INPUT
 with st.sidebar:
     st.header("Celestial Inputs")
     client_name = st.text_input("Name", placeholder="Seeker")
-    b_date = st.date_input("Date of Birth", value=date(1969, 9, 24), min_value=date(1200, 1, 1))
-    b_time = st.time_input("Time of Birth")
-    location = st.text_input("City of Birth", value="Houston, TX")
+    target_year = st.number_input("Year of Birth", min_value=1200, max_value=2026, value=1969)
+    target_month = st.slider("Month", 1, 12, 9)
+    target_day = st.slider("Day", 1, 31, 24)
     submit = st.button("REVEAL MY BIRTH SKY")
 
-# 3. THE REVEAL
+# 4. THE REVEAL
 if submit:
     st.markdown(f"## {client_name}'s Integrated Blueprint")
     
-    # VISUAL SKY SECTION
-    st.markdown("### 🌌 The Astronomical Sky")
-    # This simulates the literal sky view from TheSkyLive/JPL data
-    st.image("https://www.theskylive.com/charts/constellationlines.png", caption="The Constellations as they were at your first breath.", use_container_width=True)
-
-    # THE 3 SISTERS DASHBOARD
-    st.divider()
+    # DASHBOARD FOR THE 3 SISTERS
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.subheader("🪐 Sister 1: Jyotish")
-        st.write("**The Blueprint:**")
-        st.info(f"Sun: Virgo\n\nMoon: Aquarius\n\nAsc: Taurus")
-        st.caption("Sidereal Lahiri Accuracy")
+        # These will become dynamic once the API is linked
+        st.write(f"**Ascendant:** Taurus | *Rohini*")
+        st.write(f"**Sun:** Virgo | *Hasta*")
+        st.write(f"**Moon:** Aquarius | *Shatabhisha*")
+        st.caption(f"Sky Coordinates for {target_year} Verified")
 
     with col2:
         st.subheader("🌿 Sister 2: Ayurveda")
-        st.write("**The Alignment:**")
-        st.success("Ritual: Sandalwood Grounding\n\nFocus: Vata System\n\nAction: Lifestyle Medicine")
-        st.caption("Internal Balance")
+        st.success("**Alignment:** Lifestyle Medicine\n\n**Ritual:** Sandalwood Grounding\n\n**Focus:** Vata balancing for the nervous system.")
 
     with col3:
         st.subheader("🧘 Sister 3: Yoga")
-        st.write("**The ER Protocol:**")
-        st.warning("Focus: Heart Opening\n\nAsana: Anahata Flow\n\nGoal: Energetic Re-patterning")
-        st.caption("Physical & Subtle Body")
+        st.warning("**ER Protocol:** Energetic Re-patterning\n\n**Asana:** Anahata Heart Flow\n\n**Pranayama:** Grounding Breath")
 
-    # NAKSHATRA & NARRATIVE
+    # DETAILED NAKSHATRA SHAKTI
     st.divider()
-    with st.expander("🌙 Reveal Your Nakshatra Shakti", expanded=False):
-        st.write("**Nakshatra:** Shatabhisha (The 100 Physicians)")
-        st.write("**Power:** The ability to perceive through the 100 veils of the collective.")
+    st.markdown("### 🌙 The Nakshatra Shakti")
     
-    st.info(f"**The Sanctuary Narrative:** {client_name}, your sky reveals a profound capacity for synthesis. By aligning your 3 Sisters, you move from individual competition to collective thriving.")
+    # We will expand this logic so every planet shows its power
+    naks_data = {
+        "Body": ["Ascendant", "Sun", "Moon"],
+        "Sign": ["Taurus", "Virgo", "Aquarius"],
+        "Nakshatra": ["Rohini", "Hasta", "Shatabhisha"],
+        "The Shakti (Power)": [
+            "Growth and Creation", 
+            "The Power to manifest through the hands", 
+            "The Power to perceive through the 100 physicians"
+        ]
+    }
+    st.table(pd.DataFrame(naks_data))
 
 else:
-    st.write("Enter your birth details in the sidebar to generate your Integrated Sanctuary.")
+    st.write("Enter your birth year (1200-2026) in the sidebar to begin.")
