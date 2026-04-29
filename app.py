@@ -3,10 +3,20 @@ import pandas as pd
 from datetime import datetime, date, time
 from geopy.geocoders import Nominatim
 
-# 1. SANCTUARY SETTINGS
+# 1. SANCTUARY CONFIG
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨", layout="wide")
 
-# 2. DATA ARRAYS
+# 2. THE SHAKTI DICTIONARY (Teacher's Interpretations)
+NAK_SHAKTI = {
+    "Rohini": "The Power of Growth (Prabhava Shakti). Nurturing beauty and stability.",
+    "Hasta": "The Power to Manifest (Hasta Shakti). Precision and skill in action.",
+    "Shatabhisha": "The Power of Healing (Bheshaja Shakti). Seeing the truth through 100 physicians.",
+    "Bharani": "The Power to Carry Away. Transformation through endurance.",
+    "Jyeshtha": "The Power to Rise Above. Leadership and mastery of the senses.",
+    "Magha": "The Power of Lineage. Connection to ancestral authority.",
+    "Chitra": "The Power to Create. Artistic brilliance and craftsmanship."
+}
+
 NAK_LIST = [
     "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
     "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", 
@@ -16,82 +26,73 @@ NAK_LIST = [
 ]
 ZODIAC_LIST = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
-# 3. GEOGRAPHIC & ASTRONOMIC ENGINE
+# 3. THE CALCULATION ENGINE
 def get_coords(city_name):
     try:
-        geolocator = Nominatim(user_agent="birth_sky_sanctuary")
-        location = geolocator.geocode(city_name)
-        if location:
-            return location.latitude, location.longitude
-        return 29.76, -95.36 # Default to Houston if not found
+        geolocator = Nominatim(user_agent="sanctuary_app")
+        loc = geolocator.geocode(city_name)
+        return (loc.latitude, loc.longitude) if loc else (29.76, -95.36)
     except:
         return 29.76, -95.36
 
-def calculate_precision_sky(jd, lon):
-    ayanamsa = 24.13 # Lahiri 
-    # GMST Calculation
-    t = (jd - 2451545.0) / 36525.0
-    gmst = (280.46061837 + 360.98564736629 * (jd - 2451545.0)) % 360
+def calculate_sky(jd, lat, lon):
+    ayan = 24.13 # Lahiri
+    # Sun & Moon (Date/Time based)
+    sun_raw = ((jd - 2451545.0) * 0.9856 + 280.46 - ayan) % 360
+    moon_raw = ((jd - 2451545.0) * 13.176 + 218.31 - ayan) % 360
+    # Precision Ascendant (LST based)
+    gmst = (280.46 + 360.9856 * (jd - 2451545.0)) % 360
     lst = (gmst + lon) % 360
-    
-    # Lagna Projection
-    asc_raw = (lst + 90) % 360
-    sidereal_asc = (asc_raw - ayanamsa) % 360
-    
-    # Sun & Moon Speeds
-    sun_raw = ((jd - 2451545.0) * 0.9856 + 280.46 - ayanamsa) % 360
-    moon_raw = ((jd - 2451545.0) * 13.176 + 218.31 - ayanamsa) % 360
-    
-    return sun_raw, moon_raw, sidereal_asc
+    asc_raw = (lst + 90 + (lat * 0.1)) % 360 # Adjusting for horizon tilt
+    return sun_raw, moon_raw, (asc_raw - ayan) % 360
 
-def get_label(degree):
-    sign = ZODIAC_LIST[int(degree / 30)]
-    nak = NAK_LIST[int(degree / (360/27))]
-    return sign, nak
+def get_label(deg):
+    return ZODIAC_LIST[int(deg / 30)], NAK_LIST[int(deg / (360/27))]
 
 # 4. SIDEBAR INPUTS
 with st.sidebar:
     st.header("Seeker's Profile")
-    name = st.text_input("Name", value="Matthew")
+    client_name = st.text_input("Name", value="Matthew")
     y = st.number_input("Year", 1200, 2026, 1995)
     m = st.number_input("Month", 1, 12, 9)
     d = st.number_input("Day", 1, 31, 24)
-    t_input = st.time_input("Birth Time")
-    birth_place = st.text_input("City of Birth", value="Houston, TX")
+    t_in = st.time_input("Birth Time", value=time(12, 0))
+    place = st.text_input("Place of Birth", value="Houston, TX")
     submit = st.button("REVEAL THE BIRTH SKY")
 
-# 5. THE NARRATIVE OUTPUT
-if submit:
-    lat, lon = get_coords(birth_place)
-    dt = datetime.combine(date(y, m, d), t_input)
+# 5. THE REVEAL
+if submit and client_name:
+    lat, lon = get_coords(place)
+    dt = datetime.combine(date(y, m, d), t_in)
     jd = pd.Timestamp(dt).to_julian_date()
-    
-    s_deg, m_deg, a_deg = calculate_precision_sky(jd, lon)
-    s_s, s_n = get_label(s_deg)
-    m_s, m_n = get_label(m_deg)
-    a_s, a_n = get_label(a_deg)
+    s_d, m_d, a_d = calculate_sky(jd, lat, lon)
+    s_s, s_n = get_label(s_d)
+    m_s, m_n = get_label(m_d)
+    a_s, a_n = get_label(a_d)
 
-    st.header(f"✨ Welcome to your Sanctuary, {name}")
-    st.write(f"Born in **{birth_place}** | Coordinates: {lat}, {lon}")
+    st.header(f"✨ Welcome to your Sanctuary, {client_name}")
+    st.write(f"Reflecting the heavens over **{place}** at {t_in}")
     st.divider()
-    
+
+    # THE 3 SISTERS
     col1, col2, col3 = st.columns(3)
     with col1:
         st.subheader("🪐 Sister 1: Jyotish")
-        st.metric("Ascendant (Lagna)", a_s)
-        st.write(f"**Nakshatra:** {a_n}")
-        st.write(f"**Sun:** {s_s} ({s_n})")
-        st.write(f"**Moon:** {m_s} ({m_n})")
+        st.info(f"**Ascendant:** {a_s} ({a_n})\n\n**Sun:** {s_s} ({s_n})\n\n**Moon:** {m_s} ({m_n})")
     
     with col2:
         st.subheader("🌿 Sister 2: Ayurveda")
-        st.success(f"**Alignment Strategy:**\n\nNourish your {s_s} nature.")
+        st.success(f"**Alignment:** Grounding for your {s_s} nature.")
 
     with col3:
         st.subheader("🧘 Sister 3: Yoga")
-        st.warning(f"**ER Protocol:**\n\nBalance your {a_n} Rising energy.")
+        st.warning(f"**ER Protocol:** Heart-centered flow for {a_n}.")
 
-    st.info(f"**Teacher's Insight:** Your Ascendant in {a_s} with the power of {a_n} suggests a soul that meets the world through {a_n}'s specific Shakti.")
+    # DETAILED ANALYSIS
+    st.markdown("---")
+    st.subheader(f"Detailed Celestial Analysis for {client_name}")
+    st.markdown(f"**Your {a_s} Ascendant in {a_n}:** {NAK_SHAKTI.get(a_n, 'A unique portal of growth.')}")
+    st.markdown(f"**Your {s_s} Sun in {s_n}:** {NAK_SHAKTI.get(s_n, 'The core power of your identity.')}")
 
 else:
-    st.write("The Sanctuary awaits your details.")
+    st.write("The stars are aligning. Please enter your birth details in the sidebar.")
