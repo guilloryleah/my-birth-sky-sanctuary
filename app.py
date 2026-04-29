@@ -6,44 +6,10 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import pytz
 
-# 1. SANCTUARY CONFIG
-st.set_page_config(page_title="The Nakshatra Sanctuary", page_icon="✨", layout="wide")
-
-# 2. THE NAKSHATRA KNOWLEDGE BASE
-NAK_DATA = {
-    "Ashwini": "Power to Reach Quickly (Shidhra Shakti). Healing and swiftness.",
-    "Bharani": "Power to Carry Away (Apabharani Shakti). Transformation and endurance.",
-    "Krittika": "Power to Burn (Dahana Shakti). Purification and sharp brilliance.",
-    "Rohini": "Power of Growth (Prabhava Shakti). Nurturing and manifestation.",
-    "Mrigashira": "Power of Fulfillment (Prinana Shakti). The seeker's restless search.",
-    "Ardra": "Power of Effort (Yatna Shakti). Clarity through the storm.",
-    "Punarvasu": "Power of Renewal (Vasutva Shakti). Return of light and resources.",
-    "Pushya": "Power of Spiritual Energy (Brahmavarchasa Shakti). Nourishment.",
-    "Ashlesha": "Power to Inflict Poison (Vishasleshana Shakti). Insight into shadow.",
-    "Magha": "Power of Lineage (Tyage Shepan Shakti). Ancestral nobility.",
-    "Purva Phalguni": "Power of Procreation (Prajanana Shakti). Creative charm.",
-    "Uttara Phalguni": "Power of Giving (Chayani Shakti). Prosperity through alliance.",
-    "Hasta": "Power to Manifest (Hasta Shakti). Putting the world in your hands.",
-    "Chitra": "Power of Merit (Punya Chayani Shakti). Creating form from chaos.",
-    "Swati": "Power to Scatter like the Wind (Pradhvamsana Shakti). Freedom.",
-    "Vishakha": "Power of Achievement (Vyapana Shakti). Focused success.",
-    "Anuradha": "Power of Worship (Radhana Shakti). Balance and devotion.",
-    "Jyeshtha": "Power to Rise Above (Tarana Shakti). Courage and seniority.",
-    "Mula": "Power to Uproot (Barhana Shakti). Breaking illusions at the root.",
-    "Purva Ashadha": "Power of Invigoration (Varchograhana Shakti). Vitality.",
-    "Uttara Ashadha": "Power of Victory (Apradhrisya Shakti). Unstoppable success.",
-    "Shravana": "Power of Connection (Samhanana Shakti). Listening to the rhythm.",
-    "Dhanishta": "Power of Abundance (Sansiddha Shakti). Fame and wealth.",
-    "Shatabhisha": "Power of Healing (Bheshaja Shakti). Seeing the 100 physicians.",
-    "Purva Bhadrapada": "Power of Fire (Yajamana Shakti). Spiritual evolution.",
-    "Uttara Bhadrapada": "Power of Rain (Varshograhana Shakti). Stability and deep peace.",
-    "Revati": "Power of Nourishment (Kshiradyani Shakti). Safety on the journey."
-}
-
-NAK_LIST = list(NAK_DATA.keys())
+# 1. DATA
+NAK_LIST = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"]
 ZODIAC_LIST = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
-# 3. FORMATTING LOGIC
 def format_dms(deg_raw):
     deg_norm = deg_raw % 360
     sign_idx = int(deg_norm / 30)
@@ -53,15 +19,16 @@ def format_dms(deg_raw):
     nak_idx = int(deg_norm / 13.333333) % 27
     return f"{d}° {m}' {ZODIAC_LIST[sign_idx]}", NAK_LIST[nak_idx]
 
-# 4. PRECISION ENGINE
+# 2. PRECISION ENGINE
 def get_location_details(city_name, birth_dt):
     try:
-        geolocator = Nominatim(user_agent="sanctuary_final_v11")
+        geolocator = Nominatim(user_agent="sanctuary_final_v12")
         loc = geolocator.geocode(city_name)
         if not loc: return 41.87, -87.62, -5.0
         tf = TimezoneFinder()
         tz_name = tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
         timezone = pytz.timezone(tz_name)
+        # Force DST check
         offset_hours = timezone.utcoffset(birth_dt).total_seconds() / 3600
         return loc.latitude, loc.longitude, offset_hours
     except: return 41.87, -87.62, -5.0
@@ -69,27 +36,29 @@ def get_location_details(city_name, birth_dt):
 def calculate_sidereal_blueprint(jd_local, lat, lon, offset):
     jd_utc = jd_local - (offset / 24.0)
     ayan = 23.25 
+    
     t = (jd_utc - 2451545.0) / 36525.0
     gmst = (280.46061837 + 360.98564736629 * (jd_utc - 2451545.0) + 0.000387933 * t**2) % 360
     lst_deg = (gmst + lon) % 360
+    
     eps, phi, l_rad = math.radians(23.439), math.radians(lat), math.radians(lst_deg)
     
-    # Corrected Coordinates for Ascendant (Rising Point)
-    y = math.sin(l_rad)
-    x = math.cos(l_rad) * math.cos(eps) - math.tan(phi) * math.sin(eps)
-    asc_raw = math.degrees(math.atan2(y, x)) + 90
+    # Refined Ascendant math for Eastern Horizon
+    # We use a more direct formula: tan(Asc) = cos(LST) / -(sin(LST)cos(eps) + tan(phi)sin(eps))
+    num = math.cos(l_rad)
+    den = -(math.sin(l_rad) * math.cos(eps) + math.tan(phi) * math.sin(eps))
+    
+    asc_raw = math.degrees(math.atan2(num, den)) % 360
     
     sid_asc = (asc_raw - ayan) % 360
     sid_sun = (((jd_utc - 2451545.0) * 0.9856) + 280.46 - ayan) % 360
     sid_moon = (((jd_utc - 2451545.0) * 13.176) + 218.31 - ayan) % 360
     return sid_sun, sid_moon, sid_asc
 
-# 5. INTERFACE
+# 3. INTERFACE
 st.title("✨ The Nakshatra Sanctuary")
-st.write("A portal to the Shakti of the Stars.")
 
 with st.sidebar:
-    st.header("Seeker's Data")
     name = st.text_input("Name", value="Danny")
     y = st.number_input("Year", 1900, 2026, 1957)
     m = st.number_input("Month", 1, 12, 5)
@@ -109,6 +78,7 @@ if submit:
     asc_fmt, asc_nak = format_dms(a_d)
 
     st.header(f"The Star Map for {name}")
+    st.write(f"Calculated using UTC Offset: {off}") # This will confirm if it's -5.0
     st.divider()
 
     c1, c2, c3 = st.columns(3)
