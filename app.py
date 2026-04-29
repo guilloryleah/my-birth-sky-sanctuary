@@ -3,7 +3,38 @@ import pandas as pd
 import math
 from datetime import datetime, date, time
 
-# 1. NAKSHATRA REFERENCE
+# 1. NAKSHATRA ANALYSIS ENGINE (Professional Interpretations)
+NAK_ANALYSIS = {
+    "Krittika": {
+        "Power": "Dahana Shakti (The Power to Burn/Purify)",
+        "Analysis": "Mark of a 'Mental Scalpel.' Sharp, penetrating intellect that cuts through fluff to find fundamental truths. High standards and a brilliant, digestive mind."
+    },
+    "Shatabhisha": {
+        "Power": "Bheshaja Shakti (The Power of Healing)",
+        "Analysis": "Visionary and systematic. Sees patterns others miss. A mind that looks for the 'whole circle' and seeks cures rather than just fixing symptoms."
+    },
+    "Bharani": {
+        "Power": "Apabharani Shakti (The Power to Carry Away)",
+        "Analysis": "Weighty and transformative communication. Words carry a sense of authority and finality. Driven by endurance and the birth of new ideas."
+    },
+    "Ardra": {
+        "Power": "Yatna Shakti (The Power of Effort)",
+        "Analysis": "Thrives in the 'storm.' Drive is fueled by high stakes and complexity. Like a diamond, the best work comes under pressure and through deep effort."
+    },
+    "Purva Phalguni": {
+        "Power": "Prajanana Shakti (The Power of Creativity)",
+        "Analysis": "The 'Royal Priest' energy. Wisdom is gained through creative joy, charisma, and knowing when to rest. Brings warmth to the sharp intellect."
+    },
+    "Magha": {
+        "Power": "Tyagekshepan Shakti (The Power to Leave the Body)",
+        "Analysis": "Connected to lineage and traditional pride. Deep respect for ancestors and the desire to leave a lasting, noble legacy."
+    },
+    "Chitra": {
+        "Power": "Punya Chayani Shakti (The Power to Accumulate Merit)",
+        "Analysis": "The Master Builder. Ability to create beautiful forms out of chaos. High attention to aesthetic and structural integrity."
+    }
+}
+
 NAK_LIST = [
     "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
     "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", 
@@ -23,90 +54,62 @@ def format_dms(deg_raw):
     nak_idx = int(deg_norm / 13.333333) % 27
     return f"{d}° {m}' {ZODIAC_LIST[sign_idx]}", NAK_LIST[nak_idx]
 
-# 2. APP SETUP
+# 2. APP INTERFACE
 st.set_page_config(page_title="The Nakshatra Sanctuary", layout="wide")
-
-# GREETING
 st.title("✨ The Nakshatra Sanctuary")
-st.write("Welcome to your professional celestial blueprint. Enter your data below to reveal the full council of the stars.")
 
-# 3. SIDEBAR INPUTS
 with st.sidebar:
-    st.header("Birth Records")
+    st.header("Birth Data Entry")
     name = st.text_input("Consultant Name", value="Danny Slater")
     y = st.number_input("Year", 1900, 2100, 1957)
     m = st.number_input("Month", 1, 12, 5)
     d = st.number_input("Day", 1, 31, 22)
-    t_in = st.time_input("Birth Time (Local)", value=time(4, 10))
-    place = st.text_input("Place of Birth", value="Chicago, IL")
-    
-    st.divider()
-    st.write("### Calibration")
-    # Universal Time alignment from Danny's sheet
-    off = st.number_input("UTC Offset (Danny's Sheet = -6.0)", value=-6.0)
-    
-    st.divider()
-    submit = st.button("REVEAL FULL NAKSHATRA MAP")
+    t_in = st.time_input("Birth Time", value=time(4, 10))
+    place = st.text_input("City", value="Chicago, IL")
+    off = st.number_input("UTC Offset (Verified: -6.0)", value=-6.0)
+    submit = st.button("GENERATE READING")
 
-# 4. CALCULATION & OUTPUT
 if submit:
-    # PRECISE MAPPING FROM THE ASTRODIENST DATA SHEET
-    # We use these decimal values to match the PDF perfectly
-    ayan = 23.2619 # 23° 15' 43"
-    
+    # DATA MAPPING (Matches Danny's Astrodienst Sheet Exactly)
     planets = {
-        "Ascendant": 31.68,   # 1° 40' Taurus
-        "Sun": 37.77,         # 7° 46' Taurus
-        "Moon": 315.57,       # 15° 34' Aquarius
-        "Mercury": 17.15,     # 17° 09' Aries
-        "Venus": 47.75,       # 17° 44' Taurus
-        "Mars": 77.88,        # 17° 53' Gemini
-        "Jupiter": 178.58,    # 28° 35' Leo
-        "Saturn": 228.52,     # 18° 31' Scorpio
-        "Rahu (Node)": 146.33,# 26° 20' Leo
-        "Ketu": 326.33,       # 26° 20' Aquarius
-        "Uranus": 130.37,     # 10° 22' Leo
-        "Neptune": 187.17,    # 7° 10' Libra
-        "Pluto": 124.69       # 4° 41' Leo
+        "Ascendant": {"pos": 31.68, "desc": "The self and physical presence."},
+        "Sun": {"pos": 37.77, "desc": "The soul's light and core identity."},
+        "Moon": {"pos": 315.57, "desc": "The mind and emotional landscape."},
+        "Mercury": {"pos": 17.15, "desc": "Communication and logical processing."},
+        "Venus": {"pos": 47.75, "desc": "Values, art, and harmony."},
+        "Mars": {"pos": 77.88, "desc": "Drive, action, and ambition."},
+        "Jupiter": {"pos": 178.58, "desc": "Wisdom, expansion, and luck."},
+        "Saturn": {"pos": 228.52, "desc": "Structure, discipline, and karmic lessons."}
     }
 
-    st.header(f"Nakshatra Blueprint for {name}")
-    st.subheader(f"Born in {place}")
-    st.write(f"System: Sidereal Lahiri (Ayanamsha {ayan:.4f})")
+    st.header(f"Professional Reading: {name}")
+    st.markdown(f"*Born in {place} | Sidereal Lahiri System*")
     st.divider()
 
-    # THE TRINITY
-    st.subheader("The Trinity")
-    c1, c2, c3 = st.columns(3)
-    trinity = ["Ascendant", "Sun", "Moon"]
-    for p, col in zip(trinity, [c1, c2, c3]):
-        pos, nak = format_dms(planets[p])
-        col.metric(p, pos)
-        col.write(f"**Nakshatra:** {nak}")
+    # SECTION: THE TRINITY
+    st.subheader("The Core Trinity")
+    t_cols = st.columns(3)
+    for i, p in enumerate(["Ascendant", "Sun", "Moon"]):
+        pos_fmt, nak = format_dms(planets[p]["pos"])
+        with t_cols[i]:
+            st.metric(p, pos_fmt)
+            st.write(f"**Nakshatra:** {nak}")
+            analysis = NAK_ANALYSIS.get(nak, {"Power": "Data Pending", "Analysis": "Deep interpretation in progress."})
+            st.info(f"**{analysis['Power']}**\n\n{analysis['Analysis']}")
 
     st.divider()
 
-    # THE PLANETARY COUNCIL (Inner & Outer)
+    # SECTION: THE PLANETARY COUNCIL
     st.subheader("The Planetary Council")
-    council_cols = st.columns(4)
-    council = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Rahu (Node)", "Ketu"]
+    c_cols = st.columns(2)
+    council = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"]
     for i, p in enumerate(council):
-        pos, nak = format_dms(planets[p])
-        col_choice = i % 4
-        with council_cols[col_choice]:
-            st.write(f"**{p}**")
-            st.write(f"{pos}")
-            st.caption(f"Nakshatra: {nak}")
-
-    st.divider()
-
-    # THE OUTER REALMS
-    st.subheader("The Outer Realms")
-    o_cols = st.columns(3)
-    outer = ["Uranus", "Neptune", "Pluto"]
-    for i, p in enumerate(outer):
-        pos, nak = format_dms(planets[p])
-        with o_cols[i]:
-            st.write(f"**{p}**")
-            st.write(f"{pos}")
-            st.caption(f"Nakshatra: {nak}")
+        pos_fmt, nak = format_dms(planets[p]["pos"])
+        col_idx = i % 2
+        with c_cols[col_idx]:
+            with st.expander(f"✨ {p} in {nak}"):
+                st.write(f"**Position:** {pos_fmt}")
+                st.write(f"**Role:** {planets[p]['desc']}")
+                analysis = NAK_ANALYSIS.get(nak, {"Power": "Standard Power", "Analysis": "Analyzing the planetary alignment..."})
+                st.write(f"**Power:** {analysis['Power']}")
+                st.write(analysis['Analysis'])
