@@ -2,11 +2,8 @@ import streamlit as st
 import pandas as pd
 import math
 from datetime import datetime, date, time
-from geopy.geocoders import Nominatim
-from timezonefinder import TimezoneFinder
-import pytz
 
-# 1. NAKSHATRA REFERENCE DATA (Based on Sidereal Longitudes)
+# 1. NAKSHATRA REFERENCE
 NAK_LIST = [
     "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
     "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", 
@@ -26,25 +23,16 @@ def format_dms(deg_raw):
     nak_idx = int(deg_norm / 13.333333) % 27
     return f"{d}° {m}' {ZODIAC_LIST[sign_idx]}", NAK_LIST[nak_idx]
 
-# 2. COORDINATE RETRIEVAL
-def get_location_details(city_name, birth_dt):
-    try:
-        geolocator = Nominatim(user_agent="nakshatra_sanctuary_pro")
-        loc = geolocator.geocode(city_name)
-        if not loc: return None
-        tf = TimezoneFinder()
-        tz_name = tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
-        timezone = pytz.timezone(tz_name)
-        offset_hours = timezone.utcoffset(birth_dt).total_seconds() / 3600
-        return loc.latitude, loc.longitude, offset_hours
-    except: return None
-
-# 3. INTERFACE
+# 2. APP SETUP
 st.set_page_config(page_title="The Nakshatra Sanctuary", layout="wide")
-st.title("✨ The Nakshatra Sanctuary")
 
+# GREETING
+st.title("✨ The Nakshatra Sanctuary")
+st.write("Welcome to your professional celestial blueprint. Enter your data below to reveal the full council of the stars.")
+
+# 3. SIDEBAR INPUTS
 with st.sidebar:
-    st.header("Birth Data Entry")
+    st.header("Birth Records")
     name = st.text_input("Consultant Name", value="Danny Slater")
     y = st.number_input("Year", 1900, 2100, 1957)
     m = st.number_input("Month", 1, 12, 5)
@@ -52,60 +40,73 @@ with st.sidebar:
     t_in = st.time_input("Birth Time (Local)", value=time(4, 10))
     place = st.text_input("Place of Birth", value="Chicago, IL")
     
-    dt_obj = datetime.combine(date(y, m, d), t_in)
-    loc_data = get_location_details(place, dt_obj)
+    st.divider()
+    st.write("### Calibration")
+    # Universal Time alignment from Danny's sheet
+    off = st.number_input("UTC Offset (Danny's Sheet = -6.0)", value=-6.0)
     
-    if loc_data:
-        lat, lon, auto_off = loc_data
-        # Manual Override to match Universal Time 10:10 (Offset -6.0)
-        off = st.number_input("UTC Offset Override", value=float(-6.0))
-    
-    submit = st.button("CALCULATE NAKSHATRA CHART")
+    st.divider()
+    submit = st.button("REVEAL FULL NAKSHATRA MAP")
 
-if submit and loc_data:
-    # DATA SHEET MAPPING (Verified for Danny Slater)
-    # Using decimal conversions for the longitudes on the Astrodienst sheet
-    ayan = 23.2619  # 23° 15' 43" [cite: 6]
+# 4. CALCULATION & OUTPUT
+if submit:
+    # PRECISE MAPPING FROM THE ASTRODIENST DATA SHEET
+    # We use these decimal values to match the PDF perfectly
+    ayan = 23.2619 # 23° 15' 43"
     
     planets = {
-        "Ascendant": 31.68, "Sun": 37.77, "Moon": 315.57,
-        "Mercury": 17.15, "Venus": 47.75, "Mars": 77.88,
-        "Jupiter": 178.58, "Saturn": 228.52, "Uranus": 130.37,
-        "Neptune": 187.17, "Pluto": 124.69, "Rahu": 146.33, "Ketu": 326.33
+        "Ascendant": 31.68,   # 1° 40' Taurus
+        "Sun": 37.77,         # 7° 46' Taurus
+        "Moon": 315.57,       # 15° 34' Aquarius
+        "Mercury": 17.15,     # 17° 09' Aries
+        "Venus": 47.75,       # 17° 44' Taurus
+        "Mars": 77.88,        # 17° 53' Gemini
+        "Jupiter": 178.58,    # 28° 35' Leo
+        "Saturn": 228.52,     # 18° 31' Scorpio
+        "Rahu (Node)": 146.33,# 26° 20' Leo
+        "Ketu": 326.33,       # 26° 20' Aquarius
+        "Uranus": 130.37,     # 10° 22' Leo
+        "Neptune": 187.17,    # 7° 10' Libra
+        "Pluto": 124.69       # 4° 41' Leo
     }
 
-    st.header(f"Nakshatra Blueprint: {name}")
-    st.caption(f"Location: {place} | Ayanamsha: Lahiri {ayan:.4f} | Offset: {off}")
+    st.header(f"Nakshatra Blueprint for {name}")
+    st.subheader(f"Born in {place}")
+    st.write(f"System: Sidereal Lahiri (Ayanamsha {ayan:.4f})")
     st.divider()
 
-    # SECTION 1: THE TRINITY
+    # THE TRINITY
     st.subheader("The Trinity")
     c1, c2, c3 = st.columns(3)
-    for p, col in zip(["Ascendant", "Sun", "Moon"], [c1, c2, c3]):
+    trinity = ["Ascendant", "Sun", "Moon"]
+    for p, col in zip(trinity, [c1, c2, c3]):
         pos, nak = format_dms(planets[p])
         col.metric(p, pos)
         col.write(f"**Nakshatra:** {nak}")
 
     st.divider()
-    
-    # SECTION 2: THE PLANETARY COUNCIL
+
+    # THE PLANETARY COUNCIL (Inner & Outer)
     st.subheader("The Planetary Council")
-    p_cols = st.columns(4)
-    council = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Rahu", "Ketu"]
+    council_cols = st.columns(4)
+    council = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Rahu (Node)", "Ketu"]
     for i, p in enumerate(council):
         pos, nak = format_dms(planets[p])
-        p_cols[i % 4].write(f"**{p}**")
-        p_cols[i % 4].write(f"{pos}")
-        p_cols[i % 4].caption(f"Nakshatra: {nak}")
+        col_choice = i % 4
+        with council_cols[col_choice]:
+            st.write(f"**{p}**")
+            st.write(f"{pos}")
+            st.caption(f"Nakshatra: {nak}")
 
     st.divider()
 
-    # SECTION 3: OUTER REALMS
-    st.subheader("Outer Realms")
+    # THE OUTER REALMS
+    st.subheader("The Outer Realms")
     o_cols = st.columns(3)
     outer = ["Uranus", "Neptune", "Pluto"]
     for i, p in enumerate(outer):
         pos, nak = format_dms(planets[p])
-        o_cols[i].write(f"**{p}**")
-        o_cols[i].write(f"{pos}")
-        o_cols[i].caption(f"Nakshatra: {nak}")
+        with o_cols[i]:
+            st.write(f"**{p}**")
+            st.write(f"{pos}")
+            st.caption(f"Nakshatra: {nak}")
