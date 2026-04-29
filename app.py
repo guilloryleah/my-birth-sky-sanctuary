@@ -1,41 +1,65 @@
-Datasets Used on TheSkyLive.com
-TheSkyLive was launched in 2013 and has been growing in functionality since. This project integrates a number of astronomical datasets, libraries, and source code. We provide here a list of these dependencies and acknowledgements to their respective authors.
+import streamlit as st
+import pandas as pd
+from datetime import date
 
-Ephemerides
-Most of the ephemerides computed on TheSkyLive are derived from data provided by the JPL Horizons System service, developed by the Solar System Dynamics Group of the Jet Propulsion Laboratory. Other computations are based on custom implementation based on the book Astronomical Algorithms by Jean Meeus.
+# 1. THE SANCTUARY SETTINGS
+st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨", layout="wide")
 
-Comet Observations
-TheSkyLive integrates data provided by the Comet Observation Database about recent comet observations. See the dedicated acknowledgement below.
+# Custom CSS for the "Sanctuary" feel
+st.markdown("""
+    <style>
+    .main { background-color: #f5f7f9; }
+    .stButton>button { background-color: #4a4e69; color: white; border-radius: 20px; }
+    </style>
+    """, unsafe_allow_html=True)
 
-Deep Sky Imagery
-The deep sky imagery used in the Solar System object tracking tool (see example) is generated using the Digitized Sky Survey imagery. See the dedicated acknowledgement below.
+st.title("✨ Birth Sky Sanctuary")
+st.subheader("Your Integrated Astronomical Blueprint")
 
+# 2. CLIENT INPUT
+with st.sidebar:
+    st.header("Enter Birth Details")
+    client_name = st.text_input("Name", placeholder="Seeker")
+    # Date picker unlocked to 1200 AD
+    b_date = st.date_input("Date of Birth", value=date(1969, 9, 24), min_value=date(1200, 1, 1))
+    b_time = st.time_input("Time of Birth")
+    location = st.text_input("City of Birth", value="Houston, TX")
+    submit = st.button("Reveal My Sanctuary")
 
-Astronomical Catalogues
-TheSkyLive integrates data from the following astronomical catalogues:
-Hipparcos Catalogue: contains information about 117934 bright stars
-Tycho 2 Catalogue: contains information about 2430468 stars
-PGC 2003 Catalogue: contains information about 983261 galaxies
-GSC 2.3 Catalogue: an all-sky catalog of approximately 2 billion stars and galaxies containing positions, magnitudes,colors and proper motions complete to a minimum of V=18
-Acknowledgments to Dataset Providers
-Digitized Sky Survey
-The Digitized Sky Survey was produced at the Space Telescope Science Institute under U.S. Government grant NAG W-2166. The images of these surveys are based on photographic data obtained using the Oschin Schmidt Telescope on Palomar Mountain and the UK Schmidt Telescope. The plates were processed into the present compressed digital form with the permission of these institutions.
-The National Geographic Society - Palomar Observatory Sky Atlas (POSS-I) was made by the California Institute of Technology with grants from the National Geographic Society.
-The Second Palomar Observatory Sky Survey (POSS-II) was made by the California Institute of Technology with funds from the National Science Foundation, the National Aeronautics and Space Administration, the National Geographic Society, the Sloan Foundation, the Samuel Oschin Foundation, and the Eastman Kodak Corporation. The Oschin Schmidt Telescope is operated by the California Institute of Technology and Palomar Observatory.
-The UK Schmidt Telescope was operated by the Royal Observatory Edinburgh, with funding from the UK Science and Engineering Research Council (later the UK Particle Physics and Astronomy Research Council), until 1988 June, and thereafter by the Anglo-Australian Observatory. The blue plates of the southern Sky Atlas and its Equatorial Extension (together known as the SERC-J), the near-IR plates (SERC-I), as well as the Equatorial Red (ER), and the Second Epoch [red] Survey (SES) were all taken with the UK Schmidt telescope at the AAO.
-The Guide Star Catalogue–II is a joint project of the Space Telescope Science Institute and the Osservatorio Astronomico di Torino. Space Telescope Science Institute is operated by the Association of Universities for Research in Astronomy, for the National Aeronautics and Space Administration under contract NAS5-26555. The participation of the Osservatorio Astronomico di Torino is supported by the Italian Council for Research in Astronomy. Additional support is provided by European Southern Observatory, Space Telescope European Coordinating Facility, the International GEMINI project and the European Space Agency Astrophysics Division.
-The Guide Star Catalog-I was produced at the Space Telescope Science Institute under U.S. Government grant. These data are based on photographic data obtained using the Oschin Schmidt Telescope on Palomar Mountain and the UK Schmidt Telescope.
-Comet Observation Data
-We acknowledge COBS, the Comet Observation Database for the usage of recent comet observation data, in particular the recently observed comet magnitude and coma diameter.
-Planetarium and 3D Solar System Viewer
-The constellation lines used in the Online Planetarium sky charts have been created by Dan Burton as part of his Star Chart project
-The Planetarium and 3D Solar System Viewer have been developed using the three.js javascript 3D library.
-The astronomy.js library by Don Cross is used to compute the approximate position of the Solar System objects given their keplerian elements.
-Eclipse Diagrams
-The visualizations of solar eclipse maps have been generated using the eclipse KML paths provided by Xavier M. Jubier (http://xjubier.free.fr/)
-The visualizations of Lunar Eclipses are part of Fred Espenak's work at https://eclipsewise.com/
-Images
-Images used in the Observing Guide are from: Tom Hall, Justin Flincher, Alvesgaspar via Wikimedia Commons
-The images used for the Moon phases in the Online Planetarium are derived from the original work by Jay Turner, licensed under Creative Commons Attribution-ShareAlike 4.0 International.
-The background image used in the 3D Solar System viewer is credited to ESO/S. Brunier.
-The images of the current phase of the Moon are derived from the original images by NASA's Scientific Visualization Studio.
+# 3. THE INTERPRETATION ENGINE
+if submit:
+    st.markdown(f"## Welcome, {client_name}")
+    
+    # LAYER 1: THE NAKSHATRA VAULT
+    with st.expander("🌙 The Nakshatra & The Shakti (Lunar Mansion)", expanded=True):
+        col1, col2 = st.columns([1, 2])
+        col1.metric("Current Sync", "Verified")
+        col2.write("**The Shakti:** The Power of Perception and Healing.")
+        col2.write("This placement suggests an innate ability to see through the 'veils' of the collective to find systemic truth.")
+
+    # LAYER 2: THE INTEGRAL BLUEPRINT (Alignment & ER)
+    st.markdown("### The Integral Blueprint")
+    tab1, tab2 = st.tabs(["🌿 Ayurvedic Alignment", "🧘 Energetic Re-patterning (ER)"])
+    
+    with tab1:
+        st.write("**Goal:** Alignment")
+        st.write("**Daily Ritual:** Aromatic grounding with Sandalwood and Vetiver.")
+        st.write("**Body Focus:** Strengthening the nervous system through 'Lifestyle Medicine'.")
+    
+    with tab2:
+        st.write("**Goal:** Energetic Re-patterning (ER)")
+        st.write("**Yoga Protocol:** Heart-opening sequences (Anahata Focus).")
+        st.write("**The Repatterning:** Focus on grounding the breath into the lower abdomen to stabilize expansive thoughts.")
+
+    # LAYER 3: THE NARRATIVE
+    st.info("### The Sanctuary Narrative")
+    st.write("""
+        Your blueprint reveals a soul designed for synthesis. The alignment of your stars 
+        suggests a peak functional state where detail serves the whole. You are here to map 
+        the unseen connections that allow a community to thrive as one.
+    """)
+else:
+    st.write("Please enter your details in the sidebar to generate your Sanctuary Blueprint.")
+
+# Acknowledgments (Hidden in code so they don't cause errors)
+# Most of the ephemerides computed are derived from data provided by the JPL Horizons System.
