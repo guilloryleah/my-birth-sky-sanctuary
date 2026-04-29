@@ -6,7 +6,7 @@ from datetime import date, time
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨", layout="wide")
 
 # 2. THE DYNAMIC LOGIC (The "Math Bridge")
-# This function calculates the Sidereal Sun based on the Day and Month
+# This function calculates the Sidereal Sun based on the Day and Month using Lahiri offsets
 def calculate_sidereal_sun(m, d):
     if (m == 4 and d >= 14) or (m == 5 and d <= 14): return "Aries", "Ashwini"
     if (m == 5 and d >= 15) or (m == 6 and d <= 14): return "Taurus", "Rohini"
@@ -15,7 +15,7 @@ def calculate_sidereal_sun(m, d):
     if (m == 8 and d >= 16) or (m == 9 and d <= 15): return "Leo", "Magha"
     if (m == 9 and d >= 16) or (m == 10 and d <= 16): return "Virgo", "Hasta"
     if (m == 10 and d >= 17) or (m == 11 and d <= 15): return "Libra", "Swati"
-    if (m == 11 and d >= 16) or (m == 12 Tensor and d <= 15): return "Scorpio", "Anuradha"
+    if (m == 11 and d >= 16) or (m == 12 and d <= 15): return "Scorpio", "Anuradha"
     if (m == 12 and d >= 16) or (m == 1 and d <= 13): return "Sagittarius", "Mula"
     if (m == 1 and d >= 14) or (m == 2 and d <= 12): return "Capricorn", "Shravana"
     if (m == 2 and d >= 13) or (m == 3 and d <= 13): return "Aquarius", "Shatabhisha"
@@ -35,7 +35,7 @@ with st.sidebar:
 
 # 4. THE REVEAL
 if submit:
-    # RUN THE MATH
+    # RUN THE DYNAMIC MATH
     sun_sign, sun_nak = calculate_sidereal_sun(target_month, target_day)
     
     st.markdown(f"## {client_name}'s Integrated Blueprint")
@@ -51,17 +51,17 @@ if submit:
 
     with col2:
         st.subheader("🌿 Sister 2: Ayurveda")
-        # Dynamic Ayurvedic advice
+        # Dynamic Ayurvedic logic based on Sign Element
         if sun_sign in ["Aries", "Leo", "Sagittarius"]:
-            st.success("Focus: Pitta/Cooling\n\nRitual: Rose Water Mist")
+            st.success("**Focus:** Pitta/Cooling\n\n**Ritual:** Rose Water Mist")
         elif sun_sign in ["Taurus", "Virgo", "Capricorn"]:
-            st.success("Focus: Vata/Grounding\n\nRitual: Sandalwood Oil")
+            st.success("**Focus:** Vata/Grounding\n\n**Ritual:** Sandalwood Oil")
         else:
-            st.success("Focus: Kapha/Invigorating\n\nRitual: Dry Brushing")
+            st.success("**Focus:** Kapha/Invigorating\n\n**Ritual:** Dry Brushing")
 
     with col3:
         st.subheader("🧘 Sister 3: Yoga")
-        st.warning("ER Protocol: Energetic Re-patterning aligned to " + sun_sign)
+        st.warning(f"**ER Protocol:** Energetic Re-patterning aligned to {sun_sign}")
 
     # NAKSHATRA SHAKTI TABLE
     st.divider()
@@ -70,4 +70,4 @@ if submit:
     st.info("The power specifically calculated for this celestial alignment.")
 
 else:
-    st.write("Enter your birth details. The Sanctuary will calculate your unique alignment.")
+    st.write("Enter your birth details in the sidebar to reveal your unique Sanctuary.")
