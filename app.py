@@ -3,85 +3,91 @@ import pandas as pd
 import math
 from datetime import datetime, date, time
 from geopy.geocoders import Nominatim
+from timezonefinder import TimezoneFinder
+import pytz
 
 # 1. SANCTUARY CONFIG
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨", layout="wide")
 
-# 2. DATA ARRAYS
-NAK_LIST = [
-    "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
-    "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", 
-    "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", 
-    "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", 
-    "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
-]
+# 2. DATA
+NAK_LIST = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"]
 ZODIAC_LIST = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
-# 3. THE ASTRONOMICAL ENGINE
-def get_coords(city_name):
+# 3. THE INVISIBLE ENGINE
+def get_location_details(city_name, birth_dt):
     try:
-        geolocator = Nominatim(user_agent="sanctuary_v4")
+        geolocator = Nominatim(user_agent="sanctuary_final")
         loc = geolocator.geocode(city_name)
-        return (loc.latitude, loc.longitude) if loc else (29.76, -95.36)
+        if not loc: return 29.76, -95.36, -6.0
+        tf = TimezoneFinder()
+        tz_name = tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
+        timezone = pytz.timezone(tz_name)
+        offset_seconds = timezone.utcoffset(birth_dt).total_seconds()
+        return loc.latitude, loc.longitude, (offset_seconds / 3600)
     except:
-        return 29.76, -95.36
+        return 29.76, -95.36, -6.0
 
-def calculate_precision_sky(jd, lat, lon, offset):
-    # Adjust Julian Date for Local Time Zone
-    jd_utc = jd + (offset / 24.0)
-    ayan = 24.13 # Lahiri Ayanamsha
-    
-    # LST Calculation
+def calculate_precision_sky(jd_local, lat, lon, offset_hours):
+    jd_utc = jd_local - (offset_hours / 24.0)
+    ayan = 24.13 
     t = (jd_utc - 2451545.0) / 36525.0
     gmst = (280.4606 + 360.985647 * (jd_utc - 2451545.0)) % 360
     lst_deg = (gmst + lon) % 360
-    
-    # Spherical Projection for the Ascendant
     eps = math.radians(23.439)
     phi = math.radians(lat)
     lst_rad = math.radians(lst_deg)
-    
     num = -math.cos(lst_rad)
     den = (math.sin(lst_rad) * math.cos(eps)) + (math.tan(phi) * math.sin(eps))
-    asc_deg = math.degrees(math.atan2(num, den)) % 360
-    
-    # Final Sidereal Positions
-    sid_asc = (asc_deg - ayan) % 360
+    sid_asc = (math.degrees(math.atan2(num, den)) - ayan) % 360
     sid_sun = (((jd_utc - 2451545.0) * 0.9856) + 280.46 - ayan) % 360
     sid_moon = (((jd_utc - 2451545.0) * 13.176) + 218.31 - ayan) % 360
-    
     return sid_sun, sid_moon, sid_asc
 
-def get_label(deg):
-    return ZODIAC_LIST[int(deg / 30)], NAK_LIST[int(deg / (360/27))]
-
-# 4. SIDEBAR
+# 4. SIDEBAR (The Work)
 with st.sidebar:
     st.header("Seeker's Profile")
-    name = st.text_input("Name", value="Matthew")
+    name = st.text_input("Name", placeholder="Enter your name")
     y = st.number_input("Year", 1200, 2026, 1995)
     m = st.number_input("Month", 1, 12, 9)
     d = st.number_input("Day", 1, 31, 24)
     t_in = st.time_input("Birth Time")
-    place = st.text_input("Place of Birth", value="Houston, TX")
-    
-    # Timezone correction (Central is -5 or -6)
-    tz = st.selectbox("Time Zone Offset", options=[-6, -5, 0, 1], index=0, help="Central Time is usually -6")
-    
+    place = st.text_input("Place of Birth", placeholder="e.g. Houston, TX")
     submit = st.button("REVEAL THE BIRTH SKY")
 
-# 5. THE OUTPUT
-if submit:
-    lat, lon = get_coords(place)
-    dt = datetime.combine(date(y, m, d), t_in)
-    jd = pd.Timestamp(dt).to_julian_date()
+# 5. MAIN PAGE (The Vibe)
+if not submit:
+    st.markdown("# ✨ Welcome to Your Birth Sky Sanctuary")
+    st.markdown("""
+    ### *“As above, so below; as within, so without.”*
     
-    s_d, m_d, a_d = calculate_precision_sky(jd, lat, lon, -tz) # Flip sign for UTC math
-    s_s, s_n = get_label(s_d)
-    m_s, m_n = get_label(m_d)
-    a_s, a_n = get_label(a_d)
+    Welcome, Seeker. You have entered a space designed to bridge the ancient wisdom of the stars 
+    with the grounding path of your own life. Here, we don't just calculate signs; we map the 
+    **soul's blueprint** using the precise astronomical logic of the Sidereal sky.
+    
+    Before we begin, take a breath. Release the noise of the day. 
+    
+    **To reveal your celestial architecture:**
+    * Enter your birth details in the sidebar to the left.
+    * Ensure your **Birth Place** is specific so we can capture the exact horizon of your arrival.
+    * Once submitted, we will weave together your **Jyotish, Ayurveda, and Yoga** alignment.
+    
+    *The heavens were singing when you arrived. Let's find out what they were saying.*
+    """)
+    st.image("https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80&w=2070", caption="The stars are a map to your internal sanctuary.")
+
+# 6. OUTPUT (The Reveal)
+else:
+    birth_dt = datetime.combine(date(y, m, d), t_in)
+    lat, lon, offset = get_location_details(place, birth_dt)
+    jd_local = pd.Timestamp(birth_dt).to_julian_date()
+    s_d, m_d, a_d = calculate_precision_sky(jd_local, lat, lon, offset)
+    
+    s_s, s_n = ZODIAC_LIST[int(s_d/30)], NAK_LIST[int(s_d/13.333)]
+    m_s, m_n = ZODIAC_LIST[int(m_d/30)], NAK_LIST[int(m_d/13.333)]
+    a_s, a_n = ZODIAC_LIST[int(a_d/30)], NAK_LIST[int(a_d/13.333)]
 
     st.header(f"✨ Welcome to your Sanctuary, {name}")
+    st.write(f"Reflecting the heavens over **{place}**—precisely as they were at the moment of your breath.")
     st.divider()
 
     col1, col2, col3 = st.columns(3)
@@ -94,8 +100,8 @@ if submit:
     
     with col2:
         st.subheader("🌿 Sister 2: Ayurveda")
-        st.success(f"**Alignment Strategy:**\n\nAs a {a_s} rising, your system favors precision. Focus on Vata-balancing rituals.")
+        st.success(f"**The Elemental Path:** Nourishing your {a_s} constitution.")
 
     with col3:
         st.subheader("🧘 Sister 3: Yoga")
-        st.warning(f"**ER Protocol:**\n\nGrounding for {a_n} energy.")
+        st.warning(f"**ER Protocol:** Aligning the energy of {a_n}.")
