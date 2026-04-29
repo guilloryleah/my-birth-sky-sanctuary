@@ -9,64 +9,49 @@ import pytz
 # 1. SANCTUARY CONFIG
 st.set_page_config(page_title="The Nakshatra Sanctuary", page_icon="✨", layout="wide")
 
-# 2. NAKSHATRA SHAKTI DATABASE
-NAK_DATA = {
-    "Ashwini": "The Power to Reach Quickly (Shidhra Shakti). Miracle healing and swift action.",
-    "Bharani": "The Power to Carry Away (Apabharani Shakti). Transformation through endurance.",
-    "Krittika": "The Power to Burn (Dahana Shakti). Sharp intelligence and purification.",
-    "Rohini": "The Power of Growth (Prabhava Shakti). Nurturing beauty and manifestation.",
-    "Mrigashira": "The Power of Fulfillment (Prinana Shakti). The restless search for truth.",
-    "Ardra": "The Power of Effort (Yatna Shakti). Clarity gained through the storm.",
-    "Punarvasu": "The Power of Renewal (Vasutva Shakti). The return of light and resources.",
-    "Pushya": "The Power of Spiritual Energy (Brahmavarchasa Shakti). Deep nourishment.",
-    "Ashlesha": "The Power to Inflict Poison (Vishasleshana Shakti). Insight into the shadow.",
-    "Magha": "The Power of Lineage (Tyage Shepan Shakti). Connection to ancestral nobility.",
-    "Purva Phalguni": "The Power of Procreation (Prajanana Shakti). Creative charm and union.",
-    "Uttara Phalguni": "The Power of Giving (Chayani Shakti). Prosperity through alliances.",
-    "Hasta": "The Power to Manifest (Hasta Shakti). Putting the world in your hands.",
-    "Chitra": "The Power of Merit (Punya Chayani Shakti). Creating form out of chaos.",
-    "Swati": "The Power to Scatter like the Wind (Pradhvamsana Shakti). Complete freedom.",
-    "Vishakha": "The Power of Achievement (Vyapana Shakti). Focused, multi-branched success.",
-    "Anuradha": "The Power of Worship (Radhana Shakti). Success through balance and devotion.",
-    "Jyeshtha": "The Power to Rise Above (Tarana Shakti). Courage and mental seniority.",
-    "Mula": "The Power to Uproot (Barhana Shakti). Destroying illusions at the root.",
-    "Purva Ashadha": "The Power of Invigoration (Varchograhana Shakti). Strength and purification.",
-    "Uttara Ashadha": "The Power of Victory (Apradhrisya Shakti). Unstoppable, permanent success.",
-    "Shravana": "The Power of Connection (Samhanana Shakti). Listening to the cosmic rhythm.",
-    "Dhanishta": "The Power of Abundance (Sansiddha Shakti). Fame, music, and wealth.",
-    "Shatabhisha": "The Power of Healing (Bheshaja Shakti). Seeing the 100 physicians within.",
-    "Purva Bhadrapada": "The Power of Fire (Yajamana Shakti). Spiritual evolution and heat.",
-    "Uttara Bhadrapada": "The Power of Rain (Varshograhana Shakti). Stability and deep peace.",
-    "Revati": "The Power of Nourishment (Kshiradyani Shakti). Safety on the final journey."
-}
-
-NAK_LIST = list(NAK_DATA.keys())
+# 2. DATA ARRAYS
+NAK_LIST = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"]
 ZODIAC_LIST = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
-# 3. THE PRECISION ENGINE
+# 3. HELPER FOR DEGREES/MINUTES
+def format_dms(deg_raw):
+    """Converts raw degrees to a Sign, Degree, Minute string."""
+    sign_index = int(deg_raw / 30) % 12
+    sign_name = ZODIAC_LIST[sign_index]
+    
+    deg_in_sign = deg_raw % 30
+    d = int(deg_in_sign)
+    m = int((deg_in_sign - d) * 60)
+    
+    # Identify Nakshatra (each is 13°20' or 13.333°)
+    nak_index = int(deg_raw / 13.333333) % 27
+    nak_name = NAK_LIST[nak_index]
+    
+    return f"{d}° {m}' {sign_name}", nak_name
+
+# 4. ENGINE
 def get_location_details(city_name, birth_dt):
     try:
-        geolocator = Nominatim(user_agent="sanctuary_v5")
+        geolocator = Nominatim(user_agent="sanctuary_final_degrees")
         loc = geolocator.geocode(city_name)
-        if not loc: return 29.76, -95.36, -6.0
+        if not loc: return 41.87, -87.62, -5.0
         tf = TimezoneFinder()
         tz_name = tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
         timezone = pytz.timezone(tz_name)
         offset_hours = timezone.utcoffset(birth_dt).total_seconds() / 3600
         return loc.latitude, loc.longitude, offset_hours
-    except: return 29.76, -95.36, -6.0
+    except: return 41.87, -87.62, -5.0
 
-def calculate_sidereal_positions(jd_local, lat, lon, offset):
+def calculate_sidereal(jd_local, lat, lon, offset):
     jd_utc = jd_local - (offset / 24.0)
-    ayan = 24.13 # Lahiri Calibration
+    # Ayanamsha for May 1957
+    ayan = 23.25 
     
-    # Astronomical Constants
     t = (jd_utc - 2451545.0) / 36525.0
     gmst = (280.4606 + 360.985647 * (jd_utc - 2451545.0)) % 360
-    lst_deg = (gmst + lon) % 360
+    lst = (gmst + lon) % 360
     
-    # Lagna (Ascendant) Calculation
-    eps, phi, l_rad = math.radians(23.439), math.radians(lat), math.radians(lst_deg)
+    eps, phi, l_rad = math.radians(23.44), math.radians(lat), math.radians(lst)
     num, den = -math.cos(l_rad), (math.sin(l_rad) * math.cos(eps)) + (math.tan(phi) * math.sin(eps))
     
     sid_asc = (math.degrees(math.atan2(num, den)) - ayan) % 360
@@ -75,54 +60,49 @@ def calculate_sidereal_positions(jd_local, lat, lon, offset):
     
     return sid_sun, sid_moon, sid_asc
 
-# 4. SIDEBAR
+# 5. SIDEBAR
 with st.sidebar:
-    st.header("Celestial Data")
+    st.header("Seeker's Data")
     name = st.text_input("Name", value="Danny")
-    y = st.number_input("Year", 1900, 2026, 1980)
+    y = st.number_input("Year", 1900, 2026, 1957)
     m = st.number_input("Month", 1, 12, 5)
-    d = st.number_input("Day", 1, 31, 20)
-    t_in = st.time_input("Birth Time")
-    place = st.text_input("Birth City", value="Houston, TX")
-    submit = st.button("REVEAL THE STARS")
+    d = st.number_input("Day", 1, 31, 22)
+    t_in = st.time_input("Birth Time", value=time(4, 10))
+    place = st.text_input("Birth City", value="Chicago, IL")
+    submit = st.button("REVEAL THE CHART")
 
-# 5. MAIN PAGE
-if not submit:
-    st.title("✨ The Nakshatra Sanctuary")
-    st.markdown("### Enter your data to reveal the Lunar Mansions and the power of your birth sky.")
-else:
+# 6. MAIN PAGE
+if submit:
     dt = datetime.combine(date(y, m, d), t_in)
     lat, lon, off = get_location_details(place, dt)
-    jd = pd.Timestamp(dt).to_julian_date()
-    s_d, m_d, a_d = calculate_sidereal_positions(jd, lat, lon, off)
+    jd_local = pd.Timestamp(dt).to_julian_date()
+    s_d, m_d, a_d = calculate_sidereal(jd_local, lat, lon, off)
 
-    def get_labels(deg):
-        z = ZODIAC_LIST[int(deg/30)]
-        n = NAK_LIST[int(deg/13.3333)]
-        return z, n
+    sun_fmt, sun_nak = format_dms(s_d)
+    moon_fmt, moon_nak = format_dms(m_d)
+    asc_fmt, asc_nak = format_dms(a_d)
 
-    sz, sn = get_labels(s_d)
-    mz, mn = get_labels(m_d)
-    az, an = get_labels(a_d)
-
-    st.header(f"The Star Map for {name}")
+    st.header(f"✨ The Celestial Blueprint for {name}")
     st.divider()
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.subheader("🌙 Moon")
-        st.info(f"**{mz}**\n\n{mn}")
-        st.caption(NAK_DATA.get(mn))
-    with col2:
-        st.subheader("☀️ Sun")
-        st.success(f"**{sz}**\n\n{sn}")
-        st.caption(NAK_DATA.get(sn))
-    with col3:
-        st.subheader("🌅 Ascendant")
-        st.warning(f"**{az}**\n\n{an}")
-        st.caption(NAK_DATA.get(an))
+    # Metrics with precise degrees
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Ascendant (Lagna)", asc_fmt)
+    c1.write(f"**Nakshatra:** {asc_nak}")
+    
+    c2.metric("Sun Placement", sun_fmt)
+    c2.write(f"**Nakshatra:** {sun_nak}")
+    
+    c3.metric("Moon Placement", moon_fmt)
+    c3.write(f"**Nakshatra:** {moon_nak}")
 
-    st.markdown("---")
-    st.subheader("Detailed Nakshatra Insights")
-    st.write(f"**Sun in {sn}:** {NAK_DATA.get(sn)}")
-    st.write(f"**Ascendant in {an}:** {NAK_DATA.get(an)}")
+    st.divider()
+    st.subheader("Planetary Degrees")
+    
+    # A simple table for clarity
+    df = pd.DataFrame({
+        "Planet": ["Ascendant", "Sun", "Moon"],
+        "Position": [asc_fmt, sun_fmt, moon_fmt],
+        "Nakshatra": [asc_nak, sun_nak, moon_nak]
+    })
+    st.table(df)
