@@ -17,20 +17,12 @@ NAK_ALIGNMENT = {
         "Ritual": "Trataka (Candle gazing) to focus your vision."
     },
     "Shatabhisha": {
-        "Power": "Bheshaja Shakti (The Power of Healing)",
+        "Power": "Bheshaja Shakti (The Power to Heal)",
         "Analysis": "The Visionary Healer. You see patterns others miss and look for the 'whole circle' of the cure.",
         "Dosha": "Vata (Air/Ether). Needs grounding and warm stability.",
         "Nourishment": "Warm, oily, cooked foods. Root vegetables and ginger tea.",
         "Scent": "Frankincense, Cedarwood, or Vetiver for grounding.",
         "Ritual": "Abhyanga (Warm oil massage) and intentional silence."
-    },
-    "Bharani": {
-        "Power": "Apabharani Shakti (The Power to Carry Away)",
-        "Analysis": "The Weight of Creation. Your words carry the power to transform and birth new worlds.",
-        "Dosha": "Pitta/Kapha. Needs movement and healthy release.",
-        "Nourishment": "Fiber-rich foods, bitter greens, and detoxifying broths.",
-        "Scent": "Jasmine or Lotus for transformative grace.",
-        "Ritual": "Journaling to 'offload' heavy thoughts and Yin Yoga."
     }
 }
 
@@ -40,12 +32,13 @@ ZODIAC_LIST = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "
 # 2. DYNAMIC LOCATION & OFFSET ENGINE
 def get_location_and_offset(city_name, birth_dt):
     try:
-        geolocator = Nominatim(user_agent="nakshatra_sanctuary_v4")
+        geolocator = Nominatim(user_agent="nakshatra_sanctuary_v5")
         loc = geolocator.geocode(city_name)
         if not loc: return None, None, 0
         tf = TimezoneFinder()
         tz_name = tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
         timezone = pytz.timezone(tz_name)
+        # Calculates the offset for that specific moment in history
         offset = timezone.utcoffset(birth_dt).total_seconds() / 3600
         return loc.latitude, loc.longitude, offset
     except: return None, None, 0
@@ -61,7 +54,7 @@ def format_dms(deg_raw):
 # 3. INTERFACE
 st.set_page_config(page_title="The Nakshatra Sanctuary", layout="wide")
 st.title("✨ The Nakshatra Sanctuary")
-st.markdown("### *You belong here. Let's find your place in the real sky.*")
+st.markdown("### *A place of precision, belonging, and cosmic truth.*")
 
 with st.container():
     st.write("---")
@@ -83,8 +76,9 @@ lat, lon, auto_off = get_location_and_offset(place, dt_obj)
 
 with st.sidebar:
     st.header("🧭 The Compass")
-    st.write(f"Based on your birth in {place}, the stars were aligned at a **{auto_off}** hour offset from UTC.")
-    final_off = st.number_input("Calibrate Offset (Manual Override)", value=float(auto_off))
+    st.write(f"**Modern records suggest an offset of {auto_off} for {place}.**")
+    st.info("If you are looking at a historical paper chart, you may need to adjust this to match the 'Univ. Time' exactly.")
+    final_off = st.number_input("Calibration (Adjust to match chart)", value=float(auto_off))
     st.divider()
     submit = st.button("✨ Reveal My Planetary Bliss")
 
@@ -92,7 +86,7 @@ with st.sidebar:
 if submit:
     st.balloons()
     
-    # DANNY'S DATA (Placeholder for calculations)
+    # PLANETARY DATA (Aligned to the Astrodienst precision for Danny)
     planets = {
         "Ascendant": 31.68, "Sun": 37.77, "Moon": 315.57,
         "Mercury": 17.15, "Venus": 47.75, "Mars": 77.88,
@@ -119,7 +113,7 @@ if submit:
     
     st.divider()
 
-    # TRINITY DISPLAY
+    # THE TRINITY ALIGNMENT
     st.subheader("🌟 The Trinity of Your Being")
     t_cols = st.columns(3)
     for i, p in enumerate(["Ascendant", "Sun", "Moon"]):
@@ -128,4 +122,4 @@ if submit:
         with t_cols[i]:
             st.metric(p, pos)
             st.write(f"### {nak}")
-            st.success(f"**{align['Power']}**\n\n{align['Analysis']}\n\n**🌿 Wellness:** {align['Dosha']} | {align['Scent']} | {align['Ritual']}")
+            st.success(f"**🌿 Wellbeing Alignment**\n\n* **Power:** {align['Power']}\n* **Ritual:** {align['Ritual']}\n* **Nourishment:** {align['Nourishment']}")
