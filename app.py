@@ -7,31 +7,23 @@ from datetime import datetime, date, time
 NAK_ANALYSIS = {
     "Krittika": {
         "Power": "Dahana Shakti (The Power to Burn/Purify)",
-        "Analysis": "Mark of a 'Mental Scalpel.' Sharp, penetrating intellect that cuts through fluff to find fundamental truths. High standards and a brilliant, digestive mind."
+        "Analysis": "You possess a 'Mental Scalpel.' Yours is a sharp, penetrating intellect that cuts through fluff to find fundamental truths. You bring a brilliant, digestive fire to everything you touch."
     },
     "Shatabhisha": {
         "Power": "Bheshaja Shakti (The Power of Healing)",
-        "Analysis": "Visionary and systematic. Sees patterns others miss. A mind that looks for the 'whole circle' and seeks cures rather than just fixing symptoms."
+        "Analysis": "You are a visionary and a pattern-seeker. You see the 'whole circle' where others see fragments. Your mind seeks systematic cures, looking far beyond the surface of things."
     },
     "Bharani": {
         "Power": "Apabharani Shakti (The Power to Carry Away)",
-        "Analysis": "Weighty and transformative communication. Words carry a sense of authority and finality. Driven by endurance and the birth of new ideas."
+        "Analysis": "Your communication is weighty and transformative. Your words carry the power of birth and finality, driven by an incredible endurance to bring new ideas into the world."
     },
     "Ardra": {
         "Power": "Yatna Shakti (The Power of Effort)",
-        "Analysis": "Thrives in the 'storm.' Drive is fueled by high stakes and complexity. Like a diamond, the best work comes under pressure and through deep effort."
+        "Analysis": "You find your greatest strength in the 'storm.' Like a diamond formed under pressure, your best work and most profound drive emerge when you face complexity with deep effort."
     },
     "Purva Phalguni": {
         "Power": "Prajanana Shakti (The Power of Creativity)",
-        "Analysis": "The 'Royal Priest' energy. Wisdom is gained through creative joy, charisma, and knowing when to rest. Brings warmth to the sharp intellect."
-    },
-    "Magha": {
-        "Power": "Tyagekshepan Shakti (The Power to Leave the Body)",
-        "Analysis": "Connected to lineage and traditional pride. Deep respect for ancestors and the desire to leave a lasting, noble legacy."
-    },
-    "Chitra": {
-        "Power": "Punya Chayani Shakti (The Power to Accumulate Merit)",
-        "Analysis": "The Master Builder. Ability to create beautiful forms out of chaos. High attention to aesthetic and structural integrity."
+        "Analysis": "You carry the 'Royal Priest' energy. You find wisdom through creative joy and charisma, knowing that true prosperity includes the grace of knowing when to rest."
     }
 }
 
@@ -54,62 +46,85 @@ def format_dms(deg_raw):
     nak_idx = int(deg_norm / 13.333333) % 27
     return f"{d}° {m}' {ZODIAC_LIST[sign_idx]}", NAK_LIST[nak_idx]
 
-# 2. APP INTERFACE
+# 2. THE WELCOMING INTERFACE
 st.set_page_config(page_title="The Nakshatra Sanctuary", layout="wide")
-st.title("✨ The Nakshatra Sanctuary")
+
+# Heartfelt Entrance
+st.title("✨ Welcome to The Nakshatra Sanctuary")
+st.markdown("""
+### *You belong here.*
+Take a deep breath. This is more than a map; it is a mirror reflecting the light the stars cast upon the world at the moment you arrived. 
+Let us find the rhythm of your unique sky.
+""")
 
 with st.sidebar:
-    st.header("Birth Data Entry")
-    name = st.text_input("Consultant Name", value="Danny Slater")
-    y = st.number_input("Year", 1900, 2100, 1957)
-    m = st.number_input("Month", 1, 12, 5)
-    d = st.number_input("Day", 1, 31, 22)
-    t_in = st.time_input("Birth Time", value=time(4, 10))
-    place = st.text_input("City", value="Chicago, IL")
-    off = st.number_input("UTC Offset (Verified: -6.0)", value=-6.0)
-    submit = st.button("GENERATE READING")
+    st.header("🌿 Your Sacred Details")
+    st.write("Provide your birth details below with care.")
+    name = st.text_input("What is your name?", value="Danny Slater")
+    
+    col_date = st.columns(3)
+    y = col_date[0].number_input("Year", 1900, 2100, 1957)
+    m = col_date[1].number_input("Month", 1, 12, 5)
+    d = col_date[2].number_input("Day", 1, 31, 22)
+    
+    t_in = st.time_input("The Moment of Your Birth", value=time(4, 10))
+    place = st.text_input("The Place You Arrived (City, State)", value="Chicago, IL")
+    
+    st.divider()
+    st.write("#### 🧭 Professional Alignment")
+    off = st.number_input("UTC Offset (For Danny: -6.0)", value=-6.0)
+    
+    st.divider()
+    submit = st.button("✨ Reveal My Planetary Bliss")
 
+# 3. THE CELEBRATION
 if submit:
-    # DATA MAPPING (Matches Danny's Astrodienst Sheet Exactly)
+    st.balloons() # Added a little celebratory spark!
+    
+    # Danny's Verified Data Mapping
     planets = {
-        "Ascendant": {"pos": 31.68, "desc": "The self and physical presence."},
-        "Sun": {"pos": 37.77, "desc": "The soul's light and core identity."},
-        "Moon": {"pos": 315.57, "desc": "The mind and emotional landscape."},
-        "Mercury": {"pos": 17.15, "desc": "Communication and logical processing."},
-        "Venus": {"pos": 47.75, "desc": "Values, art, and harmony."},
-        "Mars": {"pos": 77.88, "desc": "Drive, action, and ambition."},
-        "Jupiter": {"pos": 178.58, "desc": "Wisdom, expansion, and luck."},
-        "Saturn": {"pos": 228.52, "desc": "Structure, discipline, and karmic lessons."}
+        "Ascendant": {"pos": 31.68, "desc": "Your unique presence in the world."},
+        "Sun": {"pos": 37.77, "desc": "The light of your soul's purpose."},
+        "Moon": {"pos": 315.57, "desc": "The sanctuary of your inner mind."},
+        "Mercury": {"pos": 17.15, "desc": "The voice of your wisdom."},
+        "Venus": {"pos": 47.75, "desc": "Your heart's harmony and artistry."},
+        "Mars": {"pos": 77.88, "desc": "The fire of your drive and action."},
+        "Jupiter": {"pos": 178.58, "desc": "Your path to expansion and luck."},
+        "Saturn": {"pos": 228.52, "desc": "Your foundation and life's discipline."}
     }
 
-    st.header(f"Professional Reading: {name}")
-    st.markdown(f"*Born in {place} | Sidereal Lahiri System*")
+    st.header(f"The Star-Map Celebration for {name}")
+    
+    # THE "NOT YOUR USUAL SIGN" NOTE
+    with st.expander("📝 A Note on the 'Shift' You Might Feel"):
+        st.write("""
+        You may notice that your signs here (Sidereal) are different from what you've seen in Western magazines (Tropical). 
+        **You haven't lost your old sign; you've gained your true astronomical position.** While Western astrology follows the seasons, this map follows the actual stars as they sit in the sky right now. 
+        It is a shift from the 'perceived' to the 'precise.' Welcome to the view from the telescope.
+        """)
+
     st.divider()
 
-    # SECTION: THE TRINITY
-    st.subheader("The Core Trinity")
+    # THE TRINITY: HIGH CELEBRATION
+    st.subheader("🌟 The Trinity of Your Being")
     t_cols = st.columns(3)
     for i, p in enumerate(["Ascendant", "Sun", "Moon"]):
         pos_fmt, nak = format_dms(planets[p]["pos"])
         with t_cols[i]:
             st.metric(p, pos_fmt)
-            st.write(f"**Nakshatra:** {nak}")
-            analysis = NAK_ANALYSIS.get(nak, {"Power": "Data Pending", "Analysis": "Deep interpretation in progress."})
-            st.info(f"**{analysis['Power']}**\n\n{analysis['Analysis']}")
+            st.write(f"### {nak}")
+            analysis = NAK_ANALYSIS.get(nak, {"Power": "Ancient Shakti", "Analysis": "Your star is being analyzed..."})
+            st.success(f"**{analysis['Power']}**\n\n{analysis['Analysis']}")
 
     st.divider()
-
-    # SECTION: THE PLANETARY COUNCIL
-    st.subheader("The Planetary Council")
-    c_cols = st.columns(2)
+    st.subheader("🪐 The Council of the Stars")
+    c_cols = st.columns(3)
     council = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"]
     for i, p in enumerate(council):
         pos_fmt, nak = format_dms(planets[p]["pos"])
-        col_idx = i % 2
-        with c_cols[col_idx]:
+        with c_cols[i % 3]:
             with st.expander(f"✨ {p} in {nak}"):
-                st.write(f"**Position:** {pos_fmt}")
                 st.write(f"**Role:** {planets[p]['desc']}")
-                analysis = NAK_ANALYSIS.get(nak, {"Power": "Standard Power", "Analysis": "Analyzing the planetary alignment..."})
-                st.write(f"**Power:** {analysis['Power']}")
+                analysis = NAK_ANALYSIS.get(nak, {"Power": "Standard Power", "Analysis": "Revealing the cosmic dance..."})
+                st.write(f"**{analysis['Power']}**")
                 st.write(analysis['Analysis'])
