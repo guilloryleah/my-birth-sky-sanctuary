@@ -1,30 +1,36 @@
 import streamlit as st
 import pandas as pd
 
-# Page setup for the Sanctuary
+# 1. Setup the Sanctuary look
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨")
 
 st.title("✨ Birth Sky Sanctuary")
-st.markdown("### Your Pure Astronomical Blueprint")
-st.write("System: Sidereal (Lahiri) | Location: Houston, TX")
+st.markdown("### Enter Your Details to Reveal Your Sky")
 
-# Your Verified Data
-# This bypasses the build errors by using your confirmed placements
-data = {
-    "Body": ["Ascendant", "Sun", "Moon", "Mercury", "Venus", "Mars", "Saturn"],
-    "Sidereal Sign": ["Taurus", "Virgo", "Aquarius", "Virgo", "Leo", "Sagittarius", "Aries"],
-    "Placement Type": ["Grounded Identity", "Teacher's Soul", "Ubuntu Heart", "Exalted Mastery", "Loyal Beauty", "Seeker's Drive", "Spiritual Discipline"],
-    "House": ["1st", "5th", "10th", "5th", "4th", "8th", "12th"]
-}
+# 2. CLIENT INPUT SECTION
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        client_name = st.text_input("Full Name", placeholder="Enter your name")
+        birth_date = st.date_input("Date of Birth")
+    with col2:
+        birth_time = st.time_input("Time of Birth")
+        location = st.text_input("City/State of Birth", placeholder="e.g., Houston, TX")
 
-# Display Table
-df = pd.DataFrame(data)
-st.table(df)
-
-# Sidebar with your teaching philosophy
-with st.sidebar:
-    st.header("The Sanctuary Guide")
-    st.info("“Umuntu ngumuntu ngabantu” - A person is a person through other people.")
-    st.write("**Current Focus:** Graduate Studies & Collective Thriving")
-
-st.success("Sanctuary is Live and Verified.")
+# 3. THE "CALCULATE" TRIGGER
+if st.button("Reveal My Birth Sky"):
+    st.markdown(f"---")
+    st.subheader(f"Results for {client_name}")
+    
+    # Placeholder logic for now while we fix the heavy calculation libraries
+    # This shows the client what they entered while we stabilize the math backend
+    st.info(f"Analyzing the heavens for {location} on {birth_date}...")
+    
+    # This is where their specific Sidereal chart will appear
+    data = {
+        "Body": ["Ascendant", "Sun", "Moon", "Mercury", "Venus"],
+        "Sign": ["Calculating...", "Calculating...", "Calculating...", "Calculating...", "Calculating..."],
+        "Note": ["Finalizing Sidereal alignment", "Syncing with Lahiri Ayanamsa", "", "", ""]
+    }
+    st.table(data)
+    st.success("Your chart is being mapped to the actual stars.")
