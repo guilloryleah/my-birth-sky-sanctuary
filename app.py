@@ -1,86 +1,90 @@
 import streamlit as st
 import pandas as pd
-from datetime import date, time
+from datetime import datetime, date, time
 
-# 1. THE SANCTUARY SETTINGS
+# 1. SANCTUARY CONFIG
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨", layout="wide")
 
-# 2. THE MASTER SHAKTI DICTIONARY (Based on your chart results)
-NAK_DATA = {
-    "Bharani": "The Power to Carry Away (Apabharani Shakti). Transformation through endurance and the birthing of new ideas.",
-    "Hasta": "The Power to Manifest (Hasta Shakti). Precision, craftsmanship, and the ability to put the 'Ubuntu' philosophy into practice through the hands.",
-    "Jyeshtha": "The Power to Rise Above (Courage Shakti). Leadership, mastery over the senses, and the protection of the community's values.",
-    "Rohini": "The Power of Growth. Creative stability and the nurturing of beautiful foundations.",
-    "Shatabhisha": "The Power of Healing. Perceiving systemic truth through the 100 physicians."
-}
+# 2. THE PERMANENT NAKSHATRA WHEEL
+NAK_LIST = [
+    "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
+    "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", 
+    "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", 
+    "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", 
+    "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+]
 
-# 3. THE CALIBRATED ENGINE (Sync'd to your Astro.com Screenshot)
-def get_calibrated_blueprint(m, d, y, hour, city):
-    # Today's baseline from your screenshot: April 28, 2026
-    if m == 4 and d == 28 and y == 2026:
-        sun = ("Aries", "Bharani")
-        moon = ("Virgo", "Hasta")
-        # Ascendant changes every 2 hours - this syncs to your 11:30 PM screenshot
-        if hour >= 22:
-            asc = ("Scorpio", "Jyeshtha")
-        else:
-            asc = ("Libra", "Chitra")
-    else:
-        # General Sidereal logic for other dates
-        if (m == 9 and d >= 16) or (m == 10 and d <= 16): 
-            sun = ("Virgo", "Hasta")
-        else:
-            sun = ("Taurus", "Rohini")
-        moon = ("Aquarius", "Shatabhisha")
-        asc = ("Taurus", "Rohini")
-        
-    return sun, moon, asc
+ZODIAC_LIST = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+
+# 3. THE CALCULATION ENGINE (Astronomical Math)
+def calculate_sidereal_position(jd):
+    # This is a high-level math bridge to find the degree of the moon/asc
+    # Based on the Julian Date (jd)
+    # We apply the Lahiri Ayanamsa (~24 degrees)
+    ayanamsa = 24.2  
+    
+    # SUN (Approximate degree)
+    sun_deg = (jd - 2451545.0) * 0.9856 + 280.46
+    sun_sidereal = (sun_deg - ayanamsa) % 360
+    
+    # MOON (Fast moving - moves ~13.2 deg per day)
+    moon_deg = (jd - 2451545.0) * 13.176 + 218.31
+    moon_sidereal = (moon_deg - ayanamsa) % 360
+    
+    # ASCENDANT (Changes based on time of day - approx 15 deg per hour)
+    # This is a simplified LST calculation for the Lagna
+    hour_offset = (jd % 1) * 360
+    asc_sidereal = (moon_sidereal + hour_offset) % 360 # Proxy for Lagna
+    
+    return sun_sidereal, moon_sidereal, asc_sidereal
+
+def get_sign_and_nak(degree):
+    sign = ZODIAC_LIST[int(degree / 30)]
+    nak = NAK_LIST[int(degree / (360/27))]
+    return sign, nak
 
 # 4. SIDEBAR INPUTS
 with st.sidebar:
     st.header("Seeker's Profile")
-    client_name = st.text_input("Name", placeholder="Matthew")
-    target_year = st.number_input("Year", 1200, 2026, 2026)
-    target_month = st.number_input("Month", 1, 12, 4)
-    target_day = st.number_input("Day", 1, 31, 28)
-    b_time = st.time_input("Birth Time", value=time(23, 30))
-    b_place = st.text_input("Place of Birth", "Austin, TX")
+    name = st.text_input("Name", value="Matthew")
+    y = st.number_input("Year", 1200, 2026, 1969)
+    m = st.number_input("Month", 1, 12, 9)
+    d = st.number_input("Day", 1, 31, 24)
+    t = st.time_input("Birth Time")
+    place = st.text_input("Place of Birth", "Houston, TX")
     submit = st.button("REVEAL THE BIRTH SKY")
 
-# 5. THE NARRATIVE REVEAL
-if submit and client_name:
-    sun, moon, asc = get_calibrated_blueprint(target_month, target_day, target_year, b_time.hour, b_place)
+# 5. THE OUTPUT
+if submit:
+    # Convert inputs to Julian Date for the math engine
+    dt = datetime.combine(date(y, m, d), t)
+    jd = pd.Timestamp(dt).to_julian_date()
     
-    st.markdown(f"# Welcome to your Sanctuary, {client_name}")
-    st.divider()
+    sun_d, moon_d, asc_d = calculate_sidereal_position(jd)
+    sun_s, sun_n = get_sign_and_nak(sun_d)
+    moon_s, moon_n = get_sign_and_nak(moon_d)
+    asc_s, asc_n = get_sign_and_nak(asc_d)
 
+    st.header(f"✨ Welcome, {name}")
+    st.write(f"Your unique sky over {place} is now live.")
+    
     # THE 3 SISTERS DASHBOARD
     col1, col2, col3 = st.columns(3)
-    
     with col1:
         st.subheader("🪐 Sister 1: Jyotish")
-        st.info(f"**Ascendant:** {asc[0]} | {asc[1]}\n\n**Sun:** {sun[0]} | {sun[1]}\n\n**Moon:** {moon[0]} | {moon[1]}")
-
+        st.info(f"**Sun:** {sun_s} ({sun_n})\n\n**Moon:** {moon_s} ({moon_n})\n\n**Ascendant:** {asc_s} ({asc_n})")
+    
     with col2:
         st.subheader("🌿 Sister 2: Ayurveda")
-        st.success(f"**Alignment Strategy:**\n\nFor your {sun[1]} Sun, use grounding Lifestyle Medicine to manage the intensity of {sun[0]} fire.")
+        st.success(f"**Alignment Strategy:**\n\nBalance the {sun_s} essence with grounding rituals.")
 
     with col3:
         st.subheader("🧘 Sister 3: Yoga")
-        st.warning(f"**ER Protocol:**\n\nYour {asc[1]} Ascendant requires Energetic Re-patterning that focuses on inner mastery and core strength.")
+        st.warning(f"**ER Protocol:**\n\nNurture the {asc_n} energy through heart-centered flow.")
 
-    # DETAILED NAKSHATRA ANALYSIS
-    st.markdown("---")
-    st.header("Detailed Celestial Analysis")
-    
-    st.markdown(f"### ☀️ The Sun in {sun[0]} ({sun[1]})")
-    st.write(NAK_DATA.get(sun[1], "A unique celestial power."))
-
-    st.markdown(f"### 🌙 The Moon in {moon[0]} ({moon[1]})")
-    st.write(NAK_DATA.get(moon[1], "Your emotional sanctuary."))
-
-    st.markdown(f"### 🌅 The Ascendant in {asc[0]} ({asc[1]})")
-    st.write(NAK_DATA.get(asc[1], "The gateway of your soul."))
+    st.divider()
+    st.markdown(f"### Detailed Analysis for {name}")
+    st.write(f"Your **{sun_n}** Sun gives you the power to manifest, while your **{moon_n}** resonance connects you to the collective Ubuntu heart. Finally, your **{asc_n}** Ascendant is the gateway to your life's purpose.")
 
 else:
-    st.write("The stars are waiting. Enter your details to begin.")
+    st.write("Enter the birth details in the sidebar to begin the calculation.")
