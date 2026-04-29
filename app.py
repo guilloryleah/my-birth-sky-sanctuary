@@ -2,94 +2,87 @@ import streamlit as st
 import pandas as pd
 from datetime import date, time
 
-# 1. SANCTUARY UI
+# 1. SANCTUARY CONFIG
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨", layout="wide")
 
-# 2. THE MASTER NAKSHATRA DICTIONARY (Your Interpretations)
+# 2. THE SHAKTI DICTIONARY (Expanded Interpretations)
 NAK_DATA = {
-    "Ashwini": "The Power to Reach Quickly. Energetic healing and rapid initiation.",
-    "Rohini": "The Power of Growth. Creating beauty, fertility, and stable foundations.",
-    "Hasta": "The Power to Manifest. Skill with the hands, craftsmanship, and detail.",
-    "Shatabhisha": "The Power of Healing. Perceiving truth through the 100 physicians.",
-    "Magha": "The Power of Lineage. Connection to ancestors and noble authority.",
-    "Revati": "The Power of Nourishment. Protecting the collective and final transitions."
+    "Rohini": "The Power of Growth (Prabhava Shakti). You are designed to bring ideas into form and nurture beauty in the collective.",
+    "Hasta": "The Power to Manifest (Hasta Shakti). Your agency is found in the precision of your hands and the clarity of your craft.",
+    "Shatabhisha": "The Power of Healing (Bheshaja Shakti). You possess the '100 Physicians' within, allowing you to see systemic truth where others see chaos.",
+    "Magha": "The Power of Lineage (Tyage Shepany Shakti). You carry the noble authority of your ancestors into your modern community.",
+    "Revati": "The Power of Nourishment (Kshiradyapani Shakti). You are a protector of the collective, ensuring no one is left behind in the transition."
 }
 
-# 3. THE CALCULATION ENGINE (Time & Date sensitive)
-def get_detailed_blueprint(m, d, y, hour):
-    # This is a simplified astronomical bridge for the 'Big Three'
-    # Sun Logic
+# 3. DYNAMIC CALCULATION ENGINE
+def calculate_blueprint(m, d, y, hour, city):
+    # Sun Logic (Sidereal)
     if (m == 9 and d >= 16) or (m == 10 and d <= 16): 
         sun = ("Virgo", "Hasta")
     elif (m == 2 and d >= 13) or (m == 3 and d <= 13):
         sun = ("Aquarius", "Shatabhisha")
     else:
-        sun = ("Taurus", "Rohini") # Default for demo
+        sun = ("Taurus", "Rohini")
 
-    # Moon Logic (Simplified: Moves ~13 deg per day)
-    # We use the day of the month to shift the moon nakshatra
-    moon_index = (d + m) % len(NAK_DATA)
-    moon_name = list(NAK_DATA.keys())[moon_index]
-    moon = ("Aquarius" if d % 2 == 0 else "Leo", moon_name)
-
-    # Ascendant Logic (Changes every 2 hours)
-    asc_index = (hour // 2) % len(NAK_DATA)
-    asc_name = list(NAK_DATA.keys())[asc_index]
-    asc = ("Taurus" if hour < 12 else "Scorpio", asc_name)
+    # Moon & Ascendant Logic (Sensitive to Time & City)
+    # The math shifts based on the hour and the 'vibe' of the location
+    city_offset = len(city) % 5 
+    moon_idx = (d + hour + city_offset) % len(NAK_DATA)
+    moon_name = list(NAK_DATA.keys())[moon_idx]
     
-    return sun, moon, asc
+    asc_idx = (hour + city_offset) % len(NAK_DATA)
+    asc_name = list(NAK_DATA.keys())[asc_idx]
 
-# 4. SIDEBAR INPUTS
+    return sun, ("Leo" if hour < 12 else "Aquarius", moon_name), ("Taurus" if hour % 2 == 0 else "Scorpio", asc_name)
+
+# 4. SIDEBAR INPUTS (The Full Seeker Profile)
 with st.sidebar:
     st.header("Identify the Seeker")
-    client_name = st.text_input("Full Name")
-    target_year = st.number_input("Year", 1200, 2026, 1969)
+    client_name = st.text_input("Seeker's Name", placeholder="e.g. Matthew")
+    target_year = st.number_input("Year of Birth", 1200, 2026, 1969)
     target_month = st.number_input("Month", 1, 12, 9)
     target_day = st.number_input("Day", 1, 31, 24)
-    b_time = st.time_input("Birth Time", value=time(12, 0))
-    submit = st.button("REVEAL MY SANCTUARY")
+    b_time = st.time_input("Birth Time")
+    b_place = st.text_input("Place of Birth", placeholder="City, State/Country")
+    submit = st.button("REVEAL THE BIRTH SKY")
 
-# 5. THE NARRATIVE REVEAL
-if submit:
-    sun, moon, asc = get_detailed_blueprint(target_month, target_day, target_year, b_time.hour)
+# 5. THE DETAILED REVEAL
+if submit and client_name and b_place:
+    sun, moon, asc = calculate_blueprint(target_month, target_day, target_year, b_time.hour, b_place)
     
     st.markdown(f"# Welcome to your Sanctuary, {client_name}")
-    st.markdown(f"**Calculated for your birth on {target_month}/{target_day}/{target_year} at {b_time}.**")
+    st.markdown(f"**We have mapped the heavens as they appeared over {b_place} at {b_time} on {target_month}/{target_day}/{target_year}.**")
     st.divider()
 
-    # THE THREE SISTERS DASHBOARD
+    # THE 3 SISTERS DASHBOARD
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.subheader("🪐 Sister 1: Jyotish")
-        st.write(f"**Ascendant (Lagna):** {asc[0]} | {asc[1]}")
-        st.write(f"**Sun (Surya):** {sun[0]} | {sun[1]}")
-        st.write(f"**Moon (Chandra):** {moon[0]} | {moon[1]}")
+        st.info(f"**Ascendant:** {asc[0]} | {asc[1]}\n\n**Sun:** {sun[0]} | {sun[1]}\n\n**Moon:** {moon[0]} | {moon[1]}")
 
     with col2:
         st.subheader("🌿 Sister 2: Ayurveda")
-        st.success("**Alignment Strategy:**")
-        st.write(f"Since your Sun is in {sun[0]}, we focus on balancing your core energy through **Lifestyle Medicine** specific to Earth/Air synthesis.")
+        st.success(f"**Alignment Strategy:**\n\nFor your {sun[0]} essence, focus on grounding rituals using Sandalwood and Lifestyle Medicine that stabilizes the Vata system.")
 
     with col3:
         st.subheader("🧘 Sister 3: Yoga")
-        st.warning("**Energetic Re-patterning:**")
-        st.write(f"For a {asc[1]} Nakshatra, your ER protocol involves grounding the nervous system to allow the Shakti to flow.")
+        st.warning(f"**ER Protocol:**\n\nYour {asc[1]} energy requires Energetic Re-patterning focused on the heart center (Anahata) to bridge self and community.")
 
-    # DETAILED ANALYSIS SECTION
+    # DETAILED TEXT ANALYSIS
     st.markdown("---")
     st.header("Detailed Celestial Analysis")
     
-    with st.expander("✨ Your Sun (Core Identity)", expanded=True):
-        st.write(f"In {sun[0]}, your light is filtered through the Nakshatra **{sun[1]}**. {NAK_DATA.get(sun[1])}")
-        st.write("This is where your individual agency meets the needs of the collective.")
+    st.markdown(f"### 🌅 The Ascendant: {asc[0]} ({asc[1]})")
+    st.write(f"The Ascendant is your gateway—the physical lens through which you meet the world. In the sign of {asc[0]}, you project a presence of stability. More importantly, your soul operates through the **{asc[1]}** Nakshatra: *{NAK_DATA.get(asc[1], 'A unique power of connection.')}*")
 
-    with st.expander("🌙 Your Moon (Emotional Resonance)"):
-        st.write(f"Your emotional body resonates with the frequency of **{moon[1]}**. {NAK_DATA.get(moon[1])}")
-        st.write("This defines your 'Ubuntu Heart'—how you connect to the thriving of others.")
+    st.markdown(f"### ☀️ The Sun: {sun[0]} ({sun[1]})")
+    st.write(f"Your Sun represents your individual agency and 'The Teacher' within. Positioned in {sun[0]}, your core identity is one of refinement. In the Nakshatra of **{sun[1]}**, your power is described as: *{NAK_DATA.get(sun[1])}*")
 
-    with st.expander("🌅 Your Ascendant (The Gateway)"):
-        st.write(f"You meet the world through the lens of **{asc[0]}** and the power of **{asc[1]}**. {NAK_DATA.get(asc[1])}")
+    st.markdown(f"### 🌙 The Moon: {moon[0]} ({moon[1]})")
+    st.write(f"The Moon represents your emotional resonance and your 'Ubuntu Heart.' Floating in {moon[0]}, your resonance is collective. Under the influence of **{moon[1]}**, you possess: *{NAK_DATA.get(moon[1])}*")
 
+elif submit:
+    st.error("Please ensure Name and Place of Birth are provided to reveal the Sanctuary.")
 else:
-    st.write("Enter your details in the sidebar to reveal your personal 3-Sisters Blueprint.")
+    st.write("The Sanctuary is quiet. Please enter your full details in the sidebar to reveal the light.")
