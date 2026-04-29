@@ -9,7 +9,7 @@ import pytz
 # 1. SANCTUARY CONFIG
 st.set_page_config(page_title="The Nakshatra Sanctuary", page_icon="✨", layout="wide")
 
-# 2. THE NAKSHATRA KNOWLEDGE BASE (Pure Shakti)
+# 2. THE NAKSHATRA KNOWLEDGE BASE
 NAK_DATA = {
     "Ashwini": "Power to Reach Quickly (Shidhra Shakti). Healing and swiftness.",
     "Bharani": "Power to Carry Away (Apabharani Shakti). Transformation and endurance.",
@@ -56,9 +56,9 @@ def format_dms(deg_raw):
 # 4. PRECISION ENGINE
 def get_location_details(city_name, birth_dt):
     try:
-        geolocator = Nominatim(user_agent="sanctuary_final_v10")
+        geolocator = Nominatim(user_agent="sanctuary_final_v11")
         loc = geolocator.geocode(city_name)
-        if not loc: return 41.87, -87.62, -5.0 # Fallback Chicago
+        if not loc: return 41.87, -87.62, -5.0
         tf = TimezoneFinder()
         tz_name = tf.timezone_at(lng=loc.longitude, lat=loc.latitude)
         timezone = pytz.timezone(tz_name)
@@ -68,28 +68,20 @@ def get_location_details(city_name, birth_dt):
 
 def calculate_sidereal_blueprint(jd_local, lat, lon, offset):
     jd_utc = jd_local - (offset / 24.0)
-    ayan = 23.25 # Lahiri for 1957
-    
+    ayan = 23.25 
     t = (jd_utc - 2451545.0) / 36525.0
     gmst = (280.46061837 + 360.98564736629 * (jd_utc - 2451545.0) + 0.000387933 * t**2) % 360
     lst_deg = (gmst + lon) % 360
+    eps, phi, l_rad = math.radians(23.439), math.radians(lat), math.radians(lst_deg)
     
-    eps = math.radians(23.439)
-    phi = math.radians(lat)
-    l_rad = math.radians(lst_deg)
-    
-    # Mathematical correction to force Eastern Horizon (Ascendant)
+    # Corrected Coordinates for Ascendant (Rising Point)
     y = math.sin(l_rad)
     x = math.cos(l_rad) * math.cos(eps) - math.tan(phi) * math.sin(eps)
-    
-    # We use -math.atan2(y, x) to flip from West (Libra) to East (Aries)
     asc_raw = math.degrees(math.atan2(y, x)) + 90
-    sid_asc = (asc_raw - ayan) % 360
     
-    # Planet positions
+    sid_asc = (asc_raw - ayan) % 360
     sid_sun = (((jd_utc - 2451545.0) * 0.9856) + 280.46 - ayan) % 360
     sid_moon = (((jd_utc - 2451545.0) * 13.176) + 218.31 - ayan) % 360
-    
     return sid_sun, sid_moon, sid_asc
 
 # 5. INTERFACE
@@ -107,3 +99,28 @@ with st.sidebar:
     submit = st.button("REVEAL CHART")
 
 if submit:
+    dt = datetime.combine(date(y, m, d), t_in)
+    lat, lon, off = get_location_details(place, dt)
+    jd_local = pd.Timestamp(dt).to_julian_date()
+    
+    s_d, m_d, a_d = calculate_sidereal_blueprint(jd_local, lat, lon, off)
+    sun_fmt, sun_nak = format_dms(s_d)
+    moon_fmt, moon_nak = format_dms(m_d)
+    asc_fmt, asc_nak = format_dms(a_d)
+
+    st.header(f"The Star Map for {name}")
+    st.divider()
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.subheader("🌅 Ascendant")
+        st.metric("Lagna", asc_fmt)
+        st.write(f"**Nakshatra:** {asc_nak}")
+    with c2:
+        st.subheader("☀️ Sun")
+        st.metric("Surya", sun_fmt)
+        st.write(f"**Nakshatra:** {sun_nak}")
+    with c3:
+        st.subheader("🌙 Moon")
+        st.metric("Chandra", moon_fmt)
+        st.write(f"**Nakshatra:** {moon_nak}")
