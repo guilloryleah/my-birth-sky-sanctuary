@@ -1,3 +1,5 @@
 streamlit
 pyswisseph
-datetime
+geopy
+timezonefinder
+pytz
