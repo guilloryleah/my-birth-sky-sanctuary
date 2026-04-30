@@ -3,7 +3,7 @@ import swisseph as swe
 import pytz
 from datetime import datetime
 
-# --- 1. THE WISDOM LIBRARY (The Scaffold) ---
+# --- 1. THE WISDOM LIBRARY ---
 ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
@@ -23,7 +23,7 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
     swe.set_ephe_path('./ephe') 
     
     # FORCING SIDEREAL MODE (The Lahiri Bridge)
-    # This prevents the 'Aries' drift and keeps the 1° Taurus foundation
+    # This prevents the 'Aries' drift and keeps Danny at 1° Taurus
     swe.set_sid_mode(swe.SIDM_LAHIRI)
 
     # Time Integrity: Navigating the historical time-zone ghosts
@@ -36,7 +36,7 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
     jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, 
                     utc_dt.hour + utc_dt.minute/60.0)
 
-    # Sidereal flag is required for every calculation to maintain 'Real-Sky' truth
+    # Sidereal flag is required for every calculation
     flags = swe.FLG_SIDEREAL | swe.FLG_SPEED
 
     def calc_obj(obj_id):
@@ -48,7 +48,7 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
             "Position": f"{round(deg % 30, 2)}°"
         }
 
-    # Calculate Ascendant (Using Topocentric math for Earth-Surface accuracy)
+    # Calculate Ascendant (Topocentric/Surface Accuracy)
     houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
     asc_deg = ascmc[0]
     
@@ -64,24 +64,21 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
         "Rahu": calc_obj(swe.MEAN_NODE)
     }
 
-# --- 3. THE FRONTEND (The Visual Sanctuary) ---
+# --- 3. THE FRONTEND ---
 st.set_page_config(page_title="Birth Sky Sanctuary", page_icon="✨")
 st.title("✨ Birth Sky Sanctuary")
 st.markdown("### *A Real-Sky Receipt of Truth*")
 
-# The Relationship-Centered Input Section
 with st.form("birth_data"):
     client_name = st.text_input("Client Name", placeholder="Enter full name")
     
     col1, col2 = st.columns(2)
     with col1:
-        # Defaults to Danny's verified birth date
+        # Defaults to Danny's birth data
         date = st.date_input("Birth Date", value=datetime(1957, 5, 10))
     with col2:
-        # Defaults to Danny's verified birth time
         time = st.time_input("Birth Time", value=datetime(1957, 5, 10, 12, 0).time())
     
-    # Timezone selection for historical accuracy
     tz = st.selectbox("Timezone", pytz.all_timezones, index=pytz.all_timezones.index("America/Chicago"))
 
     col3, col4 = st.columns(2)
@@ -92,24 +89,21 @@ with st.form("birth_data"):
     
     submitted = st.form_submit_button("Generate Truth Receipt")
 
-# --- 4. THE OUTPUT (The Truth Receipt) ---
+# --- 4. THE OUTPUT ---
 if submitted:
     if not client_name:
         st.error("Please enter a name for the report.")
     else:
         try:
-            # Running the 'Gold Standard' math
             report = get_real_sky_report(date.year, date.month, date.day, time.hour, time.minute, lat, lon, tz)
             
             st.divider()
             st.header(f"Real-Sky Soul Map: {client_name}")
             
-            # Displaying the 'Front Door' (Ascendant)
             asc = report["Ascendant"]
             st.subheader(f"The Gateway (Ascendant): {asc['Position']} {asc['Sign']}")
             st.write(f"**Nakshatra:** {asc['Nakshatra']}")
             
-            # Displaying the Core Pillars
             c1, c2, c3 = st.columns(3)
             with c1:
                 st.metric("Sun", f"{report['Sun']['Position']} {report['Sun']['Sign']}")
