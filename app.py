@@ -7,33 +7,29 @@ import pytz
 
 # --- THE SOUL MAP ENGINE ---
 def calculate_soul_map(year, month, day, hour, minute, lat, lon):
-    # 1. THE INVISIBLE WORLD CLOCK (Automatic UTC Sync)
-    # This automatically finds the -5.0 offset for Chicago 1957
+    # 1. THE INVISIBLE WORLD CLOCK
     tf = TimezoneFinder()
     tz_name = tf.timezone_at(lng=lon, lat=lat)
     timezone = pytz.timezone(tz_name)
-    
-    # Anchor the local time to the World Clock
     local_dt = timezone.localize(datetime(year, month, day, hour, minute))
     utc_dt = local_dt.astimezone(pytz.utc)
     
-    # Convert to Julian Day for the star engine
-    jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
+    jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
 
-    # 2. REAL-SKY CONSTANT (True Lahiri)
-    # This accounts for the Earth's 24-degree wobble
+    # 2. THE REAL-SKY CALIBRATION (The Aries Drift Cure)
+    # We set the mode to Lahiri AND explicitly tell the engine to use Sidereal houses.
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     
-    # 3. TOPOCENTRIC CALIBRATION
-    # Standing on the ground to see the real horizon
+    # 3. TOPOCENTRIC ANCHOR
     swe.set_topo(lat, lon, 0)
     
-    # 4. CALCULATING THE SOUL'S SEAT
-    # We use the Sidereal flag (FLG_SIDEREAL) to bypass the seasonal calendar
-    flags = swe.FLG_SIDEREAL | swe.FLG_SPEED
-    cusps, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
+    # 4. THE SOUL'S SEAT (House Calculation)
+    # 'sid_ascmc' gives us the Sidereal Ascendant directly, bypassing the "Aries Drift"
+    # We use the 'P' (Placidus) or 'W' (Whole Sign) based on your preference
+    cusps, ascmc = swe.houses_ex2(jd_ut, lat, lon, b'P', swe.FLG_SIDEREAL)
     
-    asc_raw = ascmc[0]
+    asc_raw = ascmc[0] # This is the Ascendant
+    
     signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
              "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
     
@@ -43,16 +39,14 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
 st.title("✨ The Real-Sky Soul Map")
 st.markdown("### Mapping the Soul for Anyone, Anywhere")
 
-# Location Search
 address = st.text_input("Enter City, State, or Country", "Chicago, Illinois")
 geolocator = Nominatim(user_agent="soul_map_engine")
 location = geolocator.geocode(address)
 
 if location:
     lat, lon = location.latitude, location.longitude
-    
-    # Birth Details
     name = st.text_input("Name", "Danny")
+    
     col1, col2 = st.columns(2)
     with col1:
         b_date = st.date_input("Birth Date", datetime(1957, 5, 10))
@@ -66,16 +60,14 @@ if location:
         
         st.header(f"✨ {name}'s Soul Map")
         
-        # This metric is now anchored to the Taurus Foundation
+        # This will now correctly display the Taurus Foundation
         st.metric("Foundation (Ascendant)", f"{deg:.2f}° {sign}")
 
-        # The Wisdom Library Integration
         if sign == "Taurus":
-            st.write("### The Protector Architecture")
             st.info("**Internal Atmosphere:** Kapha (Stability)")
             st.info("**Soulful Movement:** Vrksasana (Tree Pose)")
         
         st.divider()
-        st.caption("Calculated using True Lahiri Sidereal math to honor your Real-Sky homecoming.")
+        st.caption("Calculated using the World Clock and True Lahiri to honor your Real-Sky homecoming.")
 else:
     st.warning("Please enter a birth city to anchor the map.")
