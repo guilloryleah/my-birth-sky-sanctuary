@@ -9,14 +9,13 @@ ZODIAC_SIGNS = [
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
 ]
 
-# This library contains the 'essence' you loved: Doshas and Postures
 WISDOM_DATA = {
     "Ashwini": {"dosha": "Vata", "yoga": "Setu Bandhasana (Bridge Pose)"},
     "Bharani": {"dosha": "Pitta", "yoga": "Malasana (Garland Pose)"},
     "Krittika": {"dosha": "Pitta", "yoga": "Surya Namaskar (Sun Salutations)"},
     "Rohini": {"dosha": "Kapha", "yoga": "Vrksasana (Tree Pose)"},
     "Mrigashira": {"dosha": "Vata/Pitta", "yoga": "Nadi Shodhana (Alternate Nostril Breathing)"},
-    "Ardra": {"dosha": "Vata", "yoga": "Shivasana (Corpse Pose - for release)"},
+    "Ardra": {"dosha": "Vata", "yoga": "Shivasana (Corpse Pose)"},
     "Punarvasu": {"dosha": "Kapha", "yoga": "Tadasana (Mountain Pose)"},
     "Pushya": {"dosha": "Kapha", "yoga": "Balasana (Child's Pose)"},
     "Ashlesha": {"dosha": "Kapha", "yoga": "Bhujangasana (Cobra Pose)"},
@@ -32,7 +31,7 @@ WISDOM_DATA = {
     "Mula": {"dosha": "Vata", "yoga": "Adho Mukha Svanasana (Downward Dog)"},
     "Purva Ashadha": {"dosha": "Pitta", "yoga": "Ustrasana (Camel Pose)"},
     "Uttara Ashadha": {"dosha": "Pitta/Kapha", "yoga": "Paschimottanasana (Seated Forward Fold)"},
-    "Shravana": {"dosha": "Kapha", "yoga": "Viparita Karani (Legs up Wall)"},
+    "Shravana": {"dosha": "Kapha", "yoga": "Viparita Leg-up-Wall"},
     "Dhanishta": {"dosha": "Pitta/Kapha", "yoga": "Natarajasana (Dancer Pose)"},
     "Shatabhisha": {"dosha": "Vata", "yoga": "Padmasana (Lotus Pose)"},
     "Purva Bhadrapada": {"dosha": "Vata/Pitta", "yoga": "Urdhva Dhanurasana (Wheel Pose)"},
@@ -42,10 +41,10 @@ WISDOM_DATA = {
 
 NAKSHATRAS = list(WISDOM_DATA.keys())
 
-# --- 2. THE CALCULATION ENGINE ---
+# --- 2. THE CALCULATION ENGINE (The 1957 Chicago Solution) ---
 def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
     swe.set_ephe_path('./ephe') 
-    swe.set_sid_mode(swe.SIDM_LAHIRI)
+    swe.set_sid_mode(swe.SIDM_LAHIRI) # Real-Sky Anchor
 
     local_tz = pytz.timezone(tzone_str)
     dt = datetime(year, month, day, hour, minute)
@@ -70,6 +69,7 @@ def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
             "Yoga": WISDOM_DATA[nak_name]["yoga"]
         }
 
+    # Topocentric Ascendant (Earth-Surface Accuracy)
     houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
     asc_deg = ascmc[0]
     asc_nak = NAKSHATRAS[int(asc_deg / (360/27))]
@@ -92,10 +92,9 @@ def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
         "Rahu": calc_obj(swe.MEAN_NODE)
     }
 
-# --- 3. THE FRONTEND ---
+# --- 3. THE INTERFACE ---
 st.set_page_config(page_title="My Birth Sky Sanctuary", layout="wide")
 st.title("🌿 My Birth Sky Sanctuary")
-st.write("Merging Astronomical Truth with Ayurvedic Wisdom")
 
 with st.sidebar:
     st.header("Birth Details")
@@ -108,25 +107,29 @@ with st.sidebar:
     submitted = st.button("Generate Alignment")
 
 if submitted:
-    sky = get_birth_sky(date.year, date.month, date.day, time.hour, time.minute, lat, lon, tz)
-    
-    st.header(f"Soul Alignment for {client_name}")
-    
-    # The Big Three + Ascendant
-    col1, col2, col3, col4 = st.columns(4)
-    for i, p in enumerate(["Ascendant", "Sun", "Moon", "Rahu"]):
-        with [col1, col2, col3, col4][i]:
-            st.metric(p, f"{sky[p]['Sign']}")
-            st.write(f"**Nakshatra:** {sky[p]['Nakshatra']}")
-            st.caption(f"Dosha: {sky[p]['Dosha']}")
-            st.caption(f"Yoga: {sky[p]['Yoga']}")
+    try:
+        sky = get_birth_sky(date.year, date.month, date.day, time.hour, time.minute, lat, lon, tz)
+        
+        st.header(f"Soul Alignment for {client_name}")
+        
+        # Displaying the Core Foundation
+        col1, col2, col3, col4 = st.columns(4)
+        for i, p in enumerate(["Ascendant", "Sun", "Moon", "Rahu"]):
+            with [col1, col2, col3, col4][i]:
+                st.metric(p, f"{sky[p]['Position']} {sky[p]['Sign']}")
+                st.write(f"**Nakshatra:** {sky[p]['Nakshatra']}")
+                st.caption(f"Internal Atmosphere: {sky[p]['Dosha']}")
+                st.caption(f"Soulful Movement: {sky[p]['Yoga']}")
 
-    st.divider()
-    st.subheader("Deep Planetary Narrative")
-    
-    for planet in ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"]:
-        data = sky[planet]
-        with st.expander(f"Explore {planet} in {data['Nakshatra']}"):
-            st.write(f"**Internal Atmosphere (Dosha):** {data['Dosha']}")
-            st.write(f"**Soulful Movement (Yoga Pose):** {data['Yoga']}")
-            st.write(f"**Position:** {data['Position']} {data['Sign']}")
+        st.divider()
+        
+        # The Rest of the Wisdom Library
+        for planet in ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"]:
+            data = sky[planet]
+            with st.expander(f"Explore {planet} in {data['Nakshatra']}"):
+                st.write(f"**Position:** {data['Position']} {data['Sign']}")
+                st.write(f"**Dosha:** {data['Dosha']}")
+                st.write(f"**Yoga Pose:** {data['Yoga']}")
+                
+    except Exception as e:
+        st.error(f"Engine Error: {e}")
