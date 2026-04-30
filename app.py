@@ -47,14 +47,20 @@ st.markdown("*A Global Haven for Real-Sky Alignment.*")
 
 with st.container():
     u_name = st.text_input("Name")
-    u_date = st.date_input("Birth Date", value=datetime(1969, 9, 25))
+    
+    # FIXED DATE LINE: Allows 1900 to present day
+    u_date = st.date_input(
+        "Birth Date", 
+        value=datetime(1969, 9, 25),
+        min_value=datetime(1900, 1, 1),
+        max_value=datetime.now()
+    )
+    
     u_time = st.time_input("Birth Time (Local)")
-    # Explicit Global Instruction
     u_city = st.text_input("Birth Location", placeholder="City, State/Province, Country (e.g., London, UK)")
 
 if st.button("Reveal My Alignment"):
-    # Using a professional user_agent for global search
-    geolocator = Nominatim(user_agent="sky_sanctuary_global_v1")
+    geolocator = Nominatim(user_agent="sky_sanctuary_global_v2")
     location = geolocator.geocode(u_city, language='en')
     
     if location:
@@ -69,12 +75,13 @@ if st.button("Reveal My Alignment"):
             swe.set_sid_mode(swe.SIDM_LAHIRI) 
             jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
             
+            # Calculations
             cusps, ascmc = swe.houses_ex(jd_ut, location.latitude, location.longitude, b'W', swe.FLG_SIDEREAL)
             sun_res, _ = swe.calc_ut(jd_ut, swe.SUN, swe.FLG_SIDEREAL)
             moon_res, _ = swe.calc_ut(jd_ut, swe.MOON, swe.FLG_SIDEREAL)
             
             st.header(f"The Soul-Map for {u_name}")
-            st.caption(f"Aligned to: {location.address}") # Shows the client the site 'found' them correctly
+            st.caption(f"Aligned to: {location.address}")
             
             for label, deg in [("🌅 Ascendant", ascmc[0]), ("☀️ Sun Star", sun_res[0]), ("🌙 Moon Star", moon_res[0])]:
                 zodiac = get_zodiac(deg)
