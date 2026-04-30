@@ -10,30 +10,45 @@ ZODIAC_NAMES = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
                 "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
 NAK_DATA = {
+    "Ashwini": {
+        "Essence": "The Star of the Swift Healer. A pioneer spirit that moves with the speed of thought and the courage of a new dawn.",
+        "Alignment": "Invite warming, steady rituals to ground your fast-moving energy and soothe your 'internal wind.'",
+        "Yoga": "Balasana (Child's Pose) to find rest and centering in the midst of your natural movement."
+    },
+    "Krittika": {
+        "Essence": "The Star of the Sacred Fire. A sharp, protective intelligence that acts as the flame warming the hearth of the community.",
+        "Alignment": "Use cooling, earthy essences and grounding practices to keep your inner fire from burning too bright.",
+        "Yoga": "Agni Stambhasana (Fire Log Pose) to consciously channel and seat your internal heat."
+    },
+    "Shatabhisha": {
+        "Essence": "The Star of a Thousand Healers. A visionary, independent soul who values the truth of the big picture and the mystery of the stars.",
+        "Alignment": "Prioritize open spaces, fresh air, and moments of silence to keep your vast, airy mind clear and aligned.",
+        "Yoga": "Anjaneyasana (Low Lunge) to open your heart to the wide horizon you naturally seek."
+    },
     "Uttara Phalguni": {
-        "Essence": "The Star of the Noble Patron. This star bridges Leo's leadership and Virgo's service. You lead through organized support, acting as a stable 'throne' for your community.",
-        "Ayurveda": "Managing the Solar-Earth Fire. While you are grounded in Earth (Virgo), your star is fueled by the Sun. This creates an internal 'heat' that requires cooling rituals.",
-        "Yoga": "Virabhadrasana (Warrior Pose). Ground your feet firmly like the Earth, but reach your heart and arms up with noble, solar purpose."
+        "Essence": "The Star of the Noble Patron. Bridging leadership and service, you lead by acting as a stable 'throne' for those you support.",
+        "Alignment": "Managing the Solar-Earth Fire. Your grounded nature is fueled by the Sun; use cooling rituals to prevent burnout.",
+        "Yoga": "Virabhadrasana (Warrior Pose). Ground your feet like Earth, but reach your heart up like the Sun."
     },
     "Mrigashira": {
-        "Essence": "The Searching Star. A curious, gentle energy driven by a deep desire to explore. You are the eternal student, always seeking the next horizon of truth.",
-        "Ayurveda": "Sensitive Vata. Your mind moves quickly like a deer in the forest. Use warm, grounding rituals to help your searching mind find rest.",
-        "Yoga": "Marjaryasana (Cat-Cow). Practice finding grace and flexibility within constant movement and exploration."
+        "Essence": "The Searching Star. A curious, gentle energy driven by a deep desire to explore and uncover hidden truths.",
+        "Alignment": "Sensitive Vata. Your mind moves like a deer; use warm, rhythmic rhythms to help your searching mind find rest.",
+        "Yoga": "Marjaryasana (Cat-Cow). Find grace and flexibility in your constant search for knowledge."
     },
     "Swati": {
-        "Essence": "The Star of Independence. Like a young sprout swaying in the breeze, you value freedom and the power of the breath (Prana) to move through the world.",
-        "Ayurveda": "Air/Vata Management. You are sensitive to the 'winds' of change. Use heavy, grounding foods like root vegetables to stay anchored.",
-        "Yoga": "Pranayama (Breathwork). Use intentional breathing to steady your independent spirit and find your center."
+        "Essence": "The Star of Independence. Like a young sprout in the wind, you value freedom and the power of the breath (Prana).",
+        "Alignment": "Air/Vata Focus. You can be easily scattered by 'life's winds.' Use heavy, grounding foods to stay anchored.",
+        "Yoga": "Pranayama (Breathwork). Use the breath to steady your independent spirit and find your center."
     },
     "Purva Bhadrapada": {
-        "Essence": "The Star of Transformation. A deeply spiritual energy that acts as a bridge between the physical and the mystical worlds.",
-        "Ayurveda": "Vata/Kapha Focus. Prioritize internal warmth and physical grounding to support your visionary and often intense nature.",
-        "Yoga": "Savasana (Corpse Pose). Practice the profound art of letting go to facilitate your soul's natural cycle of change."
+        "Essence": "The Star of Transformation. A spiritual bridge between worlds, facilitating the deep cycles of soul-growth.",
+        "Alignment": "Vata/Kapha Focus. Prioritize internal warmth and physical grounding to support your visionary nature.",
+        "Yoga": "Savasana (Corpse Pose). Practice the profound art of letting go to facilitate your natural cycle of change."
     },
     "Rohini": {
-        "Essence": "The Star of Ascent. Soulful magnetism and creative beauty. This star represents the peak of growth and the ability to manifest visions into reality.",
-        "Ayurveda": "Dominant Kapha. You have a lush, steady energy; keep it flowing with active, heart-opening movements to avoid stagnation.",
-        "Yoga": "Vrksasana (Tree Pose). Root down firmly into your values so your creative branches have the stability to grow toward the sky."
+        "Essence": "The Star of Ascent. Soulful magnetism that fosters growth, creative beauty, and emotional depth.",
+        "Alignment": "Dominant Kapha. You have a lush, steady energy; keep it flowing with heart-opening movement to avoid stagnation.",
+        "Yoga": "Vrksasana (Tree Pose). Root down firmly so your creative branches have the stability to grow tall."
     }
 }
 
@@ -45,10 +60,15 @@ def get_nakshatra_info(deg):
     name = names[int(deg / 13.333333) % 27]
     reading = NAK_DATA.get(name, {
         "Essence": "A unique celestial path of growth and discovery.",
-        "Ayurveda": "Focus on balancing your elemental nature through mindful habits.",
-        "Yoga": "Practice rhythmic movement to align your body with the sky."
+        "Alignment": "Focus on balancing your internal atmosphere through mindful, rhythmic habits.",
+        "Yoga": "Practice rhythmic movement to align your body with the physical sky."
     })
     return name, reading
+
+def format_degree(deg):
+    d = int(deg)
+    m = int((deg - d) * 60)
+    return f"{d}° {m:02d}'"
 
 # --- THE ENGINE ---
 st.set_page_config(page_title="The Sky Sanctuary", layout="centered")
@@ -59,10 +79,10 @@ with st.container():
     u_name = st.text_input("Name")
     u_date = st.date_input("Birth Date", value=datetime(1969, 9, 25), min_value=datetime(1900, 1, 1), max_value=datetime.now())
     u_time = st.time_input("Birth Time (Local)")
-    u_city = st.text_input("Birth Location", placeholder="City, State, Country (e.g., Houston, TX, USA)")
+    u_city = st.text_input("Birth Location", placeholder="City, State, Country (e.g., Chicago, IL, USA)")
 
 if st.button("Reveal My Alignment"):
-    geolocator = Nominatim(user_agent="sky_sanctuary_final")
+    geolocator = Nominatim(user_agent="sky_sanctuary_final_pro")
     location = geolocator.geocode(u_city, language='en')
     
     if location:
@@ -73,27 +93,50 @@ if st.button("Reveal My Alignment"):
             timezone = pytz.timezone(tz_str)
             local_dt = timezone.localize(datetime.combine(u_date, u_time))
             utc_dt = local_dt.astimezone(pytz.utc)
-            
             swe.set_sid_mode(swe.SIDM_LAHIRI) 
             jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
             
+            # Calculations
             cusps, ascmc = swe.houses_ex(jd_ut, location.latitude, location.longitude, b'W', swe.FLG_SIDEREAL)
-            sun_res, _ = swe.calc_ut(jd_ut, swe.SUN, swe.FLG_SIDEREAL)
-            moon_res, _ = swe.calc_ut(jd_ut, swe.MOON, swe.FLG_SIDEREAL)
+            planets = {
+                "🌅 Ascendant": ascmc[0],
+                "☀️ Sun (The Soul)": swe.calc_ut(jd_ut, swe.SUN, swe.FLG_SIDEREAL)[0][0],
+                "🌙 Moon (The Mind)": swe.calc_ut(jd_ut, swe.MOON, swe.FLG_SIDEREAL)[0][0],
+                "☿️ Mercury (The Messenger)": swe.calc_ut(jd_ut, swe.MERCURY, swe.FLG_SIDEREAL)[0][0],
+                "♀️ Venus (The Harmonizer)": swe.calc_ut(jd_ut, swe.VENUS, swe.FLG_SIDEREAL)[0][0],
+                "♂️ Mars (The Protector)": swe.calc_ut(jd_ut, swe.MARS, swe.FLG_SIDEREAL)[0][0],
+                "♃ Jupiter (The Guide)": swe.calc_ut(jd_ut, swe.JUPITER, swe.FLG_SIDEREAL)[0][0],
+                "♄ Saturn (The Anchor)": swe.calc_ut(jd_ut, swe.SATURN, swe.FLG_SIDEREAL)[0][0],
+                "🐉 Rahu (The Destiny)": swe.calc_ut(jd_ut, swe.MEAN_NODE, swe.FLG_SIDEREAL)[0][0]
+            }
             
-            # THE SOUL MAP
             st.header(f"The Soul-Map for {u_name}")
-            st.caption(f"Aligned to: {location.address}")
             
-            for label, deg in [("🌅 Ascendant", ascmc[0]), ("☀️ Sun Star", sun_res[0]), ("🌙 Moon Star", moon_res[0])]:
+            # --- SECTION 1: THE SOUL-MAP (BIG THREE) ---
+            big_three = ["🌅 Ascendant", "☀️ Sun (The Soul)", "🌙 Moon (The Mind)"]
+            for label in big_three:
+                deg = planets[label]
                 zodiac = get_zodiac(deg)
                 nak_name, read = get_nakshatra_info(deg)
-                with st.expander(f"{label}: {zodiac} / {nak_name}", expanded=True):
+                with st.expander(f"{label}: {zodiac} / {nak_name} ({format_degree(deg % 30)})", expanded=True):
                     st.write(f"**Essence:** {read['Essence']}")
-                    st.write(f"**Ayurvedic Insight:** {read['Ayurveda']}")
+                    st.write(f"**Alignment:** {read['Alignment']}")
                     st.write(f"**Yoga Practice:** {read['Yoga']}")
-            
-            # THE WISDOM OF THE BIRTH SKY
+
+            # --- SECTION 2: DEEP ALIGNMENT ---
+            st.divider()
+            st.subheader("Deep Alignment: The Planetary Narrative")
+            other_planets = [p for p in planets if p not in big_three]
+            for label in other_planets:
+                deg = planets[label]
+                zodiac = get_zodiac(deg)
+                nak_name, read = get_nakshatra_info(deg)
+                with st.expander(f"{label}: {zodiac} / {nak_name} ({format_degree(deg % 30)})"):
+                    st.write(f"**Essence:** {read['Essence']}")
+                    st.write(f"**Alignment:** {read['Alignment']}")
+                    st.write(f"**Yoga Practice:** {read['Yoga']}")
+
+            # --- FOOTER ---
             st.divider()
             st.markdown("### **The Wisdom of the Birth Sky**")
             st.write("""
