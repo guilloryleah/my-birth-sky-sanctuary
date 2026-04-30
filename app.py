@@ -6,7 +6,6 @@ from timezonefinder import TimezoneFinder
 import pytz
 
 # --- THE COMPLETED WISDOM LIBRARY ---
-# This section provides the detailed "Scaffolding" for your clients.
 ZODIAC_NAMES = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
                 "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
 
@@ -58,20 +57,12 @@ st.markdown("*A Global Haven for Real-Sky Alignment.*")
 
 with st.container():
     u_name = st.text_input("Name")
-    
-    # Allows birth dates from 1900 to now (covers Danny's 1957 birth)
-    u_date = st.date_input(
-        "Birth Date", 
-        value=datetime(1969, 9, 25),
-        min_value=datetime(1900, 1, 1),
-        max_value=datetime.now()
-    )
-    
+    u_date = st.date_input("Birth Date", value=datetime(1969, 9, 25), min_value=datetime(1900, 1, 1), max_value=datetime.now())
     u_time = st.time_input("Birth Time (Local)")
     u_city = st.text_input("Birth Location", placeholder="City, State, Country (e.g., London, UK)")
 
 if st.button("Reveal My Alignment"):
-    geolocator = Nominatim(user_agent="sky_sanctuary_global_vfinal")
+    geolocator = Nominatim(user_agent="sky_sanctuary_global_v_edu")
     location = geolocator.geocode(u_city, language='en')
     
     if location:
@@ -90,6 +81,18 @@ if st.button("Reveal My Alignment"):
             sun_res, _ = swe.calc_ut(jd_ut, swe.SUN, swe.FLG_SIDEREAL)
             moon_res, _ = swe.calc_ut(jd_ut, swe.MOON, swe.FLG_SIDEREAL)
             
+            # THE EDUCATIONAL SCAFFOLD
+            st.info("""
+            ### **The Science of the Shift**
+            If your signs are different than you expected, you aren't alone! Most traditional systems use a 'frozen' map of the stars from 2,000 years ago. 
+            
+            Because the Earth has a slight **wobble (Precession)**, the constellations have shifted by about 24 degrees. The Sky Sanctuary uses **Real-Sky Astronomy** to align your map with the actual physical horizon as it appeared at your birth. We bridge the gap between the stars we 'think' we know and the stars that are actually there.
+            """)
+            
+            http://googleusercontent.com/image_content/251
+
+
+            
             st.header(f"The Soul-Map for {u_name}")
             st.caption(f"Aligned to: {location.address}")
             
@@ -101,6 +104,6 @@ if st.button("Reveal My Alignment"):
                     st.write(f"**Ayurvedic Insight:** {read['Ayurveda']}")
                     st.write(f"**Yoga Practice:** {read['Yoga']}")
         else:
-            st.error("Could not determine the time zone for this location.")
+            st.error("Could not determine the time zone.")
     else:
-        st.error("Location not found. Please add the Country for better accuracy.")
+        st.error("Location not found.")
