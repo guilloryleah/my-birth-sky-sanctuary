@@ -14,7 +14,7 @@ WISDOM_DATA = {
     "Bharani": {"dosha": "Pitta", "yoga": "Malasana (Garland Pose)"},
     "Krittika": {"dosha": "Pitta", "yoga": "Surya Namaskar (Sun Salutations)"},
     "Rohini": {"dosha": "Kapha", "yoga": "Vrksasana (Tree Pose)"},
-    "Mrigashira": {"dosha": "Vata/Pitta", "yoga": "Nadi Shodhana (Alternate Nostril Breathing)"},
+    "Mrigashira": {"dosha": "Vata/Pitta", "yoga": "Nadi Shodhana (Alternate Breathing)"},
     "Ardra": {"dosha": "Vata", "yoga": "Shivasana (Corpse Pose)"},
     "Punarvasu": {"dosha": "Kapha", "yoga": "Tadasana (Mountain Pose)"},
     "Pushya": {"dosha": "Kapha", "yoga": "Balasana (Child's Pose)"},
@@ -30,8 +30,8 @@ WISDOM_DATA = {
     "Jyeshtha": {"dosha": "Vata/Pitta", "yoga": "Ardha Matsyendrasana (Half Fish Pose)"},
     "Mula": {"dosha": "Vata", "yoga": "Adho Mukha Svanasana (Downward Dog)"},
     "Purva Ashadha": {"dosha": "Pitta", "yoga": "Ustrasana (Camel Pose)"},
-    "Uttara Ashadha": {"dosha": "Pitta/Kapha", "yoga": "Paschimottanasana (Seated Forward Fold)"},
-    "Shravana": {"dosha": "Kapha", "yoga": "Viparita Leg-up-Wall"},
+    "Uttara Ashadha": {"dosha": "Pitta/Kapha", "yoga": "Paschimottanasana (Forward Fold)"},
+    "Shravana": {"dosha": "Kapha", "yoga": "Viparita Karani (Legs up Wall)"},
     "Dhanishta": {"dosha": "Pitta/Kapha", "yoga": "Natarajasana (Dancer Pose)"},
     "Shatabhisha": {"dosha": "Vata", "yoga": "Padmasana (Lotus Pose)"},
     "Purva Bhadrapada": {"dosha": "Vata/Pitta", "yoga": "Urdhva Dhanurasana (Wheel Pose)"},
@@ -44,7 +44,7 @@ NAKSHATRAS = list(WISDOM_DATA.keys())
 # --- 2. THE CALCULATION ENGINE (The 1957 Chicago Solution) ---
 def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
     swe.set_ephe_path('./ephe') 
-    swe.set_sid_mode(swe.SIDM_LAHIRI) # Real-Sky Anchor
+    swe.set_sid_mode(swe.SIDM_LAHIRI) # Real-Sky Anchor for Danny's 1° Taurus
 
     local_tz = pytz.timezone(tzone_str)
     dt = datetime(year, month, day, hour, minute)
@@ -69,7 +69,6 @@ def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
             "Yoga": WISDOM_DATA[nak_name]["yoga"]
         }
 
-    # Topocentric Ascendant (Earth-Surface Accuracy)
     houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
     asc_deg = ascmc[0]
     asc_nak = NAKSHATRAS[int(asc_deg / (360/27))]
@@ -94,7 +93,7 @@ def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
 
 # --- 3. THE INTERFACE ---
 st.set_page_config(page_title="My Birth Sky Sanctuary", layout="wide")
-st.title("🌿 My Birth Sky Sanctuary")
+st.title("🌿 My Birth Sky Soul Map")
 
 with st.sidebar:
     st.header("Birth Details")
@@ -104,32 +103,36 @@ with st.sidebar:
     tz = st.selectbox("Timezone", pytz.all_timezones, index=pytz.all_timezones.index("America/Chicago"))
     lat = st.number_input("Latitude", value=41.8722, format="%.4f")
     lon = st.number_input("Longitude", value=-87.6298, format="%.4f")
-    submitted = st.button("Generate Alignment")
+    submitted = st.button("Generate Soul Map")
 
 if submitted:
     try:
         sky = get_birth_sky(date.year, date.month, date.day, time.hour, time.minute, lat, lon, tz)
         
-        st.header(f"Soul Alignment for {client_name}")
+        st.header(f"Soul Map for {client_name}")
         
-        # Displaying the Core Foundation
+        # Displaying the Core Pillars
         col1, col2, col3, col4 = st.columns(4)
         for i, p in enumerate(["Ascendant", "Sun", "Moon", "Rahu"]):
             with [col1, col2, col3, col4][i]:
                 st.metric(p, f"{sky[p]['Position']} {sky[p]['Sign']}")
                 st.write(f"**Nakshatra:** {sky[p]['Nakshatra']}")
-                st.caption(f"Internal Atmosphere: {sky[p]['Dosha']}")
-                st.caption(f"Soulful Movement: {sky[p]['Yoga']}")
+                st.caption(f"Dosha: {sky[p]['Dosha']}")
+                st.caption(f"Yoga: {sky[p]['Yoga']}")
 
         st.divider()
         
-        # The Rest of the Wisdom Library
+        # Expanded Planetary Wisdom
         for planet in ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"]:
             data = sky[planet]
             with st.expander(f"Explore {planet} in {data['Nakshatra']}"):
                 st.write(f"**Position:** {data['Position']} {data['Sign']}")
-                st.write(f"**Dosha:** {data['Dosha']}")
-                st.write(f"**Yoga Pose:** {data['Yoga']}")
+                st.write(f"**Internal Atmosphere (Dosha):** {data['Dosha']}")
+                st.write(f"**Soulful Movement (Yoga Pose):** {data['Yoga']}")
+        
+        # The specific message about Earth's wobble you mentioned
+        st.divider()
+        st.info("**Why is this different from a standard chart?** This Soul Map accounts for the **Precession of the Equinoxes** (the Earth's wobble). By using astronomical Real-Sky data, we align your map with where the planets actually were in the stars at the moment of birth, rather than a fixed seasonal calendar. This ensures Danny's 1° Taurus foundation remains accurate.")
                 
     except Exception as e:
         st.error(f"Engine Error: {e}")
