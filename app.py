@@ -28,7 +28,7 @@ NAK_DATA = {
     "Purva Bhadrapada": {
         "Essence": "The Star of Transformation. A deeply spiritual energy that acts as a bridge between the physical and the mystical worlds.",
         "Ayurveda": "Vata/Kapha Focus. Prioritize internal warmth and physical grounding to support your visionary and often intense nature.",
-        "Yoga": "Savasana (Corpse Pose). Practice the profound art of letting go to facilitate your soul's natural cycle of change."
+        "Yoga": "Savasana (Corpse Pose). Practice the profound art of letting go to facilitate your soul's natural cycle of change.",
     },
     "Rohini": {
         "Essence": "The Star of Ascent. Soulful magnetism and creative beauty. This star represents the peak of growth and the ability to manifest visions into reality.",
@@ -62,7 +62,7 @@ with st.container():
     u_city = st.text_input("Birth Location", placeholder="City, State, Country (e.g., London, UK)")
 
 if st.button("Reveal My Alignment"):
-    geolocator = Nominatim(user_agent="sky_sanctuary_global_v_edu")
+    geolocator = Nominatim(user_agent="sky_sanctuary_global_final_fix")
     location = geolocator.geocode(u_city, language='en')
     
     if location:
@@ -86,12 +86,8 @@ if st.button("Reveal My Alignment"):
             ### **The Science of the Shift**
             If your signs are different than you expected, you aren't alone! Most traditional systems use a 'frozen' map of the stars from 2,000 years ago. 
             
-            Because the Earth has a slight **wobble (Precession)**, the constellations have shifted by about 24 degrees. The Sky Sanctuary uses **Real-Sky Astronomy** to align your map with the actual physical horizon as it appeared at your birth. We bridge the gap between the stars we 'think' we know and the stars that are actually there.
+            Because the Earth has a slight **wobble (Precession)**, the constellations have shifted by about 24 degrees. The Sky Sanctuary uses **Real-Sky Astronomy** to align your map with the actual physical horizon as it appeared at your birth.
             """)
-            
-            http://googleusercontent.com/image_content/251
-
-
             
             st.header(f"The Soul-Map for {u_name}")
             st.caption(f"Aligned to: {location.address}")
@@ -104,6 +100,6 @@ if st.button("Reveal My Alignment"):
                     st.write(f"**Ayurvedic Insight:** {read['Ayurveda']}")
                     st.write(f"**Yoga Practice:** {read['Yoga']}")
         else:
-            st.error("Could not determine the time zone.")
+            st.error("Could not determine the time zone for this location.")
     else:
-        st.error("Location not found.")
+        st.error("Location not found. Please add the Country for better accuracy.")
