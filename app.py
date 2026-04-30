@@ -41,10 +41,10 @@ WISDOM_DATA = {
 
 NAKSHATRAS = list(WISDOM_DATA.keys())
 
-# --- 2. THE CALCULATION ENGINE (The 1957 Chicago Solution) ---
+# --- 2. THE CALCULATION ENGINE ---
 def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
     swe.set_ephe_path('./ephe') 
-    swe.set_sid_mode(swe.SIDM_LAHIRI) # Real-Sky Anchor for Danny's 1° Taurus
+    swe.set_sid_mode(swe.SIDM_LAHIRI) # Forcing the Sidereal/Taurus Anchor
 
     local_tz = pytz.timezone(tzone_str)
     dt = datetime(year, month, day, hour, minute)
@@ -69,6 +69,7 @@ def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
             "Yoga": WISDOM_DATA[nak_name]["yoga"]
         }
 
+    # Topocentric calculation for Ascendant accuracy
     houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
     asc_deg = ascmc[0]
     asc_nak = NAKSHATRAS[int(asc_deg / (360/27))]
@@ -91,10 +92,11 @@ def get_birth_sky(year, month, day, hour, minute, lat, lon, tzone_str):
         "Rahu": calc_obj(swe.MEAN_NODE)
     }
 
-# --- 3. THE INTERFACE ---
-st.set_page_config(page_title="My Birth Sky Sanctuary", layout="wide")
-st.title("🌿 My Birth Sky Soul Map")
+# --- 3. THE FRONTEND ---
+st.set_page_config(page_title="Birth Sky Sanctuary", layout="wide")
+st.title("🌿 Danny's Soul Map")
 
+# Automatic default values set for Danny's verification
 with st.sidebar:
     st.header("Birth Details")
     client_name = st.text_input("Name", value="Danny")
@@ -109,9 +111,9 @@ if submitted:
     try:
         sky = get_birth_sky(date.year, date.month, date.day, time.hour, time.minute, lat, lon, tz)
         
-        st.header(f"Soul Map for {client_name}")
+        st.header(f"Soul Map Alignment: {client_name}")
         
-        # Displaying the Core Pillars
+        # Core Pillars (Ascendant, Sun, Moon, Rahu)
         col1, col2, col3, col4 = st.columns(4)
         for i, p in enumerate(["Ascendant", "Sun", "Moon", "Rahu"]):
             with [col1, col2, col3, col4][i]:
@@ -121,18 +123,18 @@ if submitted:
                 st.caption(f"Yoga: {sky[p]['Yoga']}")
 
         st.divider()
+        st.subheader("Deep Planetary Wisdom")
         
-        # Expanded Planetary Wisdom
+        # Major Planets Alignment
         for planet in ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"]:
             data = sky[planet]
             with st.expander(f"Explore {planet} in {data['Nakshatra']}"):
-                st.write(f"**Position:** {data['Position']} {data['Sign']}")
-                st.write(f"**Internal Atmosphere (Dosha):** {data['Dosha']}")
-                st.write(f"**Soulful Movement (Yoga Pose):** {data['Yoga']}")
+                st.write(f"**Astronomical Position:** {data['Position']} {data['Sign']}")
+                st.write(f"**Ayurvedic Atmosphere (Dosha):** {data['Dosha']}")
+                st.write(f"**Yoga Movement (Posture):** {data['Yoga']}")
         
-        # The specific message about Earth's wobble you mentioned
         st.divider()
-        st.info("**Why is this different from a standard chart?** This Soul Map accounts for the **Precession of the Equinoxes** (the Earth's wobble). By using astronomical Real-Sky data, we align your map with where the planets actually were in the stars at the moment of birth, rather than a fixed seasonal calendar. This ensures Danny's 1° Taurus foundation remains accurate.")
+        st.info("**Note on Astronomical Truth:** This map uses Sidereal (Real-Sky) calculations which account for the Earth's wobble (Precession). This is why the positions may differ by roughly 23 degrees from seasonal/Western charts, correctly placing the Ascendant in Taurus.")
                 
     except Exception as e:
         st.error(f"Engine Error: {e}")
