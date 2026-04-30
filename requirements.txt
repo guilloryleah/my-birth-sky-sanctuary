@@ -1,6 +1,3 @@
 streamlit
-pandas
-geopy
-timezonefinder
-pytz
 pyswisseph
+datetime
