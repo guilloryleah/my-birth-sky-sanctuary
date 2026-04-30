@@ -1,11 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+import streamlit as st
 import swisseph as swe
 import pytz
 from datetime import datetime
 
-app = Flask(__name__)
-
-# --- 1. THE WISDOM LIBRARY (The Scaffold) ---
+# --- 1. THE WISDOM LIBRARY ---
 ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
@@ -21,20 +19,16 @@ NAKSHATRAS = [
 
 # --- 2. THE CALCULATION ENGINE ---
 def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
-    # Essential: Points to the NASA planetary data folder
     swe.set_ephe_path('./ephe') 
 
-    # Handle Time Integrity (Solving the 1957 Chicago DST mystery)
     local_tz = pytz.timezone(tzone_str)
     dt = datetime(year, month, day, hour, minute)
     local_dt = local_tz.localize(dt)
     utc_dt = local_dt.astimezone(pytz.utc)
     
-    # Julian Day for professional-grade precision
     jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, 
                     utc_dt.hour + utc_dt.minute/60.0)
 
-    # Set to Sidereal/Lahiri Mode (Real-Sky Accuracy)
     swe.set_sid_mode(swe.SIDM_LAHIRI)
     flags = swe.FLG_SIDEREAL | swe.FLG_SPEED
 
@@ -47,16 +41,10 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
             "Position": f"{round(deg % 30, 2)}°"
         }
 
-    # Calculate Ascendant (Topocentric/Surface Accuracy)
     houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
     asc_deg = ascmc[0]
     
     return {
-        "Metadata": {
-            "System": "Sidereal / True Lahiri",
-            "Teacher": "Archana",
-            "Status": "Sanctuary Live"
-        },
         "Ascendant": {
             "Sign": ZODIAC_SIGNS[int(asc_deg/30)],
             "Nakshatra": NAKSHATRAS[int(asc_deg/(360/27))],
@@ -68,29 +56,28 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
         "Rahu": calc_obj(swe.MEAN_NODE)
     }
 
-# --- 3. THE WEB ROUTES ---
-@app.route('/')
-def home():
-    # Simple landing to confirm the sanctuary is online
-    return "<h1>Sanctuary is Live</h1><p>The Universal Clock is ticking. Ready for input.</p>"
+# --- 3. THE STREAMLIT FRONTEND ---
+st.title("My Birth Sky Sanctuary")
+st.write("The Universal Clock is ready for your input.")
 
-@app.route('/calculate', methods=['GET'])
-def calculate():
-    # URL format: /calculate?year=1957&month=5&day=10&hour=12&min=0&lat=41.87&lon=-87.62&tz=America/Chicago
+with st.form("birth_data"):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        date = st.date_input("Birth Date", value=datetime(1957, 5, 10))
+    with col2:
+        time = st.time_input("Birth Time", value=datetime(1957, 5, 10, 12, 0).time())
+    with col3:
+        tz = st.selectbox("Timezone", pytz.all_timezones, index=pytz.all_timezones.index("America/Chicago"))
+
+    lat = st.number_input("Latitude", value=41.87)
+    lon = st.number_input("Longitude", value=-87.62)
+    
+    submitted = st.form_submit_button("Generate Truth Receipt")
+
+if submitted:
     try:
-        y = int(request.args.get('year'))
-        m = int(request.args.get('month'))
-        d = int(request.args.get('day'))
-        h = int(request.args.get('hour'))
-        mi = int(request.args.get('min'))
-        lat = float(request.args.get('lat'))
-        lon = float(request.args.get('lon'))
-        tz = request.args.get('tz')
-        
-        report = get_real_sky_report(y, m, d, h, mi, lat, lon, tz)
-        return jsonify(report)
+        report = get_real_sky_report(date.year, date.month, date.day, time.hour, time.minute, lat, lon, tz)
+        st.success("Analysis Complete")
+        st.json(report)
     except Exception as e:
-        return jsonify({"Engine Error": str(e)})
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        st.error(f"Engine Error: {e}")
