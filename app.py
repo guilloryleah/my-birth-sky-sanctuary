@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import swisseph as swe
 import pytz
 from datetime import datetime
 
 app = Flask(__name__)
 
-# --- 1. THE WISDOM LIBRARY ---
+# --- 1. THE WISDOM LIBRARY (The Scaffold) ---
 ZODIAC_SIGNS = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
@@ -21,18 +21,20 @@ NAKSHATRAS = [
 
 # --- 2. THE CALCULATION ENGINE ---
 def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
-    # Essential: This tells the engine where the NASA data lives
+    # Essential: Points to the NASA planetary data folder
     swe.set_ephe_path('./ephe') 
 
-    # Handle Time Integrity (Navigating the 1957 Chicago 'Ghosts')
+    # Handle Time Integrity (Solving the 1957 Chicago DST mystery)
     local_tz = pytz.timezone(tzone_str)
-    local_dt = local_tz.localize(datetime(year, month, day, hour, minute))
+    dt = datetime(year, month, day, hour, minute)
+    local_dt = local_tz.localize(dt)
     utc_dt = local_dt.astimezone(pytz.utc)
     
+    # Julian Day for professional-grade precision
     jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, 
                     utc_dt.hour + utc_dt.minute/60.0)
 
-    # Set to Sidereal/Lahiri Mode (The Real-Sky Bridge)
+    # Set to Sidereal/Lahiri Mode (Real-Sky Accuracy)
     swe.set_sid_mode(swe.SIDM_LAHIRI)
     flags = swe.FLG_SIDEREAL | swe.FLG_SPEED
 
@@ -45,11 +47,16 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
             "Position": f"{round(deg % 30, 2)}°"
         }
 
-    # Calculate Ascendant (Topocentric accuracy)
+    # Calculate Ascendant (Topocentric/Surface Accuracy)
     houses, ascmc = swe.houses_ex(jd, lat, lon, b'P', flags)
     asc_deg = ascmc[0]
     
     return {
+        "Metadata": {
+            "System": "Sidereal / True Lahiri",
+            "Teacher": "Archana",
+            "Status": "Sanctuary Live"
+        },
         "Ascendant": {
             "Sign": ZODIAC_SIGNS[int(asc_deg/30)],
             "Nakshatra": NAKSHATRAS[int(asc_deg/(360/27))],
@@ -61,15 +68,15 @@ def get_real_sky_report(year, month, day, hour, minute, lat, lon, tzone_str):
         "Rahu": calc_obj(swe.MEAN_NODE)
     }
 
-# --- 3. THE WEB ROUTES (The Bridge) ---
+# --- 3. THE WEB ROUTES ---
 @app.route('/')
 def home():
-    # This renders your main page
-    return "<h1>Sanctuary is Live</h1><p>Engine is ready for your input.</p>"
+    # Simple landing to confirm the sanctuary is online
+    return "<h1>Sanctuary is Live</h1><p>The Universal Clock is ticking. Ready for input.</p>"
 
-@app.route('/calculate')
+@app.route('/calculate', methods=['GET'])
 def calculate():
-    # Example route for testing: /calculate?year=1957&month=5&day=10&hour=12&min=0&lat=41.87&lon=-87.62&tz=America/Chicago
+    # URL format: /calculate?year=1957&month=5&day=10&hour=12&min=0&lat=41.87&lon=-87.62&tz=America/Chicago
     try:
         y = int(request.args.get('year'))
         m = int(request.args.get('month'))
@@ -81,9 +88,9 @@ def calculate():
         tz = request.args.get('tz')
         
         report = get_real_sky_report(y, m, d, h, mi, lat, lon, tz)
-        return report
+        return jsonify(report)
     except Exception as e:
-        return {"error": str(e)}
+        return jsonify({"Engine Error": str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True)
