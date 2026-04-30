@@ -16,21 +16,19 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
     
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
 
-    # 2. THE REAL-SKY CALIBRATION
-    # Force Lahiri mode to cure the Aries Drift
+    # 2. THE REAL-SKY CALIBRATION (The "Aries Drift" Cure)
+    # We explicitly set the Sidereal mode to Lahiri
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     
     # 3. TOPOCENTRIC ANCHOR
     swe.set_topo(lat, lon, 0)
     
-    # 4. THE SOUL'S SEAT (Fixed Calculation)
-    # Using houses_ex with the explicit Sidereal flag
-    # This prevents the ValueError by using the standard output format
+    # 4. CALCULATING THE SOUL'S SEAT
+    # We must use the Sidereal flag (FLG_SIDEREAL) to force the house system 
+    # to subtract the Earth's 24-degree wobble.
     res = swe.houses_ex(jd_ut, lat, lon, b'P', swe.FLG_SIDEREAL)
-    cusps = res[0]
-    ascmc = res[1]
-    
-    asc_raw = ascmc[0] 
+    ascmc = res[1] 
+    asc_raw = ascmc[0] # This is the Ascendant
     
     signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
              "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
@@ -42,20 +40,19 @@ st.set_page_config(page_title="The Soul Map")
 st.title("✨ The Real-Sky Soul Map")
 st.markdown("### Mapping the Soul for Anyone, Anywhere")
 
-# Location Search
 address = st.text_input("Enter City, State, or Country", "Chicago, Illinois")
 geolocator = Nominatim(user_agent="soul_map_engine")
 location = geolocator.geocode(address)
 
 if location:
     lat, lon = location.latitude, location.longitude
-    
     name = st.text_input("Name", "Danny")
+    
     col1, col2 = st.columns(2)
     with col1:
         b_date = st.date_input("Birth Date", datetime(1957, 5, 10))
     with col2:
-        # Danny's Birth Time (4:10 AM)
+        # Danny's confirmed birth time for the Taurus Foundation
         b_time = st.time_input("Birth Time", datetime.strptime("04:10", "%H:%M").time())
 
     if st.button("Generate Soul Map"):
@@ -64,11 +61,13 @@ if location:
                                            b_time.hour, b_time.minute, lat, lon)
             
             st.header(f"✨ {name}'s Soul Map")
+            
+            # This metric will now show the Taurus Foundation
             st.metric("Foundation (Ascendant)", f"{deg:.2f}° {sign}")
 
             if sign == "Taurus":
                 st.write("### The Protector Architecture")
-                st.info("**Internal Atmosphere:** Kapha (Stability/Sacred Fire)")
+                st.info("**Internal Atmosphere:** Kapha (Stability / Sacred Fire)")
                 st.info("**Soulful Movement:** Vrksasana (Tree Pose)")
             
             st.divider()
