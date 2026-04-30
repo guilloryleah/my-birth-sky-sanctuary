@@ -1,6 +1,7 @@
 import streamlit as st
 import swisseph as swe
 from datetime import datetime, timedelta
+from geopy.geocoders import Nominatim # The 'City Search' Engine
 
 # --- THE SOUL MAP ENGINE ---
 def calculate_soul_map(year, month, day, hour, minute, lat, lon, utc_offset):
@@ -23,27 +24,44 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon, utc_offset):
     return asc_raw % 30, signs[int(asc_raw / 30)]
 
 # --- THE COSMOSPOETESS INTERFACE ---
-st.set_page_config(page_title="Soul Map Engine")
+st.set_page_config(page_title="The Soul Map")
 st.title("✨ The Real-Sky Soul Map")
-st.markdown("### Mapping the Soul for Anyone at Any Age")
+st.markdown("### Mapping the Soul for Anyone, Anywhere, at Any Age")
 
-# Defaults are set to the 1957 Chicago foundation
+# 1. THE LOCATION SEARCH (The "Anyone, Anywhere" Key)
+st.subheader("Where were you born?")
+address = st.text_input("Enter City, State, or Country", "Chicago, Illinois")
+
+geolocator = Nominatim(user_agent="soul_map_engine")
+location = geolocator.geocode(address)
+
+if location:
+    st.success(f"Location Found: {location.address}")
+    lat, lon = location.latitude, location.longitude
+else:
+    st.warning("Please enter a valid city to anchor the map.")
+
+# 2. BIRTH DETAILS
+st.divider()
 name = st.text_input("Name", "Danny")
-b_date = st.date_input("Birth Date", datetime(1957, 5, 10))
-b_time = st.time_input("Birth Time", datetime.strptime("12:00", "%H:%M").time())
-lat = st.number_input("Latitude", value=41.8781, format="%.4f")
-lon = st.number_input("Longitude", value=-87.6298, format="%.4f")
-utc_off = st.number_input("World Clock Offset (UTC)", value=-5.0)
+col1, col2 = st.columns(2)
+with col1:
+    b_date = st.date_input("Birth Date", datetime(1957, 5, 10))
+with col2:
+    b_time = st.time_input("Birth Time", datetime.strptime("12:00", "%H:%M").time())
 
-if st.button("Generate Soul Map"):
+# 3. THE WORLD CLOCK OFFSET (Still manual for historical accuracy)
+utc_off = st.number_input("World Clock Offset (UTC) for that location", value=-5.0)
+
+# 4. GENERATE
+if st.button("Generate Soul Map") and location:
     try:
         deg, sign = calculate_soul_map(b_date.year, b_date.month, b_date.day, 
                                        b_time.hour, b_time.minute, lat, lon, utc_off)
         
-        st.success(f"Soul Map for {name} is Ready.")
-        st.metric("Ascendant (Foundation)", f"{deg:.2f}° {sign}")
+        st.header(f"✨ {name}'s Soul Map is Ready")
+        st.metric("Foundation", f"{deg:.2f}° {sign}")
 
-        # Integrating the Wisdom Library
         if sign == "Taurus":
             st.info("**Internal Atmosphere:** Kapha (Stability)")
             st.info("**Soulful Movement:** Vrksasana (Tree Pose)")
