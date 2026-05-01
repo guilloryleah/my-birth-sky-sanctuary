@@ -5,7 +5,7 @@ from geopy.geocoders import Nominatim
 
 # --- THE STABILIZED ENGINE ---
 def get_planet_data(jd_ut, planet_id, planet_name):
-    # res[0] is the longitude we need for the 1.74° Taurus math
+    # res[0] is the longitude needed for the 1.74° Taurus math
     res, ret = swe.calc_ut(jd_ut, planet_id, swe.FLG_SIDEREAL)
     long = res[0]
     
@@ -45,10 +45,9 @@ def calculate_full_map(year, month, day, hour, minute, lat, lon, transit_date=No
 
     birth_planets = [get_planet_data(jd_ut, p_id, p_name) for p_id, p_name in planets]
 
-    # 4. TRANSIT CALCULATION (Page 2 of your sheet)
+    # 4. TRANSIT CALCULATION (For today's sky)
     transit_results = []
     if transit_date:
-        # Using current time for transits
         jd_transit = swe.julday(transit_date.year, transit_date.month, transit_date.day, 12.0)
         transit_results = [get_planet_data(jd_transit, p_id, p_name) for p_id, p_name in planets]
 
@@ -71,49 +70,61 @@ if location:
     name = st.text_input("Name", "Danny Slater")
     col1, col2 = st.columns(2)
     with col1:
-        # Birth Date Verified from Sheet
-        b_date = st.date_input("Birth Date", datetime(1957, 5, 22)) 
+        # THE CALENDAR FIX: Open range from 1900 to 2100
+        b_date = st.date_input(
+            "Birth Date", 
+            value=datetime(1957, 5, 22),
+            min_value=datetime(1900, 1, 1),
+            max_value=datetime(2100, 12, 31)
+        ) 
     with col2:
-        # Birth Time Verified from Sheet
         b_time = st.time_input("Birth Time", datetime.strptime("04:10", "%H:%M").time())
 
     if st.button("Generate Full Soul Map"):
-        # We also pass today's date to see the transits from Danny's Page 2
-        data = calculate_full_map(b_date.year, b_date.month, b_date.day, 
-                                 b_time.hour, b_time.minute, 
-                                 location.latitude, location.longitude, 
-                                 transit_date=datetime.now())
-        
-        # --- DISPLAY ---
-        st.header(f"✨ {name}'s Complete Soul Map")
-        st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
-        
-        tab1, tab2 = st.tabs(["The Inner Council (Birth)", "Current Sky (Transits)"])
-        
-        with tab1:
-            st.subheader("Your Birth Constellation")
-            cols = st.columns(4)
-            for i, p in enumerate(data['birth_planets']):
-                with cols[i % 4]:
-                    st.write(f"**{p['name']}**")
-                    st.write(f"{p['deg']:.2f}° {p['sign']}")
+        try:
+            data = calculate_full_map(b_date.year, b_date.month, b_date.day, 
+                                     b_time.hour, b_time.minute, 
+                                     location.latitude, location.longitude, 
+                                     transit_date=datetime.now())
             
-            # Specialized Rahu/Ketu logic
-            ketu_deg = (data['birth_planets'][-1]['deg'])
-            ketu_sign_idx = (["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
-                              "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"].index(data['birth_planets'][-1]['sign']) + 6) % 12
-            ketu_sign = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
-                         "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"][ketu_sign_idx]
-            st.write(f"**Ketu**: {ketu_deg:.2f}° {ketu_sign}")
+            # --- DISPLAY ---
+            st.header(f"✨ {name}'s Complete Soul Map")
+            st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
+            
+            tab1, tab2 = st.tabs(["The Inner Council (Birth)", "Current Sky (Transits)"])
+            
+            with tab1:
+                st.subheader("Your Birth Constellation")
+                cols = st.columns(4)
+                for i, p in enumerate(data['birth_planets']):
+                    with cols[i % 4]:
+                        st.write(f"**{p['name']}**")
+                        st.write(f"{p['deg']:.2f}° {p['sign']}")
+                
+                # Specialized Rahu/Ketu logic (Ketu is always 180 degrees from Rahu)
+                rahu_data = data['birth_planets'][-1]
+                ketu_sign_idx = (["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
+                                  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"].index(rahu_data['sign']) + 6) % 12
+                ketu_sign = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
+                             "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"][ketu_sign_idx]
+                st.write(f"**Ketu**: {rahu_data['deg']:.2f}° {ketu_sign}")
 
-        with tab2:
-            st.subheader("April 2026 Transits")
-            st.info("Where the stars are moving today relative to your map.")
-            cols_t = st.columns(4)
-            for i, p in enumerate(data['transit_planets']):
-                with cols_t[i % 4]:
-                    st.write(f"**{p['name']}**")
-                    st.write(f"{p['deg']:.2f}° {p['sign']}")
+                if data['asc_sign'] == "Taurus":
+                    st.success("Protector Architecture: Grounded Krittika energy confirmed.")
 
-        st.divider()
-        st.caption("Calculated using Astro.com Verification (UTC 10:10) and True Lahiri.")
+            with tab2:
+                st.subheader("April 2026 Transits")
+                st.info("Where the stars are moving today relative to your birth map.")
+                cols_t = st.columns(4)
+                for i, p in enumerate(data['transit_planets']):
+                    with cols_t[i % 4]:
+                        st.write(f"**{p['name']}**")
+                        st.write(f"{p['deg']:.2f}° {p['sign']}")
+
+            st.divider()
+            st.caption("Calculated using Astro.com Verification (UTC 10:10) and True Lahiri.")
+            
+        except Exception as e:
+            st.error(f"Calibration needed: {e}")
+else:
+    st.warning("Please enter a birth city to anchor the map.")
