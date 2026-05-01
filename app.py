@@ -6,31 +6,27 @@ import pytz
 
 # --- THE SOUL MAP ENGINE ---
 def calculate_soul_map(year, month, day, hour, minute, lat, lon):
-    # 1. THE FORCED WORLD CLOCK (The Danny Constant)
-    # We are manually locking this to -5.0 to bypass the 1957 'Time-Zone Ghost'
+    # 1. THE FORCED WORLD CLOCK
+    # We manually lock this to -5.0 to bypass the 1957 'Time-Zone Ghost'
     offset = -5.0 
     
-    # Calculate Decimal Hour in Universal Time (UT)
-    # 4:10 AM Chicago (-5) = 9:10 AM UTC
+    # Calculate Universal Time (UT)
     ut_hour = (hour + minute / 60.0) - offset
-    
-    # Convert to Julian Day
     jd_ut = swe.julday(year, month, day, ut_hour)
 
     # 2. THE SIDEREAL ANCHOR (Lahiri)
-    # This is the 24-degree 'Truth Receipt'
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     ayan = swe.get_ayanamsa_ut(jd_ut)
     
     # 3. TOPOCENTRIC ANCHOR
     swe.set_topo(lat, lon, 0)
     
-    # 4. THE SOUL'S SEAT (Manual Correction)
-    # We calculate the seasonal horizon and subtract the wobble
+    # 4. THE SOUL'S SEAT
+    # We calculate the seasonal horizon and manually subtract the wobble
     res = swe.houses_ex(jd_ut, lat, lon, b'P', 0)
     ascmc = res[1]
     
-    # THE RECTIFICATION: Move backward from the Aries 'Ghost' into Taurus
+    # THE RECTIFICATION: Forcing the shift from Aries into 1° Taurus
     real_sky_asc = (ascmc[0] - ayan) % 360
     
     signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
@@ -55,25 +51,25 @@ if location:
     with col1:
         b_date = st.date_input("Birth Date", datetime(1957, 5, 10))
     with col2:
-        # Danny's Birth Time
         b_time = st.time_input("Birth Time", datetime.strptime("04:10", "%H:%M").time())
 
     if st.button("Generate Soul Map"):
+        # We wrapped this in a try/except block to keep the app from crashing
         try:
             deg, sign = calculate_soul_map(b_date.year, b_date.month, b_date.day, 
                                            b_time.hour, b_time.minute, lat, lon)
             
             st.header(f"✨ {name}'s Soul Map")
-            
-            # This metric is now forced into the 1° Taurus Foundation
             st.metric("Foundation (Ascendant)", f"{deg:.2f}° {sign}")
 
             if sign == "Taurus":
                 st.write("### The Protector Architecture")
-                st.info("**Internal Atmosphere:** Kapha (Stability / Sacred Fire)")
+                st.info("**Internal Atmosphere:** Kapha (Stability)")
                 st.info("**Soulful Movement:** Vrksasana (Tree Pose)")
             
             st.divider()
             st.caption("Calculated using a Forced Offset and True Lahiri to anchor the 1° Taurus Foundation.")
+        except Exception as e:
+            st.error(f"Calibration needed: {e}")
 else:
     st.warning("Please enter a birth city to anchor the map.")
