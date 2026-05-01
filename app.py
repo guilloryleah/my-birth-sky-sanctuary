@@ -1,4 +1,3 @@
-Next:
 import streamlit as st
 import swisseph as swe
 from datetime import datetime
