@@ -5,7 +5,7 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import pytz
 
-# --- 1. THE UNIVERSAL NAKSHATRA MEDICINE (POEMS & PROTOCOLS) ---
+# --- 1. THE UNIVERSAL NAKSHATRA MEDICINE ---
 def get_nakshatra_medicine(nakshatra_name):
     """
     Foundational 'poems' and holistic protocols for the 27 stations.
@@ -153,9 +153,8 @@ def get_nakshatra_medicine(nakshatra_name):
         "ayurveda": "Balance the elements."
     })
 
-# --- 2. SIDEREAL CALCULATIONS ---
+# --- 2. SIDEREAL CALCULATIONS (LAHIRI) ---
 def get_nakshatra_name(sign, degree):
-    # Mapping based on Lahiri sidereal logic
     if sign == "Aries":
         if degree < 13.333: return "Ashwini"
         elif degree < 26.666: return "Bharani"
@@ -214,7 +213,6 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
     utc_dt = local_dt.astimezone(pytz.utc)
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
 
-    # Real-Sky / Lahiri Settings
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     swe.set_topo(lat, lon, 0)
     ayan_corr = swe.get_ayanamsa_ut(jd_ut)
@@ -252,7 +250,7 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
 
     return {"asc_sign": asc_sign, "asc_deg": asc_deg, "asc_nak": asc_nak, "planets": results}
 
-# --- 4. STREAMLIT INTERFACE ---
+# --- 3. ROBUST STREAMLIT INTERFACE ---
 st.set_page_config(page_title="Real-Sky Soul Map", layout="wide")
 st.title("✨ The Real-Sky Soul Map: Eternal Edition")
 
@@ -265,25 +263,27 @@ with st.sidebar:
     st.divider()
     address = st.text_input("Birth Location (City, Country)", "Houston, USA")
     
-    with st.expander("Manual Coordinates (Fallback)"):
-        manual_lat = st.number_input("Latitude", value=0.0, format="%.4f")
-        manual_lon = st.number_input("Longitude", value=0.0, format="%.4f")
-        use_manual = st.checkbox("Use Manual Coordinates")
+    # MANUAL FALLBACK
+    with st.expander("Manual Coordinates (Use if map is busy)"):
+        manual_lat = st.number_input("Latitude", value=29.7604, format="%.4f")
+        manual_lon = st.number_input("Longitude", value=-95.3698, format="%.4f")
+        use_manual = st.checkbox("Override with Manual Coordinates")
 
-# Geolocation with safety fallback
+# Geolocation with safety net
 lat, lon = None, None
 if use_manual:
     lat, lon = manual_lat, manual_lon
 elif address:
     try:
-        geolocator = Nominatim(user_agent="birth_sky_sanctuary_final")
-        location = geolocator.geocode(address, timeout=10)
+        # Unique User Agent to prevent blocks
+        geolocator = Nominatim(user_agent="birth_sky_sanctuary_v3_leah")
+        location = geolocator.geocode(address, timeout=15) # Extended timeout
         if location:
             lat, lon = location.latitude, location.longitude
         else:
-            st.sidebar.warning("Location not found.")
+            st.sidebar.warning("Location not found. Please try manual coordinates.")
     except Exception:
-        st.sidebar.error("Map service busy. Use Manual Coordinates.")
+        st.sidebar.error("Map service busy. Please use 'Manual Coordinates' to continue.")
 
 if lat is not None and lon is not None:
     if st.button("Generate Medicine"):
@@ -293,7 +293,7 @@ if lat is not None and lon is not None:
         st.header(f"Soul Map: {seeker}")
         st.subheader(f"Ascendant: {data['asc_deg']:.2f}° {data['asc_sign']} in {data['asc_nak']}")
         
-        # Rising Path Expansion
+        # Rising Path
         asc_med = get_nakshatra_medicine(data['asc_nak'])
         with st.expander(f"Rising Soul Path: {data['asc_nak']}", expanded=True):
             st.markdown(f"**The Astrology:** {asc_med['astrology']}")
@@ -308,14 +308,14 @@ if lat is not None and lon is not None:
                 st.markdown(f"### The Astrology")
                 st.write(p['astrology'])
                 
-                col1, col2 = st.columns(2)
-                with col1:
+                c1, c2 = st.columns(2)
+                with c1:
                     st.markdown("🧘 **Yoga Pose**")
                     st.info(p['yoga'])
-                with col2:
+                with c2:
                     st.markdown("🍃 **Ayurvedic Alignment**")
                     st.success(p['ayurveda'])
 else:
-    st.info("Awaiting birth data in the sidebar...")
+    st.info("Awaiting birth data. Please verify your location in the sidebar.")
 
-st.caption("A sanctuary built on Real-Sky data and Holistic Wisdom.")
+st.caption("Built with Real-Sky astronomical data and Holistic Vedic wisdom.")
