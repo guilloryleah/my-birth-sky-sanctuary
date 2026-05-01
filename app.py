@@ -7,7 +7,6 @@ import pytz
 
 # --- THE POETIC NAKSHATRA ENGINE ---
 def get_nakshatra_data(sign, degree):
-    # Dictionary of your poems for easy retrieval
     poems = {
         "Ashwini": "Heal the ghost of the old self before you try to outrun it. The horse gallops not to flee the past, but to collide with the future. Listen for the medicine that hums in the silence of the dawn. Stop searching for a cure and realize you are the physician of your own wreckage.",
         "Bharani": "Carry the weight of your becoming until it turns into a wing. The dark soil is not a grave for your spirit, but a womb for your power. Hold the tension of the middle path with a grit that tastes like grace. Give birth to the version of you that no longer asks for permission to exist.",
@@ -23,7 +22,7 @@ def get_nakshatra_data(sign, degree):
         "Uttara Phalguni": "Extend your hand to the one who walks in the shadow behind you. The healer’s touch is not a technique, but a state of absolute presence. Steady the mind like a flame in a room where the wind has finally died. The path to the stars is paved with the small, quiet stones of kindness.",
         "Hasta": "Create what has never been seen with the magic of your open palms. The power is in the focus of the eye, not in the movement of the hand. Grasp the truth with everything you have, then let the outcome go. Your work is the physical signature of the peace you have found within.",
         "Chitra": "Carve the diamond of the soul out of the rough and heavy stone of habit. The external glow is merely a shadow of the fire burning in your chest. Build a temple out of the ruins of your yesterday and live in its heart. The masterpiece is not what you make, but the life you choose to inhabit.",
-        "Swati": "Sway with the wind but never lose the root that holds you to the earth. Freedom is the ability to find your breath in the center of the hurricane. Scatter your seeds without worry; the earth knows exactly where they belong. The spirit travels furthest when it stops carrying the weight of its names.",
+        "Swati": "Sway with the wind but never lose the root that holds you to the earth. Freedom is the ability to find your birth in the center of the hurricane. Scatter your seeds without worry; the earth knows exactly where they belong. The spirit travels furthest when it stops carrying the weight of its names.",
         "Vishakha": "Aim for the highest peak but cherish the blood on the jagged path. Patience is the slow fire that tempers the iron of the human soul. Break the old idols of your mind to find the living truth they were hiding. The victory is won the moment you stop fighting yourself for the prize.",
         "Anuradha": "Weave the threads of your devotion into a cloak that can weather any winter. Friendship is the bridge that keeps the soul from drowning in the lonely sea. Look for the blossom that thrives in the mud; that is where the secret lies. Belonging is not a frequency you find, but a frequency you finally learn to tune.",
         "Jyeshtha": "Protect the spark that flickers in the deepest, coldest cave of your being. Wisdom is a shield that only grows thick through the passage of time. Listen to the heavy silence that sits beneath the noise of the world. The elder within you is waiting for you to stop talking and start seeing.",
@@ -38,7 +37,6 @@ def get_nakshatra_data(sign, degree):
         "Revati": "Walk the final shore and leave no footprints for the world to follow. The traveler is the path, and the path is the goal, and the goal is now. Give everything away until you find the one thing that cannot be lost. Cross the last bridge and wake up to find the sun rising inside of you."
     }
 
-    # Range logic to find the name
     name = "Unknown"
     if sign == "Aries":
         if degree < 13.333: name = "Ashwini"
@@ -91,16 +89,66 @@ def get_nakshatra_data(sign, degree):
     
     return {"name": name, "poem": poems.get(name, "")}
 
-# --- REMAINING ENGINE FUNCTIONS (calculate_full_map, etc.) STAY THE SAME ---
-# ... [Keeping the core calculation logic from previous step] ...
+def get_planet_data(jd_ut, planet_id, planet_name):
+    res, ret = swe.calc_ut(jd_ut, planet_id, swe.FLG_SIDEREAL)
+    long = res[0]
+    signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+    sign = signs[int(long / 30)]
+    degree = long % 30
+    nak_data = get_nakshatra_data(sign, degree)
+    return {"name": planet_name, "deg": degree, "sign": sign, "nakshatra": nak_data['name'], "poem": nak_data['poem']}
 
-# --- THE UPDATED INTERFACE ---
-# Inside the generate button logic:
-st.header(f"✨ {name}'s Complete Soul Map")
-st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
+def calculate_full_map(year, month, day, hour, minute, lat, lon):
+    tf = TimezoneFinder()
+    tz_name = tf.timezone_at(lng=lon, lat=lat)
+    timezone = pytz.timezone(tz_name)
+    local_dt = timezone.localize(datetime(year, month, day, hour, minute))
+    utc_dt = local_dt.astimezone(pytz.utc)
+    jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
+    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+    swe.set_topo(lat, lon, 0)
+    res_h = swe.houses_ex(jd_ut, lat, lon, b'P', 0)
+    ayan_corr = swe.get_ayanamsa_ut(jd_ut)
+    asc_raw = (res_h[1][0] - ayan_corr) % 360
+    signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+    asc_sign = signs[int(asc_raw / 30)]
+    asc_deg = asc_raw % 30
+    asc_nak_data = get_nakshatra_data(asc_sign, asc_deg)
+    planets = [(swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"), (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), (swe.SATURN, "Saturn"), (swe.MEAN_NODE, "Rahu")]
+    birth_planets = [get_planet_data(jd_ut, p_id, p_name) for p_id, p_name in planets]
+    return {"asc_deg": asc_deg, "asc_sign": asc_sign, "asc_nakshatra": asc_nak_data['name'], "asc_poem": asc_nak_data['poem'], "birth_planets": birth_planets}
 
-# Displaying the Ascendant Poem (The Primary Soul Goal)
-with st.container():
-    st.markdown(f"### The Call of {data['asc_nakshatra']}")
-    # Using a blockquote for the poem to make it look professional and 'poised'
-    st.info(data['asc_poem'])
+# --- THE STABILIZED INTERFACE ---
+st.set_page_config(page_title="Soul Map", layout="wide")
+st.title("✨ The Real-Sky Soul Map: Nakshatra Edition")
+
+address = st.text_input("Location", "Houston, Texas")
+client_name = st.text_input("Name", "Leah G") # Renamed to client_name for safety
+
+geolocator = Nominatim(user_agent="soul_map_v2")
+location = geolocator.geocode(address)
+
+if location:
+    col1, col2 = st.columns(2)
+    with col1:
+        b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
+    with col2:
+        b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
+
+    if st.button("Generate Full Soul Map"):
+        data = calculate_full_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, location.latitude, location.longitude)
+        
+        # --- ALL DISPLAY LOGIC MOVED INSIDE THE BUTTON ---
+        st.header(f"✨ {client_name}'s Complete Soul Map")
+        st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
+        
+        st.subheader(f"The Call of {data['asc_nakshatra']}")
+        st.info(data['asc_poem'])
+        
+        cols = st.columns(4)
+        for i, p in enumerate(data['birth_planets']):
+            with cols[i % 4]:
+                st.write(f"**{p['name']}**")
+                st.write(f"{p['deg']:.2f}° {p['sign']} ({p['nakshatra']})")
+                with st.expander("Read the Medicine"):
+                    st.write(p['poem'])
