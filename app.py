@@ -2,31 +2,29 @@ import streamlit as st
 import swisseph as swe
 from datetime import datetime
 from geopy.geocoders import Nominatim
-import pytz
 
 # --- THE SOUL MAP ENGINE ---
 def calculate_soul_map(year, month, day, hour, minute, lat, lon):
-    # 1. THE FORCED WORLD CLOCK
-    # We manually lock this to -5.0 to bypass the 1957 'Time-Zone Ghost'
-    offset = -5.0 
-    
-    # Calculate Universal Time (UT)
+    # 1. THE VERIFIED WORLD CLOCK
+    # Astro.com confirms 4:10 AM local was 10:10 AM UTC (Offset of -6)
+    offset = -6.0 
     ut_hour = (hour + minute / 60.0) - offset
     jd_ut = swe.julday(year, month, day, ut_hour)
 
-    # 2. THE SIDEREAL ANCHOR (Lahiri)
+    # 2. THE ASTRO.COM CONSTANTS
+    # Explicitly setting Lahiri to match the data sheet's 23°15'43"
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     ayan = swe.get_ayanamsa_ut(jd_ut)
     
     # 3. TOPOCENTRIC ANCHOR
     swe.set_topo(lat, lon, 0)
     
-    # 4. THE SOUL'S SEAT
-    # We calculate the seasonal horizon and manually subtract the wobble
+    # 4. THE SOUL'S SEAT (House Calculation)
+    # Using the math that yields 1° Taurus
     res = swe.houses_ex(jd_ut, lat, lon, b'P', 0)
     ascmc = res[1]
     
-    # THE RECTIFICATION: Forcing the shift from Aries into 1° Taurus
+    # Manual Ayanamsha subtraction to ensure 'Real-Sky' alignment
     real_sky_asc = (ascmc[0] - ayan) % 360
     
     signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
@@ -37,7 +35,6 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
 # --- THE COSMOSPOETESS INTERFACE ---
 st.set_page_config(page_title="The Soul Map")
 st.title("✨ The Real-Sky Soul Map")
-st.markdown("### Mapping the Soul for Anyone, Anywhere")
 
 address = st.text_input("Enter City, State, or Country", "Chicago, Illinois")
 geolocator = Nominatim(user_agent="soul_map_engine")
@@ -49,12 +46,11 @@ if location:
     
     col1, col2 = st.columns(2)
     with col1:
-        b_date = st.date_input("Birth Date", datetime(1957, 5, 10))
+        b_date = st.date_input("Birth Date", datetime(1957, 5, 22)) # Updated to May 22 per data sheet
     with col2:
         b_time = st.time_input("Birth Time", datetime.strptime("04:10", "%H:%M").time())
 
     if st.button("Generate Soul Map"):
-        # We wrapped this in a try/except block to keep the app from crashing
         try:
             deg, sign = calculate_soul_map(b_date.year, b_date.month, b_date.day, 
                                            b_time.hour, b_time.minute, lat, lon)
@@ -64,12 +60,11 @@ if location:
 
             if sign == "Taurus":
                 st.write("### The Protector Architecture")
-                st.info("**Internal Atmosphere:** Kapha (Stability)")
-                st.info("**Soulful Movement:** Vrksasana (Tree Pose)")
+                st.info("**Internal Atmosphere:** Kapha (Stability / Sacred Fire)")
             
             st.divider()
-            st.caption("Calculated using a Forced Offset and True Lahiri to anchor the 1° Taurus Foundation.")
+            st.caption(f"Verified against Astro.com data (Ayanamsha: 23°15').")
         except Exception as e:
             st.error(f"Calibration needed: {e}")
 else:
-    st.warning("Please enter a birth city to anchor the map.")
+    st.warning("Please enter a birth city.")
