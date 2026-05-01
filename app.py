@@ -12,7 +12,6 @@ def get_nakshatra_medicine(nakshatra_name):
     These are the foundational 'poems' for each of the 27 stations.
     """
     
-    # This dictionary holds the 27 Nakshatra descriptions you provided
     medicine_vault = {
         "Ashwini": {
             "astrology": "The 'Swift Lightning.' Impulsive and moves faster than the mind. It creates 'head-heat' and sudden bursts of energy that can lead to burnout.",
@@ -26,7 +25,7 @@ def get_nakshatra_medicine(nakshatra_name):
         },
         "Krittika": {
             "astrology": "The 'Commander’s Blade.' The sharpest station. It provides the power to 'cut' through obstacles but can become overly aggressive or critical.",
-            "yoga": "Utkatasana (Chair Pose) — To channel the fire into the thighs and stabilize the 'Agnihotra' (internal ritual fire).",
+            "yoga": "Utkatasana (Chair Pose) — To channel the fire into the thighs and stabilize the 'Agnihotra'.",
             "ayurveda": "Blood Purifier. This energy 'boils' the blood. Use Neem or Turmeric to clear toxins (Ama) from the circulatory system."
         },
         "Rohini": {
@@ -41,7 +40,7 @@ def get_nakshatra_medicine(nakshatra_name):
         },
         "Ardra": {
             "astrology": "The 'Storm Warrior.' Destructive and emotional. It represents the 'teardrop' of the hunter. It fights through chaos and sudden shifts.",
-            "yoga": "Simhasana (Lion’s Breath) — To roar out the internal storm and clear the 'Rudra' (howling) energy from the chest.",
+            "yoga": "Simhasana (Lion’s Breath) — To roar out the internal storm and clear the 'Rudra' energy from the chest.",
             "ayurveda": "Lymphatic Flow. Can cause 'stagnant heat.' Use dry brushing to keep the 'storm' moving through the body."
         },
         "Punarvasu": {
@@ -159,7 +158,6 @@ def get_nakshatra_medicine(nakshatra_name):
 
 # --- 2. NAKSHATRA MAPPING ---
 def get_nakshatra_name(sign, degree):
-    """Calculates the Nakshatra based on Sidereal degrees."""
     if sign == "Aries":
         if degree < 13.333: return "Ashwini"
         elif degree < 26.666: return "Bharani"
@@ -267,8 +265,14 @@ with st.sidebar:
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     seeker = st.text_input("Seeker Name", "Leah G")
 
-geolocator = Nominatim(user_agent="soul_map_eternal")
-location = geolocator.geocode(address)
+# Robust Geolocation logic
+geolocator = Nominatim(user_agent="my_birth_sky_sanctuary_leahg")
+location = None
+if address:
+    try:
+        location = geolocator.geocode(address, timeout=10)
+    except Exception as e:
+        st.error("The map service is currently busy. Please wait a moment and try again.")
 
 if location and st.button("Generate Medicine"):
     data = calculate_soul_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, location.latitude, location.longitude)
@@ -276,7 +280,6 @@ if location and st.button("Generate Medicine"):
     st.header(f"Soul Map: {seeker}")
     st.subheader(f"Ascendant: {data['asc_deg']:.2f}° {data['asc_sign']} in {data['asc_nak']}")
     
-    # Display Ascendant Medicine too
     asc_med = get_nakshatra_medicine(data['asc_nak'])
     with st.expander(f"Rising Soul Path: {data['asc_nak']}"):
         st.markdown(f"**The Astrology:** {asc_med['astrology']}")
