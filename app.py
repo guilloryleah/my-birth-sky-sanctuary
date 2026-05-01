@@ -1,3 +1,5 @@
+
+
 import streamlit as st
 import swisseph as swe
 from datetime import datetime
@@ -5,317 +7,204 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import pytz
 
-# --- 1. THE UNIVERSAL NAKSHATRA MEDICINE ---
-def get_nakshatra_medicine(nakshatra_name):
-    """
-    Foundational 'poems' and holistic protocols for the 27 stations.
-    """
-    medicine_vault = {
-        "Ashwini": {
-            "astrology": "The 'Swift Lightning.' Impulsive and moves faster than the mind. It creates 'head-heat' and sudden bursts of energy that can lead to burnout.",
-            "yoga": "Savasana with an Eye Pillow — To force the 'Internal Charioteer' to stop and rest the eyes.",
-            "ayurveda": "Cranial Pressure. Use Brahmi oil on the scalp to prevent migraines and irritability."
-        },
-        "Bharani": {
-            "astrology": "The 'Volcano in the Vessel.' Under extreme pressure to transform. It represents the 'Fire of Birth' and deep survival instincts.",
-            "yoga": "Baddha Konasana (Bound Angle) — To release the deep 'Apana' (downward) energy stored in the pelvic floor.",
-            "ayurveda": "Pelvic Inflammation. Cool the 'Yoni/Linga' energy. Drink Aloe Vera juice to soothe the internal heat."
-        },
-        "Krittika": {
-            "astrology": "The 'Commander’s Blade.' The sharpest station. It provides the power to 'cut' through obstacles but can become overly aggressive or critical.",
-            "yoga": "Utkatasana (Chair Pose) — To channel the fire into the thighs and stabilize the 'Agnihotra'.",
-            "ayurveda": "Blood Purifier. This energy 'boils' the blood. Use Neem or Turmeric to clear toxins (Ama) from the circulatory system."
-        },
-        "Rohini": {
-            "astrology": "The 'Passionate Builder.' Stubborn and highly sensual. It seeks to guard its territory and its beauty with fierce loyalty.",
-            "yoga": "Vrksasana (Tree Pose) — To ground aggressive energy into the earth, preventing 'Bull-headed' stubbornness.",
-            "ayurveda": "Neck and Throat. Tension often settles here. Use warm Sesame oil massages on the throat."
-        },
-        "Mrigashira": {
-            "astrology": "The 'Restless Hunter.' Searching for a target. This creates nervous energy and a tendency to 'run' away from problems or chase illusions.",
-            "yoga": "Garudasana (Eagle Pose) — To bind the limbs and force scattered energy into a single point of focus.",
-            "ayurveda": "Sensory Exhaustion. The 'Deer' mind tires the eyes. Use Rosewater compresses to cool the optical nerves."
-        },
-        "Ardra": {
-            "astrology": "The 'Storm Warrior.' Destructive and emotional. It represents the 'teardrop' of the hunter. It fights through chaos and sudden shifts.",
-            "yoga": "Simhasana (Lion’s Breath) — To roar out the internal storm and clear the 'Rudra' energy from the chest.",
-            "ayurveda": "Lymphatic Flow. Can cause 'stagnant heat.' Use dry brushing to keep the 'storm' moving through the body."
-        },
-        "Punarvasu": {
-            "astrology": "The 'Returning Arrow.' Defensive and protective. It seeks to return to a state of safety and 'Home.'",
-            "yoga": "Anjaneyasana (Low Lunge) — To open the chest and 'pull the bow' of the spirit back to its center.",
-            "ayurveda": "Shoulder Tension. Carries the weight of the world. Use Mahanarayan oil on the upper back and shoulders."
-        },
-        "Pushya": {
-            "astrology": "The 'Guardian of the Well.' Strength found in vulnerability. It creates a protective, nurturing energy that resists aggressive conflict.",
-            "yoga": "Balasana (Child’s Pose) — To surrender the 'sword' and realize that true strength is found in stillness.",
-            "ayurveda": "Digestive Agni. This energy 'steams' the stomach. Eat cooling 'Moon-milk' (warm milk with cardamom) to soothe the lining."
-        },
-        "Ashlesha": {
-            "astrology": "The 'Serpent’s Grip.' Strategic, hypnotic, and can be 'poisonous' if provoked. It moves with secret maneuvers and deep intensity.",
-            "yoga": "Bhujangasana (Cobra Pose) — To move energy through the spine like a fluid snake, preventing 'joint-locking.'",
-            "ayurveda": "Joint Lubrication. Dries out the 'Shleshaka Kapha' (joint fluid). Use Ghee in the diet to keep the 'hinges' moving."
-        },
-        "Magha": {
-            "astrology": "The 'Ancestral King.' Noble and concerned with honor and legacy. It can be overly proud and 'Heart-heavy.'",
-            "yoga": "Tadasana (Mountain Pose) — To stand with the weight of the crown without letting the ego collapse the spine.",
-            "ayurveda": "The Physical Heart. Can cause 'heart-burn' or palpitations. Use Arjuna bark to strengthen the cardiac muscle."
-        },
-        "Purva Phalguni": {
-            "astrology": "The 'Relaxed Combatant.' Wants to enjoy life and fights for the right to rest and create. It is the 'War for Pleasure.'",
-            "yoga": "Natarajasana (Dancer’s Pose) — To turn heat into a creative, rhythmic expression.",
-            "ayurveda": "Lower Back. Can 'burn out' the kidneys. Drink plenty of structured water and avoid excess salt."
-        },
-        "Uttara Phalguni": {
-            "astrology": "The 'Soldier of Service.' Disciplined and focused on the 'Work.' It seeks to organize and perfect the environment.",
-            "yoga": "Setu Bridge Pose — To support the 'nervous bridge' between the heart and the gut.",
-            "ayurveda": "Nervous Digestion. 'Fries' the small intestine. Use cooling Mint or Fennel to calm the gut-brain axis."
-        },
-        "Hasta": {
-            "astrology": "The 'Craftsman’s Fist.' Incredibly dexterous. It works through skill, manipulation, and the 'Magic of the Hand.'",
-            "yoga": "Bakasana (Crow Pose) — To put the entire weight into the hands and balance the 'clutched' energy.",
-            "ayurveda": "Wrist and Forearm. Tension from 'over-working' shows up here. Use daily hand stretches and Sesame oil."
-        },
-        "Chitra": {
-            "astrology": "The 'Architect of War.' Brilliant and aesthetic. It seeks to create beauty or to 'rebuild' life from the ashes.",
-            "yoga": "Sirsasana (Headstand) — To flip the perspective and see the 'structure' of the universe clearly.",
-            "ayurveda": "Skin Radiance. Can cause rashes (Pitta). Use Sandalwood paste to cool the skin and lower internal 'glare.'"
-        },
-        "Swati": {
-            "astrology": "The 'Wind-Swept Warrior.' Independent and moves like a kite. It fights for freedom and has a 'restless' independence.",
-            "yoga": "Nadi Shodhana Pranayama — Balance the breath to ground the 'Airy' energy.",
-            "ayurveda": "Colon Health. In 'Air' signs, causes gas/bloating. Use 'Hing' (Asafoetida) in cooking to ground the 'Vata.'"
-        },
-        "Vishakha": {
-            "astrology": "The 'Two-Branched Path.' At a crossroads. It struggles between worldly ambition and spiritual depth.",
-            "yoga": "Parivrtta Trikonasana (Revolved Triangle) — To 'twist' the soul and see both directions at once.",
-            "ayurveda": "Bladder and Pelvis. Can cause 'burning' sensations. Drink Cranberry or Coriander water to flush the system."
-        },
-        "Anuradha": {
-            "astrology": "The 'Devoted Knight.' Softened by the 'Star of Success.' It is dedicated to friends, family, and the 'Lotus-path.'",
-            "yoga": "Padmasana (Lotus) — To lock energy into a seat of prayer and devotion.",
-            "ayurveda": "Circulatory Vitality. Keep the blood moving. Use 'Warm' spices like Cinnamon to ensure energy doesn't become 'cold and dark.'"
-        },
-        "Jyeshtha": {
-            "astrology": "The 'Eldest Protector.' Powerful and 'Psychic.' It works with wisdom, secrets, and the 'Earring of Power.'",
-            "yoga": "Matsyendrasana (Seated Twist) — To wring out the 'poison' of the ego and access hidden power.",
-            "ayurveda": "Nervous Core. Can be 'highly-strung.' Use Ashwagandha to 'buffer' the nerves against stress."
-        },
-        "Moola": {
-            "astrology": "The 'Uprooter.' Fierce and destructive to illusions. It seeks the 'Root' of the problem, often by burning the house down.",
-            "yoga": "Adho Mukha Svanasana (Downward Dog) — To ground the 'Root-striking' energy into the hands and feet.",
-            "ayurveda": "The Psoas Muscle. The seat of 'Fight or Flight' trauma. Release it to stop the internal 'panic.'"
-        },
-        "Purva Ashada": {
-            "astrology": "The 'Invincible Invader.' Fueled by 'The Early Victory.' It moves with the fluidity of water and the power of conviction.",
-            "yoga": "Virabhadrasana I (Warrior I) — To stand as an 'Invincible' force, lunging toward the goal.",
-            "ayurveda": "Liver Heat. 'Angers' the liver. Use 'Dandelion root' or 'Milk Thistle' to keep the blood clean."
-        },
-        "Uttara Ashada": {
-            "astrology": "The 'Eternal Victor.' Controlled, disciplined, and unstoppable. The 'Mountaineer' of the zodiac.",
-            "yoga": "Salamba Sarvangasana (Shoulder Stand) — To stabilize the entire 'Kingdom' of the body in a single, focused 'victory.'",
-            "ayurveda": "Bone Strength. Builds the 'Asti Dhatu' (Bones). Ensure high mineral intake and Ghee for joint cushioning."
-        },
-        "Shravana": {
-            "astrology": "The 'Silent Soldier.' Acts through 'Listening.' It is the energy of the scout or the monk. It conquers through patience.",
-            "yoga": "Viparita Karani (Legs Up the Wall) — To let the blood drain back into the heart and 'listen' to the internal pulse.",
-            "ayurveda": "The Ears. Can cause Tinnitus. Keep the ears warm and quiet; avoid loud, 'aggressive' sounds."
-        },
-        "Dhanishta": {
-            "astrology": "The 'Drummer of War.' Rhythmic and communal. It works for the 'Group' and the 'Future.' The 'Electric Warrior.'",
-            "yoga": "Ustrasana (Camel Pose) — To open the heart to the 'Cosmic Drum' and release 'future-fear.'",
-            "ayurveda": "The Ankles. Puts tension on the 'base of the flow.' Use magnesium oil on the ankles to prevent cramping."
-        },
-        "Shatabhisha": {
-            "astrology": "The 'Healing Rebel.' Unconventional. It works with 'The Hundred Physicians.' Heals the world by breaking the rules.",
-            "yoga": "Savasana — To enter the 'Void' and allow the 'Hundred Stars' to heal fatigue.",
-            "ayurveda": "Detoxification. Can hold 'stagnant toxins.' Use 'Kitchari' (mung bean and rice) cleanses to reset."
-        },
-        "Purva Bhadrapada": {
-            "astrology": "The 'Two-Faced Fire.' Highly spiritual but 'Dualistic.' It fights for the 'Light' but knows the 'Dark.' The 'Priest-Warrior.'",
-            "yoga": "Pincha Mayurasana (Forearm Balance) — To balance the 'Two faces' of the ego on the 'Arms of Truth.'",
-            "ayurveda": "The Feet. Can feel 'un-grounded.' Use warm foot baths with Epsom salts to pull the fire down."
-        },
-        "Uttara Bhadrapada": {
-            "astrology": "The 'Deep Sea Guardian.' Quiet and hidden in the 'Deep Water.' It guards the 'Dreaming World.'",
-            "yoga": "Ananta Shayanasana (Side Reclining) — To rest like the 'Infinite Serpent' and realize the war is won in the dream.",
-            "ayurveda": "Deep Sleep. Can cause insomnia. Use 'Nutmeg' in warm milk before bed to ground the spiritual visions."
-        },
-        "Revati": {
-            "astrology": "The 'Shepherd of Souls.' At the end of the journey. The 'Gentle Warrior.' It guides others to the 'Final Shore.'",
-            "yoga": "Yoga Nidra — To dissolve the 'Warrior' entirely into the 'Ocean.'",
-            "ayurveda": "Psychological Peace. Use Sandalwood oil on the 'Third Eye' to bring peace to the soul."
-        }
+# --- THE POETIC NAKSHATRA ENGINE ---
+def get_nakshatra_data(sign, degree):
+    """Returns the Nakshatra name and poem based on exact degree ranges."""
+    poems = {
+        "Ashwini": "Heal the ghost of the old self before you try to outrun it. The horse gallops not to flee the past, but to collide with the future. Listen for the medicine that hums in the silence of the dawn. Stop searching for a cure and realize you are the physician of your own wreckage.",
+        "Bharani": "Carry the weight of your becoming until it turns into a wing. The dark soil is not a grave for your spirit, but a womb for your power. Hold the tension of the middle path with a grit that tastes like grace. Give birth to the version of you that no longer asks for permission to exist.",
+        "Krittika": "Burn away the brush until only the gold has room to breathe. The blade that cuts you open is the same one that sets you free. Seek the heat that transforms your form rather than the fire that feeds your ego. Let your truth be a cauterizing flame that heals the cold world by touch.",
+        "Rohini": "Plant your feet where the earth is soft and red with ancient memory. Ascend the heights by sinking deeper into the marrow of your being. Tend to the garden of the heart with hands that have forgotten how to hurry. Beauty is not an ornament; it is the vital oxygen that mends a fractured soul.",
+        "Mrigashira": "Stop chasing the horizon and start watching the rhythm of your shadow. The nectar you seek is hidden in the quiet stride of the searcher. Softness is the only armor that the world is unable to pierce or break. Find the sanctuary that exists between the inhale and the exhale.",
+        "Ardra": "Let the storm wash the salt from your eyes until you see without filters. The thunder is the sound of the ego’s architecture finally crumbling. Stand naked in the rain until you are nothing but the core of the lightning. Renewal begins only when you stop trying to keep your old life dry.",
+        "Punarvasu": "Return to the center after every long wandering through the wild. The arrow finds the mark only when the hand has ceased its trembling. Trust the cycles of the light as deeply as you trust the dark of the moon. You are the destination you have been traveling a thousand lives to find.",
+        "Pushya": "Feed the spirit until it is heavy enough to anchor the drifting mind. Flow like the milk of a star through the veins of the heavy night. Stability is found in the absolute surrender to the service of the sacred. Be the hollow bone; let a higher wisdom play its song through your life.",
+        "Ashlesha": "Embrace the serpent that guards the gates of your inner temple. The sting is the wake-up call for the god who fell asleep in your skin. Look into the dark until the dark begins to reflect your own inner light. Shed the skin of who you were so the truth can breathe through your pores.",
+        "Magha": "Honor the blood that flows through your veins, for it is an ocean of ancestors. The throne is a cage unless the heart is humble enough to serve the lowest. Walk with the kings of the past but dream a dream they were too afraid to see. Noble action is the only currency that buys a seat in the hall of the eternal.",
+        "Purva Phalguni": "Dance until the dancer and the dance are swallowed by the movement. The creative spark is the only bridge that spans the gap to the divine. Rest is a sacred prayer; do not apologize for the stillness that restores you. Pour your love into the world like a wine that never runs dry.",
+        "Uttara Phalguni": "Extend your hand to the one who walks in the shadow behind you. The healer’s touch is not a technique, but a state of absolute presence. Steady the mind like a flame in a room where the wind has finally died. The path to the stars is paved with the small, quiet stones of kindness.",
+        "Hasta": "Create what has never been seen with the magic of your open palms. The power is in the focus of the eye, not in the movement of the hand. Grasp the truth with everything you have, then let the outcome go. Your work is the physical signature of the peace you have found within.",
+        "Chitra": "Carve the diamond of the soul out of the rough and heavy stone of habit. The external glow is merely a shadow of the fire burning in your chest. Build a temple out of the ruins of your yesterday and live in its heart. The masterpiece is not what you make, but the life you choose to inhabit.",
+        "Swati": "Sway with the wind but never lose the root that holds you to the earth. Freedom is the ability to find your breath in the center of the hurricane. Scatter your seeds without worry; the earth knows exactly where they belong. The spirit travels furthest when it stops carrying the weight of its names.",
+        "Vishakha": "Aim for the highest peak but cherish the blood on the jagged path. Patience is the slow fire that tempers the iron of the human soul. Break the old idols of your mind to find the living truth they were hiding. The victory is won the moment you stop fighting yourself for the prize.",
+        "Anuradha": "Weave the threads of your devotion into a cloak that can weather any winter. Friendship is the bridge that keeps the soul from drowning in the lonely sea. Look for the blossom that thrives in the mud; that is where the secret lies. Belonging is not a frequency you find, but a frequency you finally learn to tune.",
+        "Jyeshtha": "Protect the spark that flickers in the deepest, coldest cave of your being. Wisdom is a shield that only grows thick through the passage of time. Listen to the heavy silence that sits beneath the noise of the world. The elder within you is waiting for you to stop talking and start seeing.",
+        "Moola": "Dig past the layers of bone until you strike the primary root of existence. The collapse of your world is the invitation for the truth to be born. Destroy everything that is false so that what is eternal can finally stand. Foundations are only discovered when you have reached the absolute bottom.",
+        "Purva Ashada": "Dive into the depths where the light of the sun is a forgotten memory. Surrender to the current and let the great tides decide your direction. The ocean is not an obstacle; it is the vast embrace of the mother. In the middle of the deep water, discover that you are the shore.",
+        "Uttara Ashada": "Stand like a mountain of light against the howling wind of the world’s opinion. The sun of the spirit never sets on a heart that has nothing to hide. Commitment is the anchor that holds when the sky turns black with rain. Integrity is the only peak that offers a view of the entire universe.",
+        "Shravana": "Listen to the pulse of the stars as it beats inside your own ears. Learning is the art of becoming a mirror that reflects the light of the sun. Walk the earth as if every step were a word in a holy and secret book. Knowledge is a weight you carry; wisdom is the light that carries you.",
+        "Dhanishta": "Find the rhythm that beats beneath the skin of the physical world. Abundance flows only to the hand that is open enough to let it go. Let your every movement be a ritual for the gods who live in the silence. The drum of the heart is the only map you need to navigate the divine.",
+        "Shatabhisha": "Hide within the hundred veils until you find the eye that never blinks. The mystery is not a problem to be solved, but a reality to be entered. Heal the wounds of the world by mending the fractures in your own soul. The void is not empty; it is the womb of everything that is yet to be.",
+        "Purva Bhadrapada": "Face the fire of your own shadow and do not turn your eyes away. Transformation requires the absolute death of the mask you wear for others. Carry the torch of your truth through the longest tunnel of the dark. The warrior’s greatest battle is won the moment the sword is laid down.",
+        "Uttara Bhadrapada": "Sleep in the deep, still waters and dream the world back into balance. Peace is the treasure guarded by the mind that has stopped seeking. The end of the journey is the discovery that you never truly left home. Dissolve into the blue of the infinite and realize you are the sky.",
+        "Revati": "Walk the final shore and leave no footprints for the world to follow. The traveler is the path, and the path is the goal, and the goal is now. Give everything away until you find the one thing that cannot be lost. Cross the last bridge and wake up to find the sun rising inside of you."
     }
-    return medicine_vault.get(nakshatra_name, {
-        "astrology": "Wisdom ripening...",
-        "yoga": "Mindful Presence",
-        "ayurveda": "Balance the elements."
-    })
 
-# --- 2. SIDEREAL CALCULATIONS (LAHIRI) ---
-def get_nakshatra_name(sign, degree):
+    name = "Unknown"
     if sign == "Aries":
-        if degree < 13.333: return "Ashwini"
-        elif degree < 26.666: return "Bharani"
-        return "Krittika"
+        if degree < 13.333: name = "Ashwini"
+        elif degree < 26.666: name = "Bharani"
+        else: name = "Krittika"
     elif sign == "Taurus":
-        if degree < 10.0: return "Krittika"
-        elif degree < 23.333: return "Rohini"
-        return "Mrigashira"
+        if degree < 10.0: name = "Krittika"
+        elif degree < 23.333: name = "Rohini"
+        else: name = "Mrigashira"
     elif sign == "Gemini":
-        if degree < 6.666: return "Mrigashira"
-        elif degree < 20.0: return "Ardra"
-        return "Punarvasu"
+        if degree < 6.666: name = "Mrigashira"
+        elif degree < 20.0: name = "Ardra"
+        else: name = "Punarvasu"
     elif sign == "Cancer":
-        if degree < 3.333: return "Punarvasu"
-        elif degree < 16.666: return "Pushya"
-        return "Ashlesha"
+        if degree < 3.333: name = "Punarvasu"
+        elif degree < 16.666: name = "Pushya"
+        else: name = "Ashlesha"
     elif sign == "Leo":
-        if degree < 13.333: return "Magha"
-        elif degree < 26.666: return "Purva Phalguni"
-        return "Uttara Phalguni"
+        if degree < 13.333: name = "Magha"
+        elif degree < 26.666: name = "Purva Phalguni"
+        else: name = "Uttara Phalguni"
     elif sign == "Virgo":
-        if degree < 10.0: return "Uttara Phalguni"
-        elif degree < 23.333: return "Hasta"
-        return "Chitra"
+        if degree < 10.0: name = "Uttara Phalguni"
+        elif degree < 23.333: name = "Hasta"
+        else: name = "Chitra"
     elif sign == "Libra":
-        if degree < 6.666: return "Chitra"
-        elif degree < 20.0: return "Swati"
-        return "Vishakha"
+        if degree < 6.666: name = "Chitra"
+        elif degree < 20.0: name = "Swati"
+        else: name = "Vishakha"
     elif sign == "Scorpio":
-        if degree < 3.333: return "Vishakha"
-        elif degree < 16.666: return "Anuradha"
-        return "Jyeshtha"
+        if degree < 3.333: name = "Vishakha"
+        elif degree < 16.666: name = "Anuradha"
+        else: name = "Jyeshtha"
     elif sign == "Sagittarius":
-        if degree < 13.333: return "Moola"
-        elif degree < 26.666: return "Purva Ashada"
-        return "Uttara Ashada"
+        if degree < 13.333: name = "Moola"
+        elif degree < 26.666: name = "Purva Ashada"
+        else: name = "Uttara Ashada"
     elif sign == "Capricorn":
-        if degree < 10.0: return "Uttara Ashada"
-        elif degree < 23.333: return "Shravana"
-        return "Dhanishta"
+        if degree < 10.0: name = "Uttara Ashada"
+        elif degree < 23.333: name = "Shravana"
+        else: name = "Dhanishta"
     elif sign == "Aquarius":
-        if degree < 6.666: return "Dhanishta"
-        elif degree < 20.0: return "Shatabhisha"
-        return "Purva Bhadrapada"
+        if degree < 6.666: name = "Dhanishta"
+        elif degree < 20.0: name = "Shatabhisha"
+        else: name = "Purva Bhadrapada"
     elif sign == "Pisces":
-        if degree < 3.333: return "Purva Bhadrapada"
-        elif degree < 16.666: return "Uttara Bhadrapada"
-        return "Revati"
-    return "Unknown"
+        if degree < 3.333: name = "Purva Bhadrapada"
+        elif degree < 16.666: name = "Uttara Bhadrapada"
+        else: name = "Revati"
+    
+    return {"name": name, "poem": poems.get(name, "Medicine is still being prepared for this star.")}
 
-def calculate_soul_map(year, month, day, hour, minute, lat, lon):
+# --- THE CALCULATION ENGINE ---
+def get_planet_data(jd_ut, planet_id, planet_name):
+    res, ret = swe.calc_ut(jd_ut, planet_id, swe.FLG_SIDEREAL)
+    long = res[0]
+    signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+    sign = signs[int(long / 30)]
+    degree = long % 30
+    nak_data = get_nakshatra_data(sign, degree)
+    return {"name": planet_name, "deg": degree, "sign": sign, "nakshatra": nak_data['name'], "poem": nak_data['poem']}
+
+def calculate_full_map(year, month, day, hour, minute, lat, lon):
+    # Automatic Timezone Engine
     tf = TimezoneFinder()
     tz_name = tf.timezone_at(lng=lon, lat=lat)
-    timezone = pytz.timezone(tz_name or "UTC")
+    timezone = pytz.timezone(tz_name)
     local_dt = timezone.localize(datetime(year, month, day, hour, minute))
     utc_dt = local_dt.astimezone(pytz.utc)
+    
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
 
+    # Real-Sky Configuration (Lahiri)
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     swe.set_topo(lat, lon, 0)
-    ayan_corr = swe.get_ayanamsa_ut(jd_ut)
 
+    # Ascendant Calculation
     res_h = swe.houses_ex(jd_ut, lat, lon, b'P', 0)
+    ayan_corr = swe.get_ayanamsa_ut(jd_ut)
     asc_raw = (res_h[1][0] - ayan_corr) % 360
     
     signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
     asc_sign = signs[int(asc_raw / 30)]
     asc_deg = asc_raw % 30
-    asc_nak = get_nakshatra_name(asc_sign, asc_deg)
-
-    planet_ids = [(swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), 
-                  (swe.VENUS, "Venus"), (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), 
-                  (swe.SATURN, "Saturn"), (swe.MEAN_NODE, "Rahu")]
+    asc_nak_data = get_nakshatra_data(asc_sign, asc_deg)
     
-    results = []
-    for p_id, p_name in planet_ids:
-        res, ret = swe.calc_ut(jd_ut, p_id, swe.FLG_SIDEREAL)
-        long = res[0]
-        p_sign = signs[int(long / 30)]
-        p_deg = long % 30
-        p_nak = get_nakshatra_name(p_sign, p_deg)
-        medicine = get_nakshatra_medicine(p_nak)
-        
-        results.append({
-            "name": p_name,
-            "sign": p_sign,
-            "deg": p_deg,
-            "nakshatra": p_nak,
-            "astrology": medicine["astrology"],
-            "yoga": medicine["yoga"],
-            "ayurveda": medicine["ayurveda"]
-        })
+    # Council Calculation
+    planets = [(swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"), 
+               (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), (swe.SATURN, "Saturn"), (swe.MEAN_NODE, "Rahu")]
+    birth_planets = [get_planet_data(jd_ut, p_id, p_name) for p_id, p_name in planets]
 
-    return {"asc_sign": asc_sign, "asc_deg": asc_deg, "asc_nak": asc_nak, "planets": results}
+    return {
+        "asc_deg": asc_deg,
+        "asc_sign": asc_sign,
+        "asc_nakshatra": asc_nak_data['name'],
+        "asc_poem": asc_nak_data['poem'],
+        "birth_planets": birth_planets
+    }
 
-# --- 3. ROBUST STREAMLIT INTERFACE ---
-st.set_page_config(page_title="Real-Sky Soul Map", layout="wide")
-st.title("✨ The Real-Sky Soul Map: Eternal Edition")
+# --- THE INTERFACE ---
+st.set_page_config(page_title="The Soul Map", layout="wide", page_icon="✨")
+st.title("✨ The Real-Sky Soul Map: Full Edition")
 
-with st.sidebar:
-    st.header("Birth Calibration")
-    seeker = st.text_input("Seeker Name", "Leah G")
-    b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
-    b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
-    
-    st.divider()
-    address = st.text_input("Birth Location (City, Country)", "Houston, USA")
-    
-    # MANUAL FALLBACK
-    with st.expander("Manual Coordinates (Use if map is busy)"):
-        manual_lat = st.number_input("Latitude", value=29.7604, format="%.4f")
-        manual_lon = st.number_input("Longitude", value=-95.3698, format="%.4f")
-        use_manual = st.checkbox("Override with Manual Coordinates")
+address = st.text_input("Location (Birth City)", "Houston, Texas")
+client_name = st.text_input("Name", "Leah G")
 
-# Geolocation with safety net
-lat, lon = None, None
-if use_manual:
-    lat, lon = manual_lat, manual_lon
-elif address:
-    try:
-        # Unique User Agent to prevent blocks
-        geolocator = Nominatim(user_agent="birth_sky_sanctuary_v3_leah")
-        location = geolocator.geocode(address, timeout=15) # Extended timeout
-        if location:
-            lat, lon = location.latitude, location.longitude
-        else:
-            st.sidebar.warning("Location not found. Please try manual coordinates.")
-    except Exception:
-        st.sidebar.error("Map service busy. Please use 'Manual Coordinates' to continue.")
+geolocator = Nominatim(user_agent="soul_map_sanctuary_final")
+location = geolocator.geocode(address)
 
-if lat is not None and lon is not None:
-    if st.button("Generate Medicine"):
-        data = calculate_soul_map(b_date.year, b_date.month, b_date.day, 
-                                 b_time.hour, b_time.minute, lat, lon)
-        
-        st.header(f"Soul Map: {seeker}")
-        st.subheader(f"Ascendant: {data['asc_deg']:.2f}° {data['asc_sign']} in {data['asc_nak']}")
-        
-        # Rising Path
-        asc_med = get_nakshatra_medicine(data['asc_nak'])
-        with st.expander(f"Rising Soul Path: {data['asc_nak']}", expanded=True):
-            st.markdown(f"**The Astrology:** {asc_med['astrology']}")
-            st.markdown(f"🧘 **Yoga:** {asc_med['yoga']}")
-            st.markdown(f"🍃 **Ayurveda:** {asc_med['ayurveda']}")
-        
-        st.divider()
+if location:
+    col1, col2 = st.columns(2)
+    with col1:
+        # Timeless Calendar Range
+        b_date = st.date_input(
+            "Birth Date", 
+            value=datetime(1969, 9, 24),
+            min_value=datetime(1900, 1, 1),
+            max_value=datetime(2100, 12, 31)
+        )
+    with col2:
+        b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
 
-        # Planet Details
-        for p in data['planets']:
-            with st.expander(f"{p['name']} in {p['nakshatra']} ({p['sign']})"):
-                st.markdown(f"### The Astrology")
-                st.write(p['astrology'])
-                
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.markdown("🧘 **Yoga Pose**")
-                    st.info(p['yoga'])
-                with c2:
-                    st.markdown("🍃 **Ayurvedic Alignment**")
-                    st.success(p['ayurveda'])
+    if st.button("Generate Full Soul Map"):
+        try:
+            data = calculate_full_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, location.latitude, location.longitude)
+            
+            # Header Section
+            st.divider()
+            st.header(f"✨ {client_name}'s Soul Map")
+            st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
+            
+            # The Foundation Medicine
+            st.markdown(f"### The Call of {data['asc_nakshatra']}")
+            st.info(data['asc_poem'])
+            
+            # The Council Section
+            st.subheader("The Inner Council")
+            cols = st.columns(4)
+            for i, p in enumerate(data['birth_planets']):
+                with cols[i % 4]:
+                    st.write(f"**{p['name']}**")
+                    st.write(f"{p['deg']:.2f}° {p['sign']}")
+                    st.caption(f"*{p['nakshatra']}*")
+                    with st.expander("Read the Medicine"):
+                        st.write(p['poem'])
+            
+            # Ketu Calculation (180 degrees from Rahu)
+            rahu = data['birth_planets'][-1]
+            signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+            ketu_sign_idx = (signs.index(rahu['sign']) + 6) % 12
+            ketu_sign = signs[ketu_sign_idx]
+            ketu_nak = get_nakshatra_data(ketu_sign, rahu['deg'])
+            
+            with cols[0]: # Place Ketu in the next available slot
+                st.write(f"**Ketu**")
+                st.write(f"{rahu['deg']:.2f}° {ketu_sign}")
+                st.caption(f"*{ketu_nak['name']}*")
+                with st.expander("Read the Medicine"):
+                    st.write(ketu_nak['poem'])
+
+            st.divider()
+            st.caption("Calculated using Automatic Timezone Detection, True Lahiri Sidereal, and Your Custom Nakshatra Poems.")
+
+        except Exception as e:
+            st.error(f"Calibration needed: {e}")
 else:
-    st.info("Awaiting birth data. Please verify your location in the sidebar.")
+    st.warning("Please enter a birth city to anchor the map.")
 
-st.caption("Built with Real-Sky astronomical data and Holistic Vedic wisdom.")
