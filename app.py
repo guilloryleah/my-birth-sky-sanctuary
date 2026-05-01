@@ -39,7 +39,6 @@ def get_nakshatra_data(sign, degree):
     }
 
     name = "Unknown"
-    # Sidereal degree range logic
     if sign == "Aries":
         if degree < 13.333: name = "Ashwini"
         elif degree < 26.666: name = "Bharani"
@@ -102,20 +101,21 @@ def get_planet_data(jd_ut, planet_id, planet_name):
     return {"name": planet_name, "deg": degree, "sign": sign, "nakshatra": nak_data['name'], "poem": nak_data['poem']}
 
 def calculate_full_map(year, month, day, hour, minute, lat, lon):
-    # Automatic Timezone Detection
-    tf = TimezoneFinder()
-    tz_name = tf.timezone_at(lng=lon, lat=lat)
-    timezone = pytz.timezone(tz_name)
-    local_dt = timezone.localize(datetime(year, month, day, hour, minute))
-    utc_dt = local_dt.astimezone(pytz.utc)
-    
-    jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
+    # Timezone Logic for Modern Dates, UTC for Ancient Dates
+    if year > 1800:
+        tf = TimezoneFinder()
+        tz_name = tf.timezone_at(lng=lon, lat=lat)
+        timezone = pytz.timezone(tz_name or "UTC")
+        local_dt = timezone.localize(datetime(year, month, day, hour, minute))
+        utc_dt = local_dt.astimezone(pytz.utc)
+        jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
+    else:
+        # Ancient dates are calculated directly in UTC to avoid timezone ambiguity
+        jd_ut = swe.julday(year, month, day, hour + minute/60.0)
 
-    # True Lahiri Real-Sky Settings
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     swe.set_topo(lat, lon, 0)
 
-    # Ascendant Calculation
     res_h = swe.houses_ex(jd_ut, lat, lon, b'P', 0)
     ayan_corr = swe.get_ayanamsa_ut(jd_ut)
     asc_raw = (res_h[1][0] - ayan_corr) % 360
@@ -125,7 +125,6 @@ def calculate_full_map(year, month, day, hour, minute, lat, lon):
     asc_deg = asc_raw % 30
     asc_nak_data = get_nakshatra_data(asc_sign, asc_deg)
     
-    # Council Members (Planets)
     planets = [(swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"), 
                (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), (swe.SATURN, "Saturn"), (swe.MEAN_NODE, "Rahu")]
     birth_planets = [get_planet_data(jd_ut, p_id, p_name) for p_id, p_name in planets]
@@ -140,23 +139,22 @@ def calculate_full_map(year, month, day, hour, minute, lat, lon):
 
 # --- GLOBAL INTERFACE ---
 st.set_page_config(page_title="Soul Map Sanctuary", layout="wide", page_icon="✨")
-st.title("✨ The Real-Sky Soul Map: Global Edition")
+st.title("✨ The Real-Sky Soul Map: Eternal Edition")
 
-# Updated label to welcome international clients
-address = st.text_input("Birth Location (City, State/Province, Country)", "Houston, Texas, USA")
-client_name = st.text_input("Client/Seeker Name", "Leah G")
+address = st.text_input("Birth Location (City, Country)", "Houston, USA")
+client_name = st.text_input("Name", "Leah G")
 
-geolocator = Nominatim(user_agent="soul_map_global_engine")
+geolocator = Nominatim(user_agent="soul_map_eternal")
 location = geolocator.geocode(address)
 
 if location:
     col1, col2 = st.columns(2)
     with col1:
-        # Timeless range for grandchildren and ancestors
+        # Calendar Range: Year 1 to 2100
         b_date = st.date_input(
             "Birth Date", 
             value=datetime(1969, 9, 24),
-            min_value=datetime(1900, 1, 1),
+            min_value=datetime(1, 1, 1),
             max_value=datetime(2100, 12, 31)
         )
     with col2:
@@ -168,7 +166,7 @@ if location:
             
             st.divider()
             st.header(f"✨ Soul Map for {client_name}")
-            st.metric("Ascendant (The Horizon)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
+            st.metric("Ascendant", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
             
             st.markdown(f"### The Call of {data['asc_nakshatra']}")
             st.info(data['asc_poem'])
@@ -183,7 +181,7 @@ if location:
                     with st.expander("Listen to the Medicine"):
                         st.write(p['poem'])
             
-            # Auto-calculate Ketu (opposite Rahu)
+            # Ketu Calculation
             rahu = data['birth_planets'][-1]
             signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
             ketu_sign_idx = (signs.index(rahu['sign']) + 6) % 12
@@ -198,7 +196,7 @@ if location:
                     st.write(ketu_nak['poem'])
 
             st.divider()
-            st.caption("Sidereal Lahiri Calculations | Automatic Timezone & Global Geocoding Enabled.")
+            st.caption("Universal Sidereal Calculations | Powered by Swiss Ephemeris.")
 
         except Exception as e:
             st.error(f"Engine calibration needed: {e}")
