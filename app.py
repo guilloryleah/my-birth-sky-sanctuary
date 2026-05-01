@@ -8,10 +8,8 @@ import pytz
 # --- 1. THE UNIVERSAL NAKSHATRA MEDICINE (POEMS & PROTOCOLS) ---
 def get_nakshatra_medicine(nakshatra_name):
     """
-    Returns the Astrology, Yoga, and Ayurveda for each Nakshatra.
-    These are the foundational 'poems' for each of the 27 stations.
+    Foundational 'poems' and holistic protocols for the 27 stations.
     """
-    
     medicine_vault = {
         "Ashwini": {
             "astrology": "The 'Swift Lightning.' Impulsive and moves faster than the mind. It creates 'head-heat' and sudden bursts of energy that can lead to burnout.",
@@ -149,15 +147,15 @@ def get_nakshatra_medicine(nakshatra_name):
             "ayurveda": "Psychological Peace. Use Sandalwood oil on the 'Third Eye' to bring peace to the soul."
         }
     }
-
     return medicine_vault.get(nakshatra_name, {
         "astrology": "Wisdom ripening...",
         "yoga": "Mindful Presence",
         "ayurveda": "Balance the elements."
     })
 
-# --- 2. NAKSHATRA MAPPING ---
+# --- 2. SIDEREAL CALCULATIONS ---
 def get_nakshatra_name(sign, degree):
+    # Mapping based on Lahiri sidereal logic
     if sign == "Aries":
         if degree < 13.333: return "Ashwini"
         elif degree < 26.666: return "Bharani"
@@ -208,7 +206,6 @@ def get_nakshatra_name(sign, degree):
         return "Revati"
     return "Unknown"
 
-# --- 3. EPHEMERIS CALCULATIONS ---
 def calculate_soul_map(year, month, day, hour, minute, lat, lon):
     tf = TimezoneFinder()
     tz_name = tf.timezone_at(lng=lon, lat=lat)
@@ -217,6 +214,7 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
     utc_dt = local_dt.astimezone(pytz.utc)
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
 
+    # Real-Sky / Lahiri Settings
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     swe.set_topo(lat, lon, 0)
     ayan_corr = swe.get_ayanamsa_ut(jd_ut)
@@ -260,45 +258,64 @@ st.title("✨ The Real-Sky Soul Map: Eternal Edition")
 
 with st.sidebar:
     st.header("Birth Calibration")
-    address = st.text_input("Birth Location", "Houston, USA")
+    seeker = st.text_input("Seeker Name", "Leah G")
     b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
-    seeker = st.text_input("Seeker Name", "Leah G")
-
-# Robust Geolocation logic
-geolocator = Nominatim(user_agent="my_birth_sky_sanctuary_leahg")
-location = None
-if address:
-    try:
-        location = geolocator.geocode(address, timeout=10)
-    except Exception as e:
-        st.error("The map service is currently busy. Please wait a moment and try again.")
-
-if location and st.button("Generate Medicine"):
-    data = calculate_soul_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, location.latitude, location.longitude)
-    
-    st.header(f"Soul Map: {seeker}")
-    st.subheader(f"Ascendant: {data['asc_deg']:.2f}° {data['asc_sign']} in {data['asc_nak']}")
-    
-    asc_med = get_nakshatra_medicine(data['asc_nak'])
-    with st.expander(f"Rising Soul Path: {data['asc_nak']}"):
-        st.markdown(f"**The Astrology:** {asc_med['astrology']}")
-        st.markdown(f"🧘 **Yoga:** {asc_med['yoga']}")
-        st.markdown(f"🍃 **Ayurveda:** {asc_med['ayurveda']}")
     
     st.divider()
+    address = st.text_input("Birth Location (City, Country)", "Houston, USA")
+    
+    with st.expander("Manual Coordinates (Fallback)"):
+        manual_lat = st.number_input("Latitude", value=0.0, format="%.4f")
+        manual_lon = st.number_input("Longitude", value=0.0, format="%.4f")
+        use_manual = st.checkbox("Use Manual Coordinates")
 
-    for p in data['planets']:
-        with st.expander(f"{p['name']} in {p['nakshatra']} ({p['sign']})"):
-            st.markdown(f"### The Astrology")
-            st.write(p['astrology'])
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("🧘 **Yoga Pose**")
-                st.info(p['yoga'])
-            with col2:
-                st.markdown("🍃 **Ayurvedic Alignment**")
-                st.success(p['ayurveda'])
+# Geolocation with safety fallback
+lat, lon = None, None
+if use_manual:
+    lat, lon = manual_lat, manual_lon
+elif address:
+    try:
+        geolocator = Nominatim(user_agent="birth_sky_sanctuary_final")
+        location = geolocator.geocode(address, timeout=10)
+        if location:
+            lat, lon = location.latitude, location.longitude
+        else:
+            st.sidebar.warning("Location not found.")
+    except Exception:
+        st.sidebar.error("Map service busy. Use Manual Coordinates.")
+
+if lat is not None and lon is not None:
+    if st.button("Generate Medicine"):
+        data = calculate_soul_map(b_date.year, b_date.month, b_date.day, 
+                                 b_time.hour, b_time.minute, lat, lon)
+        
+        st.header(f"Soul Map: {seeker}")
+        st.subheader(f"Ascendant: {data['asc_deg']:.2f}° {data['asc_sign']} in {data['asc_nak']}")
+        
+        # Rising Path Expansion
+        asc_med = get_nakshatra_medicine(data['asc_nak'])
+        with st.expander(f"Rising Soul Path: {data['asc_nak']}", expanded=True):
+            st.markdown(f"**The Astrology:** {asc_med['astrology']}")
+            st.markdown(f"🧘 **Yoga:** {asc_med['yoga']}")
+            st.markdown(f"🍃 **Ayurveda:** {asc_med['ayurveda']}")
+        
+        st.divider()
+
+        # Planet Details
+        for p in data['planets']:
+            with st.expander(f"{p['name']} in {p['nakshatra']} ({p['sign']})"):
+                st.markdown(f"### The Astrology")
+                st.write(p['astrology'])
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("🧘 **Yoga Pose**")
+                    st.info(p['yoga'])
+                with col2:
+                    st.markdown("🍃 **Ayurvedic Alignment**")
+                    st.success(p['ayurveda'])
+else:
+    st.info("Awaiting birth data in the sidebar...")
 
 st.caption("A sanctuary built on Real-Sky data and Holistic Wisdom.")
