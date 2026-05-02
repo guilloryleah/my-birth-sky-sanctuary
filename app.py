@@ -42,25 +42,31 @@ TEACHER_GUIDE = {
         "focus": "Pelvic Release & Creative Energy",
         "why": "Encourages patience during the 'crushing' or planting phase of growth.",
         "steps": ["Sit tall, soles of feet together.", "Length the spine on the inhale.", "Fold forward slowly on the exhale."]
+    },
+    "Child's Pose": {
+        "sanskrit": "Balasana",
+        "focus": "Third Eye & Surrender",
+        "why": "A pose of complete release to quiet the ego and listen to the soul.",
+        "steps": ["Kneel on the floor, big toes touching.", "Sit on your heels and separate your knees.", "Fold forward, resting forehead on the mat.", "Breathe into your back."]
     }
 }
 
-# --- 2. THE SOUL MAP REMEDY LIBRARY (Including Ayurveda & Ketu) ---
+# --- 2. THE SOUL MAP REMEDY LIBRARY ---
 def get_sacred_alignment(planet_name, nakshatra_name):
     library = {
         "Sun": {
             "Uttara Phalguni": {
                 "pose": "Bridge Pose", 
                 "focus": "Nervous System & Digestion", 
-                "ayurveda": "Eat warm, cooked root vegetables and practice oil pulling (Gandusha) each morning to ground your nervous system.",
-                "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a mission larger than your own name."
+                "ayurveda": "Eat warm, cooked root vegetables and practice oil pulling each morning to ground your nervous system.",
+                "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a purpose larger than your name."
             }
         },
         "Moon": {
             "Purva Bhadrapada": {
                 "pose": "Forearm Stand", 
                 "focus": "Perspective Shift", 
-                "ayurveda": "Prioritize cooling beverages like coconut water and use sandalwood oil on your temples before bed to calm the internal fire.",
+                "ayurveda": "Prioritize cooling beverages like coconut water and use sandalwood oil on your temples before bed.",
                 "poem": "The face you show the world is a mask; take it off and breathe. Do not fear the fire that burns away false identities."
             }
         },
@@ -68,8 +74,8 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Hasta": {
                 "pose": "Crow Pose", 
                 "focus": "Mental Precision", 
-                "ayurveda": "Minimize screen time before noon. Practice Nasya (nasal oiling) to clarify the mind and support sensory perception.",
-                "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of the smallest details."
+                "ayurveda": "Practice Nasya (nasal oiling) to clarify the mind and minimize screen time before noon.",
+                "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of small details."
             }
         },
         "Venus": {
@@ -84,32 +90,32 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Moola": {
                 "pose": "Downward-Facing Dog", 
                 "focus": "Psoas & Root Tension", 
-                "ayurveda": "Engage in daily brisk walking in nature. Use warming spices like ginger and turmeric to keep your internal 'agni' (fire) moving.",
-                "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of the pain."
+                "ayurveda": "Engage in daily brisk walking in nature and use warming spices like ginger and turmeric.",
+                "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of your pain."
             }
         },
         "Saturn": {
             "Bharani": {
                 "pose": "Bound Angle Pose", 
                 "focus": "Pelvic & Creative Patience", 
-                "ayurveda": "Ensure high fiber intake to support downward-moving energy (Apana Vayu). Sip warm CCF tea (Cumin, Coriander, Fennel) throughout the day.",
-                "poem": "Do not fear the weight of the tasks that pull you toward the earth. The seed must endure the dark before it becomes a tree."
+                "ayurveda": "Support downward energy flow with high fiber intake and warm CCF tea (Cumin, Coriander, Fennel).",
+                "poem": "Do not fear the weight of tasks that pull you toward the earth. The seed must endure the dark before it becomes a tree."
             }
         },
         "Ascendant": {
             "Rohini": {
                 "pose": "Stillness", 
                 "focus": "Earthing", 
-                "ayurveda": "Spend 10 minutes daily with bare feet on the earth. Favor sweet, juicy fruits like pears and grapes to nurture your vital essence.",
-                "poem": "Stop searching for meaning in the noise. Sink your feet into the red earth and listen to the pulse of the soil."
+                "ayurveda": "Spend 10 minutes daily with bare feet on the earth. Favor sweet, juicy fruits like pears and grapes.",
+                "poem": "Stop searching for meaning in the noise of the screen. Sink your feet into the red earth and listen to the pulse of the soil."
             }
         },
         "Ketu": {
             "General": {
                 "pose": "Child's Pose",
                 "focus": "Third Eye & Surrender",
-                "ayurveda": "Practice 'Mouna' (sacred silence) for 30 minutes daily. Use Frankincense or Myrrh during meditation to thin the veil.",
-                "poem": "Let go of the need to understand everything with the mind. You are the empty vessel that the divine wants to fill."
+                "ayurveda": "Practice 30 minutes of sacred silence (Mouna) daily. Use Frankincense or Myrrh during meditation.",
+                "poem": "Let go of the need to understand with the mind. You are the empty vessel that the divine wants to fill."
             }
         }
     }
@@ -132,14 +138,25 @@ def get_sidereal_sign(degree):
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
-# EDUCATIONAL POEM
+# THE FULL EDUCATIONAL POEM
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
+*A little secret for the curious soul...*
+
 You might notice your signs look a bit 'out of line,'  
 Compared to the horoscopes you read all the time.  
 See, the Earth is a dancer, a spinning glass top,  
-But she **wobbles** a bit, and she never will stop!  
+But she **wobbles** a bit, and she never will stop!
+
+Over thousands of years, she’s tilted her head,  
+The stars shifted left while the calendar sped.  
+While others look back at where stars *used* to be,  
 We look at the sky as it is—**actually.**
+
+So if you've moved back by a sign or a space,  
+Don't worry, dear heart, you're in the right place.  
+It’s not a mistake, or a glitch, or a lie—  
+It’s just how we dance with the **real, living sky.**
 """)
 
 with st.sidebar:
@@ -148,7 +165,9 @@ with st.sidebar:
     b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     st.subheader("Birth Location")
-    city, state, country = st.text_input("City", "Houston"), st.text_input("State", "Texas"), st.text_input("Country", "USA")
+    city = st.text_input("City", "Houston")
+    state = st.text_input("State", "Texas")
+    country = st.text_input("Country", "USA")
 
 if st.button("Unveil My Remedy"):
     full_loc = f"{city}, {state}, {country}"
@@ -166,19 +185,28 @@ if st.button("Unveil My Remedy"):
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         ayan = swe.get_ayanamsa_ut(jd)
         
-        # Ascendant
+        # Calculate Ascendant
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
         asc_deg = (res_h[1][0] - ayan) % 360
-        asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
+        asc_nak = get_nakshatra(asc_deg)
+        asc_sign = get_sidereal_sign(asc_deg)
         asc_med = get_sacred_alignment("Ascendant", "Rohini")
         
         st.header(f"The Soul Map of {name}")
-        st.subheader(f"🏺 Foundational Container: {asc_nak} in {asc_sign}")
+        
+        # --- ASCENDANT DISPLAY ---
+        st.subheader(f"🏺 Foundational Container (Ascendant)")
+        st.markdown(f"### **{asc_nak} in {asc_sign}**")
         st.info(f"*{asc_med['poem']}*")
         st.write(f"🌿 **Ayurveda Ritual:** {asc_med['ayurveda']}")
         st.divider()
 
-        planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS), ("Rahu", swe.MEAN_NODE)]
+        # PLANETARY ALIGNMENTS
+        planets = [
+            ("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), 
+            ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS),
+            ("Rahu", swe.MEAN_NODE)
+        ]
         
         for p_name, p_id in planets:
             res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
@@ -207,5 +235,11 @@ if st.button("Unveil My Remedy"):
                     st.markdown(f"*{k_med['poem']}*")
                     st.write(f"🧘 **Yoga Pose:** {k_med['pose']} | 📍 **Focus:** {k_med['focus']}")
                     st.write(f"🌿 **Ayurveda Ritual:** {k_med['ayurveda']}")
+                    if k_med['pose'] in TEACHER_GUIDE:
+                        with st.expander("📖 Guided Practice Steps"):
+                            for step in TEACHER_GUIDE[k_med['pose']]['steps']: st.write(f"• {step}")
+        st.divider()
+    else:
+        st.error("Location not found.")
 
 st.caption("Sidereal Lahiri System | The Soul Map Remedy")
