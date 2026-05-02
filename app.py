@@ -58,7 +58,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Uttara Phalguni": {
                 "pose": "Bridge Pose", 
                 "focus": "Nervous System & Digestion", 
-                "ayurveda": "Eat warm, cooked root vegetables and practice oil pulling each morning to ground your nervous system.",
+                "ayurveda": "Eat warm, cooked root vegetables and practice oil pulling each morning.",
                 "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a purpose larger than your name."
             }
         },
@@ -66,7 +66,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Purva Bhadrapada": {
                 "pose": "Forearm Stand", 
                 "focus": "Perspective Shift", 
-                "ayurveda": "Prioritize cooling beverages like coconut water and use sandalwood oil on your temples before bed.",
+                "ayurveda": "Prioritize cooling beverages and sandalwood oil on your temples before bed.",
                 "poem": "The face you show the world is a mask; take it off and breathe. Do not fear the fire that burns away false identities."
             }
         },
@@ -74,7 +74,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Hasta": {
                 "pose": "Crow Pose", 
                 "focus": "Mental Precision", 
-                "ayurveda": "Practice Nasya (nasal oiling) to clarify the mind and minimize screen time before noon.",
+                "ayurveda": "Practice Nasya (nasal oiling) and minimize screen time before noon.",
                 "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of small details."
             }
         },
@@ -82,7 +82,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Magha": {
                 "pose": "Mountain Pose", 
                 "focus": "Heart Center & Lineage", 
-                "ayurveda": "Perform Abhyanga (self-massage) with warm sesame oil to honor your physical vessel and ancestors.",
+                "ayurveda": "Perform Abhyanga (self-massage) with warm sesame oil to honor your lineage.",
                 "poem": "You are the living prayer of those who came before you. Honor your bloodline by breaking the old cycles."
             }
         },
@@ -90,7 +90,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Moola": {
                 "pose": "Downward-Facing Dog", 
                 "focus": "Psoas & Root Tension", 
-                "ayurveda": "Engage in daily brisk walking in nature and use warming spices like ginger and turmeric.",
+                "ayurveda": "Engage in daily brisk walking in nature and use warming spices like ginger.",
                 "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of your pain."
             }
         },
@@ -98,7 +98,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Bharani": {
                 "pose": "Bound Angle Pose", 
                 "focus": "Pelvic & Creative Patience", 
-                "ayurveda": "Support downward energy flow with high fiber intake and warm CCF tea (Cumin, Coriander, Fennel).",
+                "ayurveda": "Support downward energy with high fiber intake and warm CCF tea.",
                 "poem": "Do not fear the weight of tasks that pull you toward the earth. The seed must endure the dark before it becomes a tree."
             }
         },
@@ -106,15 +106,15 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Rohini": {
                 "pose": "Stillness", 
                 "focus": "Earthing", 
-                "ayurveda": "Spend 10 minutes daily with bare feet on the earth. Favor sweet, juicy fruits like pears and grapes.",
-                "poem": "Stop searching for meaning in the noise of the screen. Sink your feet into the red earth and listen to the pulse of the soil."
+                "ayurveda": "Spend 10 minutes daily with bare feet on the earth. Favor juicy fruits like pears and grapes.",
+                "poem": "Stop searching for meaning in the noise. Sink your feet into the red earth and listen to the pulse of the soil."
             }
         },
         "Ketu": {
             "General": {
                 "pose": "Child's Pose",
                 "focus": "Third Eye & Surrender",
-                "ayurveda": "Practice 30 minutes of sacred silence (Mouna) daily. Use Frankincense or Myrrh during meditation.",
+                "ayurveda": "Practice 30 minutes of sacred silence (Mouna) daily. Use Frankincense during meditation.",
                 "poem": "Let go of the need to understand with the mind. You are the empty vessel that the divine wants to fill."
             }
         }
@@ -123,7 +123,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
     if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, library["Moon"]["Purva Bhadrapada"])
     if planet_name == "Ketu": return library["Ketu"]["General"]
     
-    return library.get(planet_name, {}).get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "ayurveda": "Breathe deeply and sip warm water.", "poem": "Breathe into the silence..."})
+    return library.get(planet_name, {}).get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "ayurveda": "Breathe deeply.", "poem": "Breathe into the silence..."})
 
 # --- 3. THE CALCULATOR ENGINE ---
 def get_nakshatra(degree):
@@ -138,7 +138,7 @@ def get_sidereal_sign(degree):
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
-# THE FULL EDUCATIONAL POEM
+# THE EDUCATIONAL POEM
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
 *A little secret for the curious soul...*
@@ -165,9 +165,7 @@ with st.sidebar:
     b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     st.subheader("Birth Location")
-    city = st.text_input("City", "Houston")
-    state = st.text_input("State", "Texas")
-    country = st.text_input("Country", "USA")
+    city, state, country = st.text_input("City", "Houston"), st.text_input("State", "Texas"), st.text_input("Country", "USA")
 
 if st.button("Unveil My Remedy"):
     full_loc = f"{city}, {state}, {country}"
@@ -188,13 +186,12 @@ if st.button("Unveil My Remedy"):
         # Calculate Ascendant
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
         asc_deg = (res_h[1][0] - ayan) % 360
-        asc_nak = get_nakshatra(asc_deg)
-        asc_sign = get_sidereal_sign(asc_deg)
+        asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
         asc_med = get_sacred_alignment("Ascendant", "Rohini")
         
         st.header(f"The Soul Map of {name}")
         
-        # --- ASCENDANT DISPLAY ---
+        # ASCENDANT DISPLAY
         st.subheader(f"🏺 Foundational Container (Ascendant)")
         st.markdown(f"### **{asc_nak} in {asc_sign}**")
         st.info(f"*{asc_med['poem']}*")
@@ -202,11 +199,7 @@ if st.button("Unveil My Remedy"):
         st.divider()
 
         # PLANETARY ALIGNMENTS
-        planets = [
-            ("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), 
-            ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS),
-            ("Rahu", swe.MEAN_NODE)
-        ]
+        planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS), ("Rahu", swe.MEAN_NODE)]
         
         for p_name, p_id in planets:
             res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
@@ -241,5 +234,16 @@ if st.button("Unveil My Remedy"):
         st.divider()
     else:
         st.error("Location not found.")
+
+# --- 5. THE SACRED DISCLAIMER ---
+st.markdown("""
+---
+### ⚖️ A Note on Your Journey
+The suggestions provided in this Soul Map—including the yoga poses, Ayurvedic rituals, and spiritual poems—are intended for **educational and spiritual alignment purposes only**. 
+
+I am an **astrologer and educator**, not a medical doctor or licensed healthcare professional. These remedies are not meant to diagnose, treat, or cure any physical or mental condition. Please consult with your physician before beginning any new exercise or dietary routine. 
+
+*Honor your body, trust your intuition, and move with grace.*
+""")
 
 st.caption("Sidereal Lahiri System | The Soul Map Remedy")
