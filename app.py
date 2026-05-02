@@ -41,6 +41,7 @@ def get_nakshatra_data(sign, degree):
     }
 
     name = "Unknown"
+    # Sidereal degree range logic
     if sign == "Aries":
         if degree < 13.333: name = "Ashwini"
         elif degree < 26.666: name = "Bharani"
@@ -90,9 +91,9 @@ def get_nakshatra_data(sign, degree):
         elif degree < 16.666: name = "Uttara Bhadrapada"
         else: name = "Revati"
     
-    return {"name": name, "poem": poems.get(name, "Medicine is still being prepared for this star.")}
+    return {"name": name, "poem": poems.get(name, "Medicine is ripening.")}
 
-# --- THE CALCULATION ENGINE ---
+# --- CALCULATION ENGINE ---
 def get_planet_data(jd_ut, planet_id, planet_name):
     res, ret = swe.calc_ut(jd_ut, planet_id, swe.FLG_SIDEREAL)
     long = res[0]
@@ -103,7 +104,7 @@ def get_planet_data(jd_ut, planet_id, planet_name):
     return {"name": planet_name, "deg": degree, "sign": sign, "nakshatra": nak_data['name'], "poem": nak_data['poem']}
 
 def calculate_full_map(year, month, day, hour, minute, lat, lon):
-    # Automatic Timezone Engine
+    # Automatic Timezone Detection
     tf = TimezoneFinder()
     tz_name = tf.timezone_at(lng=lon, lat=lat)
     timezone = pytz.timezone(tz_name)
@@ -112,7 +113,7 @@ def calculate_full_map(year, month, day, hour, minute, lat, lon):
     
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
 
-    # Real-Sky Configuration (Lahiri)
+    # True Lahiri Real-Sky Settings
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
     swe.set_topo(lat, lon, 0)
 
@@ -126,7 +127,7 @@ def calculate_full_map(year, month, day, hour, minute, lat, lon):
     asc_deg = asc_raw % 30
     asc_nak_data = get_nakshatra_data(asc_sign, asc_deg)
     
-    # Council Calculation
+    # Council Members (Planets)
     planets = [(swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"), 
                (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), (swe.SATURN, "Saturn"), (swe.MEAN_NODE, "Rahu")]
     birth_planets = [get_planet_data(jd_ut, p_id, p_name) for p_id, p_name in planets]
@@ -139,20 +140,21 @@ def calculate_full_map(year, month, day, hour, minute, lat, lon):
         "birth_planets": birth_planets
     }
 
-# --- THE INTERFACE ---
-st.set_page_config(page_title="The Soul Map", layout="wide", page_icon="✨")
-st.title("✨ The Real-Sky Soul Map: Full Edition")
+# --- GLOBAL INTERFACE ---
+st.set_page_config(page_title="Soul Map Sanctuary", layout="wide", page_icon="✨")
+st.title("✨ The Real-Sky Soul Map: Global Edition")
 
-address = st.text_input("Location (Birth City)", "Houston, Texas")
-client_name = st.text_input("Name", "Leah G")
+# Updated label to welcome international clients
+address = st.text_input("Birth Location (City, State/Province, Country)", "Houston, Texas, USA")
+client_name = st.text_input("Client/Seeker Name", "Leah G")
 
-geolocator = Nominatim(user_agent="soul_map_sanctuary_final")
+geolocator = Nominatim(user_agent="soul_map_global_engine")
 location = geolocator.geocode(address)
 
 if location:
     col1, col2 = st.columns(2)
     with col1:
-        # Timeless Calendar Range
+        # Timeless range for grandchildren and ancestors
         b_date = st.date_input(
             "Birth Date", 
             value=datetime(1969, 9, 24),
@@ -162,49 +164,47 @@ if location:
     with col2:
         b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
 
-    if st.button("Generate Full Soul Map"):
+    if st.button("Generate Soul Map"):
         try:
             data = calculate_full_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, location.latitude, location.longitude)
             
-            # Header Section
             st.divider()
-            st.header(f"✨ {client_name}'s Soul Map")
-            st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
+            st.header(f"✨ Soul Map for {client_name}")
+            st.metric("Ascendant (The Horizon)", f"{data['asc_deg']:.2f}° {data['asc_sign']}")
             
-            # The Foundation Medicine
             st.markdown(f"### The Call of {data['asc_nakshatra']}")
             st.info(data['asc_poem'])
             
-            # The Council Section
-            st.subheader("The Inner Council")
+            st.subheader("The Planetary Council")
             cols = st.columns(4)
             for i, p in enumerate(data['birth_planets']):
                 with cols[i % 4]:
                     st.write(f"**{p['name']}**")
                     st.write(f"{p['deg']:.2f}° {p['sign']}")
                     st.caption(f"*{p['nakshatra']}*")
-                    with st.expander("Read the Medicine"):
+                    with st.expander("Listen to the Medicine"):
                         st.write(p['poem'])
             
-            # Ketu Calculation (180 degrees from Rahu)
+            # Auto-calculate Ketu (opposite Rahu)
             rahu = data['birth_planets'][-1]
             signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
             ketu_sign_idx = (signs.index(rahu['sign']) + 6) % 12
             ketu_sign = signs[ketu_sign_idx]
             ketu_nak = get_nakshatra_data(ketu_sign, rahu['deg'])
             
-            with cols[0]: # Place Ketu in the next available slot
+            with cols[0]: 
                 st.write(f"**Ketu**")
                 st.write(f"{rahu['deg']:.2f}° {ketu_sign}")
                 st.caption(f"*{ketu_nak['name']}*")
-                with st.expander("Read the Medicine"):
+                with st.expander("Listen to the Medicine"):
                     st.write(ketu_nak['poem'])
 
             st.divider()
-            st.caption("Calculated using Automatic Timezone Detection, True Lahiri Sidereal, and Your Custom Nakshatra Poems.")
+            st.caption("Sidereal Lahiri Calculations | Automatic Timezone & Global Geocoding Enabled.")
 
         except Exception as e:
-            st.error(f"Calibration needed: {e}")
+            st.error(f"Engine calibration needed: {e}")
 else:
-    st.warning("Please enter a birth city to anchor the map.")
+    st.warning("Please provide a birth location to anchor the sky.")
+
 
