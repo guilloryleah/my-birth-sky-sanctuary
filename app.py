@@ -11,100 +11,113 @@ TEACHER_GUIDE = {
         "sanskrit": "Adho Mukha Svanasana",
         "focus": "Psoas Release (Deep Hip & Lower Back Connection)",
         "why": "Releases deep-seated tension and 'digs' to the root of physical discomfort.",
-        "steps": [
-            "Start on your hands and knees, wrists under shoulders.",
-            "Tuck your toes and lift your hips toward the ceiling to form an 'V' shape.",
-            "Press firmly through your palms and knuckles.",
-            "Pedal your feet to stretch the calves and hips.",
-            "Exhale deeply, letting your head hang heavy to release the neck."
-        ]
+        "steps": ["Start on your hands and knees.", "Tuck your toes and lift your hips high.", "Press through your palms.", "Pedal your feet to stretch the calves.", "Let your head hang heavy."]
     },
     "Mountain Pose": {
         "sanskrit": "Tadasana",
         "focus": "Heart Center & Posture",
         "why": "Aligns the spine to honor your lineage and stand in your own authority.",
-        "steps": [
-            "Stand with big toes touching and heels slightly apart.",
-            "Root into the earth by spreading your toes wide.",
-            "Roll your shoulders back and down.",
-            "Keep your arms at your sides, palms facing forward.",
-            "Lengthen the crown of your head toward the sky."
-        ]
+        "steps": ["Stand tall with feet rooted.", "Roll your shoulders back and down.", "Palms face forward.", "Reach the crown of your head to the sky."]
     },
     "Bridge Pose": {
         "sanskrit": "Setu Bandhasana",
         "focus": "Nervous System & Digestion",
         "why": "Opens the belly and chest to calm the 'fight or flight' response.",
-        "steps": [
-            "Lie on your back with knees bent and feet flat on the floor.",
-            "Press your feet into the floor and lift your hips up.",
-            "Interlace your hands under your back if comfortable.",
-            "Hold for 5 breaths, then slowly roll your spine back down."
-        ]
+        "steps": ["Lie on your back, knees bent.", "Press feet down and lift your hips.", "Interlace hands beneath you if possible.", "Breathe into the belly."]
     },
     "Crow Pose": {
         "sanskrit": "Bakasana",
         "focus": "Mental Focus & Wrist Strength",
         "why": "Teaches the mastery of small details and finding balance.",
-        "steps": [
-            "Come into a low squat with feet together and knees wide.",
-            "Place your hands flat on the floor, shoulder-width apart.",
-            "Place your knees against the backs of your upper arms.",
-            "Lean forward, shifting weight onto your hands, and lift your feet."
-        ]
+        "steps": ["Squat low, hands flat.", "Place knees against upper arms.", "Lean forward, shifting weight.", "Lift feet one at a time."]
     },
     "Forearm Stand": {
         "sanskrit": "Pincha Mayurasana",
         "focus": "Perspective Shift & Blood Flow",
         "why": "An inversion to help you see past the 'mask' and find internal strength.",
-        "steps": [
-            "Start on your forearms and knees, elbows shoulder-width apart.",
-            "Lift your hips and walk your feet toward your elbows.",
-            "Gaze between your forearms and lift one leg toward the sky.",
-            "Practice small hops to find vertical balance."
-        ]
+        "steps": ["Forearms down, elbows shoulder-width.", "Lift hips and walk feet in.", "Lift one leg, then the other.", "Gaze between your arms."]
     },
     "Bound Angle Pose": {
         "sanskrit": "Baddha Konasana",
         "focus": "Pelvic Release & Creative Energy",
         "why": "Encourages patience during the 'crushing' or planting phase of growth.",
-        "steps": [
-            "Sit tall and bring the soles of your feet together.",
-            "Inhale to lengthen your spine.",
-            "Exhale and slowly fold forward from the hips.",
-            "Breathe into the inner thighs and lower back."
-        ]
+        "steps": ["Sit tall, soles of feet together.", "Length the spine on the inhale.", "Fold forward slowly on the exhale."]
     }
 }
 
-# --- 2. THE SOUL MAP REMEDY LIBRARY ---
+# --- 2. THE SOUL MAP REMEDY LIBRARY (Including Ayurveda & Ketu) ---
 def get_sacred_alignment(planet_name, nakshatra_name):
     library = {
         "Sun": {
-            "Uttara Phalguni": {"pose": "Bridge Pose", "focus": "Nervous System & Digestion", "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a purpose that is larger than your own name."}
+            "Uttara Phalguni": {
+                "pose": "Bridge Pose", 
+                "focus": "Nervous System & Digestion", 
+                "ayurveda": "Eat warm, cooked root vegetables and practice oil pulling (Gandusha) each morning to ground your nervous system.",
+                "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a mission larger than your own name."
+            }
         },
         "Moon": {
-            "Purva Bhadrapada": {"pose": "Forearm Stand", "focus": "Perspective Shift", "poem": "The face you show the world is a mask; take it off and breathe. Do not be afraid of the fire that burns away your false identities."}
+            "Purva Bhadrapada": {
+                "pose": "Forearm Stand", 
+                "focus": "Perspective Shift", 
+                "ayurveda": "Prioritize cooling beverages like coconut water and use sandalwood oil on your temples before bed to calm the internal fire.",
+                "poem": "The face you show the world is a mask; take it off and breathe. Do not fear the fire that burns away false identities."
+            }
         },
         "Mercury": {
-            "Hasta": {"pose": "Crow Pose", "focus": "Mental Precision", "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of the smallest details."}
+            "Hasta": {
+                "pose": "Crow Pose", 
+                "focus": "Mental Precision", 
+                "ayurveda": "Minimize screen time before noon. Practice Nasya (nasal oiling) to clarify the mind and support sensory perception.",
+                "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of the smallest details."
+            }
         },
         "Venus": {
-            "Magha": {"pose": "Mountain Pose", "focus": "Heart Center & Lineage", "poem": "You are the living prayer of those who came before you. Honor your bloodline by being the one who finally breaks the old cycles."}
+            "Magha": {
+                "pose": "Mountain Pose", 
+                "focus": "Heart Center & Lineage", 
+                "ayurveda": "Perform Abhyanga (self-massage) with warm sesame oil to honor your physical vessel and ancestors.",
+                "poem": "You are the living prayer of those who came before you. Honor your bloodline by breaking the old cycles."
+            }
         },
         "Mars": {
-            "Moola": {"pose": "Downward-Facing Dog", "focus": "Psoas & Root Tension", "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of your pain and pull it out."}
+            "Moola": {
+                "pose": "Downward-Facing Dog", 
+                "focus": "Psoas & Root Tension", 
+                "ayurveda": "Engage in daily brisk walking in nature. Use warming spices like ginger and turmeric to keep your internal 'agni' (fire) moving.",
+                "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of the pain."
+            }
         },
         "Saturn": {
-            "Bharani": {"pose": "Bound Angle Pose", "focus": "Pelvic & Creative Patience", "poem": "Do not fear the weight of the tasks that pull you toward the earth. The seed must endure the crushing dark before it becomes a tree."}
+            "Bharani": {
+                "pose": "Bound Angle Pose", 
+                "focus": "Pelvic & Creative Patience", 
+                "ayurveda": "Ensure high fiber intake to support downward-moving energy (Apana Vayu). Sip warm CCF tea (Cumin, Coriander, Fennel) throughout the day.",
+                "poem": "Do not fear the weight of the tasks that pull you toward the earth. The seed must endure the dark before it becomes a tree."
+            }
         },
         "Ascendant": {
-            "Rohini": {"pose": "Stillness", "focus": "Earthing", "poem": "Stop searching for meaning in the noise of the screen. Sink your bare feet into the red earth and listen to the pulse of the soil."}
+            "Rohini": {
+                "pose": "Stillness", 
+                "focus": "Earthing", 
+                "ayurveda": "Spend 10 minutes daily with bare feet on the earth. Favor sweet, juicy fruits like pears and grapes to nurture your vital essence.",
+                "poem": "Stop searching for meaning in the noise. Sink your feet into the red earth and listen to the pulse of the soil."
+            }
+        },
+        "Ketu": {
+            "General": {
+                "pose": "Child's Pose",
+                "focus": "Third Eye & Surrender",
+                "ayurveda": "Practice 'Mouna' (sacred silence) for 30 minutes daily. Use Frankincense or Myrrh during meditation to thin the veil.",
+                "poem": "Let go of the need to understand everything with the mind. You are the empty vessel that the divine wants to fill."
+            }
         }
     }
+    
     if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, library["Moon"]["Purva Bhadrapada"])
-    if planet_name == "Ketu": return library["Sun"].get(nakshatra_name, library["Sun"]["Uttara Phalguni"])
-    return library.get(planet_name, {}).get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "poem": "Breathe into the silence..."})
+    if planet_name == "Ketu": return library["Ketu"]["General"]
+    
+    return library.get(planet_name, {}).get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "ayurveda": "Breathe deeply and sip warm water.", "poem": "Breathe into the silence..."})
 
 # --- 3. THE CALCULATOR ENGINE ---
 def get_nakshatra(degree):
@@ -119,25 +132,14 @@ def get_sidereal_sign(degree):
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
-# THE EDUCATIONAL POEM
+# EDUCATIONAL POEM
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
-*A little secret for the curious soul...*
-
 You might notice your signs look a bit 'out of line,'  
 Compared to the horoscopes you read all the time.  
 See, the Earth is a dancer, a spinning glass top,  
-But she **wobbles** a bit, and she never will stop!
-
-Over thousands of years, she’s tilted her head,  
-The stars shifted left while the calendar sped.  
-While others look back at where stars *used* to be,  
+But she **wobbles** a bit, and she never will stop!  
 We look at the sky as it is—**actually.**
-
-So if you've moved back by a sign or a space,  
-Don't worry, dear heart, you're in the right place.  
-It’s not a mistake, or a glitch, or a lie—  
-It’s just how we dance with the **real, living sky.**
 """)
 
 with st.sidebar:
@@ -145,11 +147,8 @@ with st.sidebar:
     name = st.text_input("Name", "Leah")
     b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
-    
     st.subheader("Birth Location")
-    city = st.text_input("City", "Houston")
-    state = st.text_input("State", "Texas")
-    country = st.text_input("Country", "USA")
+    city, state, country = st.text_input("City", "Houston"), st.text_input("State", "Texas"), st.text_input("Country", "USA")
 
 if st.button("Unveil My Remedy"):
     full_loc = f"{city}, {state}, {country}"
@@ -167,60 +166,46 @@ if st.button("Unveil My Remedy"):
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         ayan = swe.get_ayanamsa_ut(jd)
         
-        # Calculate Ascendant
+        # Ascendant
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
         asc_deg = (res_h[1][0] - ayan) % 360
-        asc_nak = get_nakshatra(asc_deg)
-        asc_sign = get_sidereal_sign(asc_deg)
+        asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
+        asc_med = get_sacred_alignment("Ascendant", "Rohini")
         
         st.header(f"The Soul Map of {name}")
-        
-        # ASCENDANT SECTION
-        with st.container():
-            st.subheader(f"🏺 Foundational Container (Ascendant)")
-            st.write(f"**{asc_nak} in {asc_sign}**")
-            st.info(f"*{get_sacred_alignment('Ascendant', 'Rohini')['poem']}*")
-            st.divider()
+        st.subheader(f"🏺 Foundational Container: {asc_nak} in {asc_sign}")
+        st.info(f"*{asc_med['poem']}*")
+        st.write(f"🌿 **Ayurveda Ritual:** {asc_med['ayurveda']}")
+        st.divider()
 
-        # PLANETARY ALIGNMENTS (Including Rahu/Ketu)
         planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS), ("Rahu", swe.MEAN_NODE)]
         
         for p_name, p_id in planets:
             res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
             p_deg = res[0]
-            p_nak = get_nakshatra(p_deg)
-            p_sign = get_sidereal_sign(p_deg)
+            p_nak, p_sign = get_nakshatra(p_deg), get_sidereal_sign(p_deg)
             
-            # Manual Overrides for accuracy
+            # Known Placements Overrides
             if p_name == "Sun": p_nak = "Uttara Phalguni"
             if p_name == "Moon": p_nak = "Purva Bhadrapada"
             if p_name == "Saturn": p_nak = "Bharani"
             
             med = get_sacred_alignment(p_name, p_nak)
-            
             with st.expander(f"✨ {p_name} Alignment: {p_nak} in {p_sign}", expanded=True):
                 st.markdown(f"*{med['poem']}*")
-                st.write(f"🧘 **Yoga Pose:** {med['pose']}")
-                st.write(f"📍 **Body Focus:** {med['focus']}")
-                
+                st.write(f"🧘 **Yoga Pose:** {med['pose']} | 📍 **Focus:** {med['focus']}")
+                st.write(f"🌿 **Ayurveda Ritual:** {med['ayurveda']}")
                 if med['pose'] in TEACHER_GUIDE:
-                    with st.expander(f"📖 Guided Practice: {med['pose']}"):
-                        st.write(f"**Sanskrit:** {TEACHER_GUIDE[med['pose']]['sanskrit']}")
-                        st.write(f"**Why:** {TEACHER_GUIDE[med['pose']]['why']}")
-                        for step in TEACHER_GUIDE[med['pose']]['steps']:
-                            st.write(f"• {step}")
+                    with st.expander("📖 Guided Practice Steps"):
+                        for step in TEACHER_GUIDE[med['pose']]['steps']: st.write(f"• {step}")
             
             if p_name == "Rahu":
                 k_deg = (p_deg + 180) % 360
-                k_nak = get_nakshatra(k_deg)
-                k_sign = get_sidereal_sign(k_deg)
+                k_nak, k_sign = get_nakshatra(k_deg), get_sidereal_sign(k_deg)
                 k_med = get_sacred_alignment("Ketu", k_nak)
                 with st.expander(f"✨ Ketu Alignment: {k_nak} in {k_sign}", expanded=True):
                     st.markdown(f"*{k_med['poem']}*")
-                    st.write(f"🧘 **Yoga Pose:** {k_med['pose']}")
-                    st.write(f"📍 **Body Focus:** {k_med['focus']}")
-        st.divider()
-    else:
-        st.error("Location not found.")
+                    st.write(f"🧘 **Yoga Pose:** {k_med['pose']} | 📍 **Focus:** {k_med['focus']}")
+                    st.write(f"🌿 **Ayurveda Ritual:** {k_med['ayurveda']}")
 
 st.caption("Sidereal Lahiri System | The Soul Map Remedy")
