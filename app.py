@@ -41,16 +41,16 @@ TEACHER_GUIDE = {
     }
 }
 
-# --- 2. THE EXPANDED REMEDY LIBRARY ---
+# --- 2. THE REMEDY LIBRARY ---
 def get_sacred_alignment(planet_name, nakshatra, sign):
-    # Guidance includes Danny's and your verified placements
     library = {
         "Sun": {
             "Taurus": {"pose": "Mountain Pose", "poem": "Root into the fertile valley of your worth.", "ayurveda": "Use grounding oils like Vetiver."},
             "Uttara Phalguni": {"pose": "Bridge Pose", "poem": "The world is a mirror of your kindness.", "ayurveda": "Eat warm, cooked root vegetables."}
         },
         "Moon": {
-            "Pisces": {"pose": "Child's Pose", "poem": "You are the ocean, not the wave.", "ayurveda": "Warm baths with sea salt."}
+            "Pisces": {"pose": "Child's Pose", "poem": "You are the ocean, not the wave.", "ayurveda": "Warm baths with sea salt."},
+            "Aquarius": {"pose": "Warrior II", "poem": "The water bearer pours wisdom into the void.", "ayurveda": "Stay hydrated with infused waters."}
         },
         "Mercury": {
             "Aries": {"pose": "Warrior I", "poem": "Speak with the sharpness of a needle.", "ayurveda": "Minimize screen time."}
@@ -62,10 +62,12 @@ def get_sacred_alignment(planet_name, nakshatra, sign):
             "Gemini": {"pose": "Triangle Pose", "poem": "Your strength is the agility of your mind.", "ayurveda": "Sip ginger tea."}
         },
         "Saturn": {
-            "Aries": {"pose": "Warrior II", "poem": "Discipline is the bridge to the flame.", "ayurveda": "Warm grounding soups."}
+            "Aries": {"pose": "Warrior II", "poem": "Discipline is the bridge to the flame.", "ayurveda": "Warm grounding soups."},
+            "Scorpio": {"pose": "Downward-Facing Dog", "poem": "Transform the shadows into steady earth.", "ayurveda": "Deep tissue massage."}
         },
         "Ascendant": {
-            "Rohini": {"pose": "Stillness", "poem": "Sink your feet into the red earth.", "ayurveda": "Bare feet on the soil."}
+            "Rohini": {"pose": "Stillness", "poem": "Sink your feet into the red earth.", "ayurveda": "Bare feet on the soil."},
+            "Taurus": {"pose": "Mountain Pose", "poem": "Stable as the mountain, quiet as the field.", "ayurveda": "Warm sesame oil application."}
         }
     }
     
@@ -76,7 +78,7 @@ def get_sacred_alignment(planet_name, nakshatra, sign):
         return match
     return {
         "pose": "Child's Pose",
-        "poem": f"The stars whisper of {nakshatra}. Find your center.",
+        "poem": f"The stars whisper of {nakshatra or sign}. Find your center.",
         "ayurveda": "Drink warm water and stay in silence."
     }
 
@@ -120,7 +122,7 @@ st.markdown("""
 with st.sidebar:
     st.header("Birth Details")
     target_name = st.text_input("Name", "Leah")
-    # Date range now removed to accommodate Danny and all others
+    # THE FIX: min/max values removed for Danny
     b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     
@@ -143,10 +145,10 @@ if st.button("Unveil My Remedy"):
         
         jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
         
-        # ACTIVATE SIDEREAL CALCULATION
+        # Sidereal Lahiri Setup
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         
-        # HOUSE CALCULATION (ASCENDANT)
+        # Ascendant calculation with proper Sidereal Flag
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', swe.FLG_SIDEREAL)
         asc_deg = res_h[0][0] 
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
@@ -159,7 +161,7 @@ if st.button("Unveil My Remedy"):
         st.write(f"🌿 **Ayurveda:** {med['ayurveda']}")
         st.divider()
 
-        # PLANETARY CALCULATIONS
+        # Planet calculation
         planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS)]
         
         for p_name, p_id in planets:
@@ -177,7 +179,6 @@ if st.button("Unveil My Remedy"):
     else:
         st.error("Location not found.")
 
-# MEDICAL DISCLAIMER
 st.markdown("""
 ---
 ### ⚖️ A Note on Your Journey
