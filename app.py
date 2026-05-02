@@ -9,50 +9,76 @@ import pytz
 TEACHER_GUIDE = {
     "Downward-Facing Dog": {
         "sanskrit": "Adho Mukha Svanasana",
-        "focus": "Psoas Release",
-        "steps": ["Start on hands and knees.", "Lift hips high, pressing through palms.", "Let the head hang heavy."]
+        "steps": ["Start on hands and knees.", "Lift hips high.", "Press through palms."]
     },
     "Mountain Pose": {
         "sanskrit": "Tadasana",
-        "focus": "Heart Center & Grounding",
-        "steps": ["Stand tall with feet rooted.", "Roll shoulders back.", "Reach the crown of head to the sky."]
-    },
-    "Bridge Pose": {
-        "sanskrit": "Setu Bandhasana",
-        "focus": "Nervous System & Digestion",
-        "steps": ["Lie on your back, knees bent.", "Press feet down and lift your hips.", "Interlace hands beneath you.", "Breathe into the belly."]
+        "steps": ["Stand tall.", "Root feet.", "Reach crown high."]
     },
     "Child's Pose": {
         "sanskrit": "Balasana",
-        "focus": "Surrender",
-        "steps": ["Kneel, toes touching.", "Fold forward, resting forehead on the mat.", "Breathe into the back."]
+        "steps": ["Kneel and sit on heels.", "Fold forward.", "Rest forehead on mat."]
+    },
+    "Bridge Pose": {
+        "sanskrit": "Setu Bandhasana",
+        "steps": ["Lie on your back, knees bent.", "Press feet down and lift your hips.", "Interlace hands beneath you."]
+    },
+    "Warrior I": {
+        "sanskrit": "Virabhadrasana I",
+        "steps": ["Step one foot forward into a lunge.", "Square hips to the front.", "Reach arms toward the sky."]
+    },
+    "Warrior II": {
+        "sanskrit": "Virabhadrasana II",
+        "steps": ["Step feet wide apart.", "Turn one foot out 90 degrees.", "Stretch arms out parallel to the floor."]
+    },
+    "Triangle Pose": {
+        "sanskrit": "Trikonasana",
+        "steps": ["Feet wide, reach one hand to your shin or floor.", "Extend the other arm up.", "Keep the chest open."]
+    },
+    "Bound Angle Pose": {
+        "sanskrit": "Baddha Konasana",
+        "steps": ["Sit tall, soles of feet together.", "Length the spine.", "Fold forward slowly."]
     }
 }
 
-# --- 2. UNIVERSAL REMEDY LIBRARY ---
+# --- 2. THE EXPANDED REMEDY LIBRARY ---
 def get_sacred_alignment(planet_name, nakshatra, sign):
-    # Library based on your specified natal placements
+    # Library includes Danny's and Leah's verified placements
     library = {
-        "Sun": {"Taurus": {"pose": "Mountain Pose", "poem": "Root into the fertile valley of your worth.", "ayurveda": "Use grounding oils like Vetiver."}},
-        "Moon": {"Pisces": {"pose": "Child's Pose", "poem": "You are the ocean, not the wave.", "ayurveda": "Warm baths with sea salt."}},
-        "Mercury": {"Aries": {"pose": "Warrior I", "poem": "Speak with the sharpness of a needle and the intent of a healer.", "ayurveda": "Minimize screen time before noon."}},
-        "Venus": {"Taurus": {"pose": "Bound Angle Pose", "poem": "Beauty is found in the stillness of stone.", "ayurveda": "Favor sweet, juicy fruits."}},
-        "Mars": {"Gemini": {"pose": "Triangle Pose", "poem": "Your strength is the agility of your mind.", "ayurveda": "Sip ginger tea."}},
-        "Saturn": {"Aries": {"pose": "Warrior II", "poem": "Discipline is the bridge between the spark and the flame.", "ayurveda": "Warm, grounding soups."}},
-        "Ascendant": {"Rohini": {"pose": "Stillness", "poem": "Sink your feet into the red earth.", "ayurveda": "Bare feet on the soil for 10 minutes."}}
+        "Sun": {
+            "Taurus": {"pose": "Mountain Pose", "poem": "Root into the fertile valley of your worth.", "ayurveda": "Use grounding oils like Vetiver."},
+            "Uttara Phalguni": {"pose": "Bridge Pose", "poem": "The world is a mirror of your kindness.", "ayurveda": "Eat warm, cooked root vegetables."}
+        },
+        "Moon": {
+            "Pisces": {"pose": "Child's Pose", "poem": "You are the ocean, not the wave.", "ayurveda": "Warm baths with sea salt."}
+        },
+        "Mercury": {
+            "Aries": {"pose": "Warrior I", "poem": "Speak with the sharpness of a needle.", "ayurveda": "Minimize screen time."}
+        },
+        "Venus": {
+            "Taurus": {"pose": "Bound Angle Pose", "poem": "Beauty is found in the stillness of stone.", "ayurveda": "Favor sweet fruits."}
+        },
+        "Mars": {
+            "Gemini": {"pose": "Triangle Pose", "poem": "Your strength is the agility of your mind.", "ayurveda": "Sip ginger tea."}
+        },
+        "Saturn": {
+            "Aries": {"pose": "Warrior II", "poem": "Discipline is the bridge to the flame.", "ayurveda": "Warm grounding soups."}
+        },
+        "Ascendant": {
+            "Rohini": {"pose": "Stillness", "poem": "Sink your feet into the red earth.", "ayurveda": "Bare feet on the soil."}
+        }
     }
     
     planet_data = library.get(planet_name, {})
-    match = planet_data.get(sign) if sign in planet_data else planet_data.get(nakshatra)
+    match = planet_data.get(sign) or planet_data.get(nakshatra)
     
     if match:
         return match
-    else:
-        return {
-            "pose": "Child's Pose",
-            "poem": f"The stars whisper of {nakshatra}. Observe the breath and find your center.",
-            "ayurveda": "Drink warm water and practice 5 minutes of silence."
-        }
+    return {
+        "pose": "Child's Pose",
+        "poem": f"The stars whisper of {nakshatra}. Find your center.",
+        "ayurveda": "Drink warm water and stay in silence."
+    }
 
 # --- 3. THE CALCULATOR ENGINE ---
 def get_nakshatra(degree):
@@ -72,7 +98,7 @@ def format_dms(deg):
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
-# RESTORED: THE WOBBLE POEM
+# THE WOBBLE POEM
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
 > *You might notice your signs look a bit 'out of line,'*  
@@ -94,13 +120,12 @@ st.markdown("""
 with st.sidebar:
     st.header("Birth Details")
     target_name = st.text_input("Name", "Leah")
-    b_date = st.date_input("Birth Date", value=date(1969, 9, 24), min_value=date(1, 1, 1))
+    b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     
     st.subheader("Location")
     city = st.text_input("City", "Houston")
     state = st.text_input("State", "Texas")
-    # RESTORED: COUNTRY FIELD
     country = st.text_input("Country", "USA")
 
 if st.button("Unveil My Remedy"):
@@ -116,12 +141,15 @@ if st.button("Unveil My Remedy"):
         utc_dt = local_dt.astimezone(pytz.utc)
         
         jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
+        
+        # SET SIDEREAL MODE
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         ayan = swe.get_ayanamsa_ut(jd)
         
-        # HOUSE/ASCENDANT CALCULATION
-        res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
-        asc_deg = (res_h[1][0] - ayan) % 360
+        # CALCULATE SIDEREAL ASCENDANT (House 1)
+        # Using FLG_SIDEREAL ensures the houses are calculated in the sidereal plane
+        res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', swe.FLG_SIDEREAL)
+        asc_deg = res_h[0][0] 
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
         
         st.header(f"The Soul Map of {target_name}")
@@ -150,7 +178,7 @@ if st.button("Unveil My Remedy"):
     else:
         st.error("Location not found.")
 
-# RESTORED: MEDICAL DISCLAIMER
+# MEDICAL DISCLAIMER
 st.markdown("""
 ---
 ### ⚖️ A Note on Your Journey
