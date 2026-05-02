@@ -73,14 +73,11 @@ def get_sacred_alignment(planet_name, key):
         },
         "Ascendant": {
             "Rohini": {"pose": "Stillness", "focus": "Earthing", "ayurveda": "Bare feet on the earth for 10 minutes.", "poem": "Sink your feet into the red earth and listen to the pulse of the soil."}
-        },
-        "Ketu": {
-            "General": {"pose": "Child's Pose", "focus": "Third Eye", "ayurveda": "30 minutes of sacred silence.", "poem": "You are the empty vessel that the divine wants to fill."}
         }
     }
     
     if planet_name == "Rahu": return library["Moon"].get(key, library["Moon"]["Purva Bhadrapada"])
-    if planet_name == "Ketu": return library["Ketu"]["General"]
+    if planet_name == "Ketu": return {"pose": "Child's Pose", "focus": "Third Eye", "ayurveda": "30 minutes of sacred silence.", "poem": "You are the empty vessel that the divine wants to fill."}
     
     planet_data = library.get(planet_name, {})
     return planet_data.get(key, {"pose": "Stillness", "focus": "Breath", "ayurveda": "Breathe deeply.", "poem": "The stars are in alignment..."})
@@ -100,14 +97,26 @@ st.title("🌌 The Soul Map Remedy")
 
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
-*You might notice your signs look a bit 'out of line,' compared to the horoscopes you read all the time. 
-See, the Earth is a dancer, a spinning glass top, but she **wobbles** a bit, and she never will stop!*
+> *You might notice your signs look a bit 'out of line,'*  
+> *Compared to the horoscopes you read all the time.*  
+> *See, the Earth is a dancer, a spinning glass top,*  
+> *But she **wobbles** a bit, and she never will stop!*  
+>  
+> *Over thousands of years, she’s tilted her head,*  
+> *The stars shifted left while the calendar sped.*  
+> *While others look back at where stars used to be,*  
+> *We look at the sky as it is—**actually.***  
+>  
+> *So if you've moved back by a sign or a space,*  
+> *Don't worry, dear heart, you're in the right place.*  
+> *It’s not a mistake, or a glitch, or a lie—*  
+> *It’s just how we dance with the **real, living sky.***
 """)
 
 with st.sidebar:
     st.header("Birth Sky Details")
     target_name = st.text_input("Name", "Leah")
-    b_date = st.date_input("Birth Date", value=date(1969, 9, 24), min_value=date(1, 1, 1), max_value=date(2099, 12, 31))
+    b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     st.subheader("Birth Location")
     city = st.text_input("City", "Houston")
@@ -127,18 +136,18 @@ if st.button("Unveil My Remedy"):
         utc_dt = local_dt.astimezone(pytz.utc)
         
         jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
+        
+        # --- FIXED SIDEREAL MATH ---
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         ayan = swe.get_ayanamsa_ut(jd)
         
-        # --- ASCENDANT CALCULATION & OVERRIDE ---
+        # Calculate Ascendant
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
         asc_deg = (res_h[1][0] - ayan) % 360
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
         
-        if target_name.lower() == "danny":
-            asc_nak, asc_sign = "Rohini", "Taurus"
+        asc_med = get_sacred_alignment("Ascendant", asc_nak)
         
-        asc_med = get_sacred_alignment("Ascendant", "Rohini")
         st.header(f"The Soul Map of {target_name}")
         st.subheader(f"🏺 Foundational Container (Ascendant)")
         st.markdown(f"### **{asc_nak} in {asc_sign}**")
@@ -146,26 +155,16 @@ if st.button("Unveil My Remedy"):
         st.write(f"🌿 **Ayurveda Ritual:** {asc_med['ayurveda']}")
         st.divider()
 
-        # --- PLANETARY ALIGNMENTS ---
-        planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS), ("Rahu", swe.MEAN_NODE)]
+        # Calculate Planets
+        planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS)]
         
         for p_name, p_id in planets:
             res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
             p_deg = res[0]
             p_nak, p_sign = get_nakshatra(p_deg), get_sidereal_sign(p_deg)
             
-            lookup_key = p_nak
+            med = get_sacred_alignment(p_name, p_nak)
             
-            if target_name.lower() == "danny":
-                if p_name == "Sun": p_sign, lookup_key = "Taurus", "Taurus"
-                elif p_name == "Venus": p_sign, lookup_key = "Taurus", "Taurus"
-                elif p_name == "Mercury": p_sign, lookup_key = "Aries", "Aries"
-                elif p_name == "Mars": p_sign, lookup_key = "Gemini", "Gemini"
-            elif target_name.lower() == "leah":
-                if p_name == "Moon": p_nak, p_sign, lookup_key = "Purva Bhadrapada", "Pisces", "Purva Bhadrapada"
-                elif p_name == "Saturn": p_nak, p_sign, lookup_key = "Bharani", "Aries", "Aries"
-            
-            med = get_sacred_alignment(p_name, lookup_key)
             with st.expander(f"✨ {p_name} Alignment: {p_nak} in {p_sign}", expanded=True):
                 st.markdown(f"*{med['poem']}*")
                 st.write(f"🧘 **Yoga Pose:** {med['pose']} | 📍 **Focus:** {med['focus']}")
@@ -173,14 +172,8 @@ if st.button("Unveil My Remedy"):
                 if med['pose'] in TEACHER_GUIDE:
                     with st.expander("📖 Guided Practice Steps"):
                         for step in TEACHER_GUIDE[med['pose']]['steps']: st.write(f"• {step}")
-        
         st.divider()
     else:
         st.error("Location not found.")
 
-st.markdown("""
----
-### ⚖️ A Note on Your Journey
-The suggestions provided in this Soul Map are intended for **educational and spiritual alignment purposes only**. I am an **astrologer and educator**, not a medical doctor. Consult with your physician before beginning any new exercise or dietary routine.
-""")
 st.caption("Sidereal Lahiri System | The Soul Map Remedy")
