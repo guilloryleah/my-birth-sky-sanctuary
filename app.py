@@ -43,7 +43,7 @@ TEACHER_GUIDE = {
 
 # --- 2. THE EXPANDED REMEDY LIBRARY ---
 def get_sacred_alignment(planet_name, nakshatra, sign):
-    # Library includes known placements for consistent guidance
+    # Guidance includes Danny's and your verified placements
     library = {
         "Sun": {
             "Taurus": {"pose": "Mountain Pose", "poem": "Root into the fertile valley of your worth.", "ayurveda": "Use grounding oils like Vetiver."},
@@ -120,7 +120,7 @@ st.markdown("""
 with st.sidebar:
     st.header("Birth Details")
     target_name = st.text_input("Name", "Leah")
-    # Date range removed to allow all birth dates
+    # Date range now removed to accommodate Danny and all others
     b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     
@@ -143,11 +143,10 @@ if st.button("Unveil My Remedy"):
         
         jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
         
-        # SIDEREAL LAHIRI SETUP
+        # ACTIVATE SIDEREAL CALCULATION
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         
-        # SIDEREAL HOUSE CALCULATION (Ascendant)
-        # Using FLG_SIDEREAL flag for the actual house calculation
+        # HOUSE CALCULATION (ASCENDANT)
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', swe.FLG_SIDEREAL)
         asc_deg = res_h[0][0] 
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
