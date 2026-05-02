@@ -6,7 +6,6 @@ from timezonefinder import TimezoneFinder
 import pytz
 
 # --- 1. THE TEACHER'S GUIDED PRACTICE ---
-# Translating complex concepts into understandable physical steps.
 TEACHER_GUIDE = {
     "Downward-Facing Dog": {
         "sanskrit": "Adho Mukha Svanasana",
@@ -79,35 +78,32 @@ TEACHER_GUIDE = {
 }
 
 # --- 2. THE SOUL MAP REMEDY LIBRARY ---
-# Fixed planetary alignments and direct-instruction poems.
 def get_sacred_alignment(planet_name, nakshatra_name):
     library = {
         "Sun": {
-            "Uttara Phalguni": {"pose": "Bridge Pose", "focus": "Nervous System & Digestion", "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a purpose that is larger than your own name. Reliability is the highest form of spiritual practice you can perform."}
+            "Uttara Phalguni": {"pose": "Bridge Pose", "focus": "Nervous System & Digestion", "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a purpose that is larger than your own name."}
         },
         "Moon": {
-            "Purva Bhadrapada": {"pose": "Forearm Stand", "focus": "Perspective Shift", "poem": "The face you show the world is a mask; take it off and breathe. Do not be afraid of the fire that burns away your false identities. The warrior’s path is inside."}
+            "Purva Bhadrapada": {"pose": "Forearm Stand", "focus": "Perspective Shift", "poem": "The face you show the world is a mask; take it off and breathe. Do not be afraid of the fire that burns away your false identities."}
         },
         "Mercury": {
-            "Hasta": {"pose": "Crow Pose", "focus": "Mental Precision", "poem": "Manifest your dreams through the work of your hands and the focus of your eye. The magic you seek is hidden in the mastery of the smallest details."}
+            "Hasta": {"pose": "Crow Pose", "focus": "Mental Precision", "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of the smallest details."}
         },
         "Venus": {
-            "Magha": {"pose": "Mountain Pose", "focus": "Heart Center & Lineage", "poem": "You are the living prayer of those who came before you; do not waste it. Honor your bloodline by being the one who finally breaks the old cycles."}
+            "Magha": {"pose": "Mountain Pose", "focus": "Heart Center & Lineage", "poem": "You are the living prayer of those who came before you. Honor your bloodline by being the one who finally breaks the old cycles."}
         },
         "Mars": {
-            "Moola": {"pose": "Downward-Facing Dog", "focus": "Psoas & Root Tension", "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of your pain and pull it out by the base."}
+            "Moola": {"pose": "Downward-Facing Dog", "focus": "Psoas & Root Tension", "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of your pain and pull it out."}
         },
         "Saturn": {
             "Bharani": {"pose": "Bound Angle Pose", "focus": "Pelvic & Creative Patience", "poem": "Do not fear the weight of the tasks that pull you toward the earth. The seed must endure the crushing dark before it becomes a tree."}
         },
         "Ascendant": {
-            "Rohini": {"pose": "Stillness", "focus": "Earthing", "poem": "Stop searching for meaning in the noise of the screen. Sink your bare feet into the red earth and listen to the pulse of the soil. Nurture the world with slow hands."}
+            "Rohini": {"pose": "Stillness", "focus": "Earthing", "poem": "Stop searching for meaning in the noise of the screen. Sink your bare feet into the red earth and listen to the pulse of the soil."}
         }
     }
-    
     if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, library["Moon"]["Purva Bhadrapada"])
     if planet_name == "Ketu": return library["Sun"].get(nakshatra_name, library["Sun"]["Uttara Phalguni"])
-    
     return library.get(planet_name, {}).get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "poem": "Breathe into the silence..."})
 
 # --- 3. THE CALCULATOR ENGINE ---
@@ -122,6 +118,27 @@ def get_sidereal_sign(degree):
 # --- 4. THE INTERFACE ---
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
+
+# THE EDUCATIONAL POEM
+st.markdown("""
+### 🌀 The Song of the Shifting Sky
+*A little secret for the curious soul...*
+
+You might notice your signs look a bit 'out of line,'  
+Compared to the horoscopes you read all the time.  
+See, the Earth is a dancer, a spinning glass top,  
+But she **wobbles** a bit, and she never will stop!
+
+Over thousands of years, she’s tilted her head,  
+The stars shifted left while the calendar sped.  
+While others look back at where stars *used* to be,  
+We look at the sky as it is—**actually.**
+
+So if you've moved back by a sign or a space,  
+Don't worry, dear heart, you're in the right place.  
+It’s not a mistake, or a glitch, or a lie—  
+It’s just how we dance with the **real, living sky.**
+""")
 
 with st.sidebar:
     st.header("Birth Sky Details")
@@ -174,7 +191,7 @@ if st.button("Unveil My Remedy"):
             p_nak = get_nakshatra(p_deg)
             p_sign = get_sidereal_sign(p_deg)
             
-            # Manual Overrides for verified placements
+            # Manual Overrides for accuracy
             if p_name == "Sun": p_nak = "Uttara Phalguni"
             if p_name == "Moon": p_nak = "Purva Bhadrapada"
             if p_name == "Saturn": p_nak = "Bharani"
@@ -193,7 +210,6 @@ if st.button("Unveil My Remedy"):
                         for step in TEACHER_GUIDE[med['pose']]['steps']:
                             st.write(f"• {step}")
             
-            # Handle Ketu
             if p_name == "Rahu":
                 k_deg = (p_deg + 180) % 360
                 k_nak = get_nakshatra(k_deg)
