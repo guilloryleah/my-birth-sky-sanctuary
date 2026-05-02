@@ -95,6 +95,7 @@ def get_sidereal_sign(degree):
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
+# --- THE WOBBLE POEM ---
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
 > *You might notice your signs look a bit 'out of line,'*  
@@ -116,7 +117,12 @@ st.markdown("""
 with st.sidebar:
     st.header("Birth Sky Details")
     target_name = st.text_input("Name", "Leah")
-    b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
+    b_date = st.date_input(
+        "Birth Date", 
+        value=date(1969, 9, 24),
+        min_value=date(1, 1, 1), 
+        max_value=date(2099, 12, 31)
+    )
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     st.subheader("Birth Location")
     city = st.text_input("City", "Houston")
@@ -136,8 +142,6 @@ if st.button("Unveil My Remedy"):
         utc_dt = local_dt.astimezone(pytz.utc)
         
         jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
-        
-        # --- FIXED SIDEREAL MATH ---
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         ayan = swe.get_ayanamsa_ut(jd)
         
@@ -145,7 +149,6 @@ if st.button("Unveil My Remedy"):
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
         asc_deg = (res_h[1][0] - ayan) % 360
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
-        
         asc_med = get_sacred_alignment("Ascendant", asc_nak)
         
         st.header(f"The Soul Map of {target_name}")
@@ -162,7 +165,6 @@ if st.button("Unveil My Remedy"):
             res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
             p_deg = res[0]
             p_nak, p_sign = get_nakshatra(p_deg), get_sidereal_sign(p_deg)
-            
             med = get_sacred_alignment(p_name, p_nak)
             
             with st.expander(f"✨ {p_name} Alignment: {p_nak} in {p_sign}", expanded=True):
@@ -176,4 +178,10 @@ if st.button("Unveil My Remedy"):
     else:
         st.error("Location not found.")
 
+# --- THE DISCLAIMER ---
+st.markdown("""
+---
+### ⚖️ A Note on Your Journey
+The suggestions provided in this Soul Map are intended for **educational and spiritual alignment purposes only**. I am an **astrologer and educator**, not a medical doctor. Consult with your physician before beginning any new exercise or dietary routine.
+""")
 st.caption("Sidereal Lahiri System | The Soul Map Remedy")
