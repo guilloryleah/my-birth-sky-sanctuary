@@ -5,121 +5,148 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import pytz
 
-# --- 1. THE TEACHER'S ASANA GUIDE ---
+# --- 1. THE TEACHER'S GUIDED PRACTICE ---
+# Making the "vague" terms understandable with clear steps.
 TEACHER_GUIDE = {
-    "Tadasana": {
-        "description": "Mountain Pose: Finding your core authority.",
-        "steps": ["Big toes touch, heels slightly apart.", "Engage thighs, lift kneecaps.", "Roll shoulders back, palms forward.", "Lengthen crown to sky."],
-        "focus": "Stability and Heart Muscle alignment."
+    "Downward-Facing Dog": {
+        "sanskrit": "Adho Mukha Svanasana",
+        "focus": "Psoas Release (Deep Hip/Lower Back Connection)",
+        "why": "This releases deep-seated tension and 'digs' to the root of physical discomfort.",
+        "steps": [
+            "Start on your hands and knees, wrists under shoulders.",
+            "Tuck your toes and lift your hips toward the ceiling to form an 'V' shape.",
+            "Press firmly through your palms and knuckles.",
+            "Pedal your feet (press one heel down, then the other) to stretch the calves and hips.",
+            "Exhale deeply, letting your head hang heavy to release the neck."
+        ]
     },
-    "Setu Bandhasana": {
-        "description": "Bridge Pose: Opening the solar plexus.",
-        "steps": ["Lie on back, knees bent, feet hip-width.", "Lift hips toward the ceiling.", "Interlace hands under your back.", "Keep neck long and chin away from chest."],
-        "focus": "Nervous Digestion and calm surrender."
+    "Mountain Pose": {
+        "sanskrit": "Tadasana",
+        "focus": "Heart Center & Posture",
+        "why": "Aligns the spine to honor your lineage and stand in your own authority.",
+        "steps": [
+            "Stand with big toes touching and heels slightly apart.",
+            "Lift your toes, spread them wide, and place them back down to 'root' into the earth.",
+            "Roll your shoulders up to your ears and then back and down.",
+            "Keep your arms at your sides, palms facing forward.",
+            "Imagine a string pulling the crown of your head toward the sky."
+        ]
     },
-    "Pincha Mayurasana": {
-        "description": "Forearm Stand: The warrior's internal inversion.",
-        "steps": ["Begin on forearms, elbows shoulder-width.", "Lift hips into a dolphin pose.", "Kick up or walk feet in to find balance.", "Engage core to remove the 'mask' of effort."],
-        "focus": "Perspective shift and Foot Reflexology."
+    "Bridge Pose": {
+        "sanskrit": "Setu Bandhasana",
+        "focus": "Nervous System & Digestion",
+        "why": "Opens the belly and chest to calm the 'fight or flight' response.",
+        "steps": [
+            "Lie on your back with knees bent and feet flat on the floor, hip-width apart.",
+            "Place your arms alongside your body, palms down.",
+            "As you inhale, press your feet into the floor and lift your hips up.",
+            "Interlace your hands under your back if comfortable.",
+            "Hold for 5 breaths, then slowly roll your spine back down to the floor."
+        ]
     },
-    "Bakasana": {
-        "description": "Crow Pose: Mastering the smallest details.",
-        "steps": ["Squat and place hands flat on the floor.", "Place knees against the backs of upper arms.", "Lean forward and lift feet off the ground.", "Focus eyes on a single point (Drishti)."],
-        "focus": "Intestinal Transit and mental precision."
+    "Crow Pose": {
+        "sanskrit": "Bakasana",
+        "focus": "Mental Focus & Wrist Strength",
+        "why": "Teaches the mastery of small details and finding balance in the 'dirt'.",
+        "steps": [
+            "Come into a low squat with feet together and knees wide.",
+            "Place your hands flat on the floor, shoulder-width apart.",
+            "Place your knees against the backs of your upper arms, near the armpits.",
+            "Lean forward, shifting your weight onto your hands.",
+            "Slowly lift one foot, then the other, balancing on your hands."
+        ]
     },
-    "Adho Mukha Svanasana": {
-        "description": "Downward-Facing Dog: Digging to the root.",
-        "steps": ["Hands and feet on floor, hips high.", "Press palms firmly, rotate shoulders outward.", "Pedal feet to release the psoas.", "Exhale deeply to 'burn the lie'."],
-        "focus": "Psoas Release and foundational truth."
+    "Forearm Stand": {
+        "sanskrit": "Pincha Mayurasana",
+        "focus": "Perspective Shift & Blood Flow",
+        "why": "An inversion to help you see past the 'mask' and find internal strength.",
+        "steps": [
+            "Start on your forearms and knees, elbows shoulder-width apart.",
+            "Interlace your fingers or keep palms flat.",
+            "Lift your hips and walk your feet toward your elbows.",
+            "Gaze between your forearms and lift one leg toward the sky.",
+            "Practice small 'hops' or use a wall for support to find vertical balance."
+        ]
     },
-    "Baddha Konasana": {
-        "description": "Bound Angle: Planting the seed in the dark.",
-        "steps": ["Sit with soles of feet together, knees wide.", "Hold feet and lengthen the spine.", "Fold forward gently from the hips.", "Breathe into the pressure of the forge."],
-        "focus": "Pelvic Inflammation and creative patience."
+    "Bound Angle Pose": {
+        "sanskrit": "Baddha Konasana",
+        "focus": "Pelvic Release & Creative Energy",
+        "why": "Encourages patience during the 'crushing' or planting phase of growth.",
+        "steps": [
+            "Sit tall and bring the soles of your feet together, letting knees fall out to the sides.",
+            "Hold your ankles or feet.",
+            "Inhale to lengthen your spine.",
+            "Exhale and slowly fold forward, keeping your back flat.",
+            "Breathe into the inner thighs and lower back."
+        ]
     }
 }
 
 # --- 2. THE SOUL MAP REMEDY LIBRARY ---
+# Updated with common names and the refined poems
 def get_sacred_alignment(planet_name, nakshatra_name):
     library = {
         "Sun": {
-            "Uttara Phalguni": {"yoga": "Setu Bandhasana", "ayurveda": "Nervous Digestion", "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a purpose that is larger than your own name. Reliability is the highest form of spiritual practice you can perform. You reach the stars by tending to the garden that is right in front of you."}
+            "Uttara Phalguni": {"pose": "Bridge Pose", "focus": "Nervous System & Digestion", "poem": "The world is a mirror of the kindness you show to the stranger. Steady your mind by serving a purpose that is larger than your own name. You reach the stars by tending to the garden that is right in front of you."}
         },
         "Moon": {
-            "Purva Bhadrapada": {"yoga": "Pincha Mayurasana", "ayurveda": "Foot Reflexology", "poem": "The face you show the world is a mask; take it off and breathe. Do not be afraid of the fire that burns away your false identities. The warrior’s path is inside; the only enemy you must defeat is yourself. Transformation is a death that leads to the only life worth living."}
+            "Purva Bhadrapada": {"pose": "Forearm Stand", "focus": "Perspective Shift", "poem": "The face you show the world is a mask; take it off and breathe. Do not be afraid of the fire that burns away your false identities. The warrior’s path is inside; the only enemy you must defeat is yourself."}
         },
         "Mercury": {
-            "Hasta": {"yoga": "Bakasana", "ayurveda": "Intestinal Transit", "poem": "Manifest your dreams through the work of your hands and the focus of your eye. The magic you seek is hidden in the mastery of the smallest details. Do not grasp so tightly that you crush the very thing you are trying to hold. Your skill is a gift; use it to build a bridge between the dream and the dirt."}
-        },
-        "Jupiter": {
-            "Hasta": {"yoga": "Bakasana", "ayurveda": "Wrist & Forearm", "poem": "Manifest your dreams through the work of your hands and the focus of your eye. The magic you seek is hidden in the mastery of the smallest details. Your skill is a gift; use it to build a bridge between the dream and the dirt."}
+            "Hasta": {"pose": "Crow Pose", "focus": "Mental Precision", "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of the smallest details. Use your skill to build a bridge between the dream and the dirt."}
         },
         "Venus": {
-            "Magha": {"yoga": "Tadasana", "ayurveda": "Heart Muscle", "poem": "You are the living prayer of those who came before you; do not waste it. Authority is a burden that is only light when it is used to lift the small. Honor your bloodline by being the one who finally breaks the old cycles. True royalty is found in the way you treat those who can do nothing for you."}
+            "Magha": {"pose": "Mountain Pose", "focus": "Heart Center & Lineage", "poem": "You are the living prayer of those who came before you. Honor your bloodline by being the one who finally breaks the old cycles. True royalty is found in how you treat the vulnerable."}
         },
         "Mars": {
-            "Moola": {"yoga": "Adho Mukha Svanasana", "ayurveda": "Psoas Release", "poem": "If you want to see the truth, you must be willing to burn the lie. Do not be afraid of the collapse; the old walls were blocking the view. Dig until you find the root of your pain and pull it out by the base. Nothing that is truly yours can ever be destroyed by the fire."}
+            "Moola": {"pose": "Downward-Facing Dog", "focus": "Psoas & Root Tension", "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of your pain and pull it out by the base."}
         },
         "Saturn": {
-            "Bharani": {"yoga": "Baddha Konasana", "ayurveda": "Pelvic Inflammation", "poem": "Do not fear the weight of the tasks that pull you toward the earth. The seed must endure the crushing dark before it becomes a tree. Discipline is the forge that turns your raw desire into a crown. You are not being buried; you are being planted for a greater harvest."}
+            "Bharani": {"pose": "Bound Angle Pose", "focus": "Pelvic & Creative Patience", "poem": "Do not fear the weight of the tasks that pull you toward the earth. The seed must endure the crushing dark before it becomes a tree. You are being planted for a greater harvest."}
         },
         "Ascendant": {
-            "Rohini": {"poem": "Stop searching for meaning in the noise of the city and the screen. Sink your bare feet into the red earth and listen to the pulse of the soil. Beauty is not a distraction; it is the physical evidence of the divine. Nurture the world with slow hands, and the world will feed your soul."}
+            "Rohini": {"poem": "Stop searching for meaning in the noise of the screen. Sink your bare feet into the red earth and listen to the pulse of the soil. Nurture the world with slow hands."}
         }
     }
-    
+    # Logic to fetch node alignments (Rahu/Ketu)
     if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, library["Moon"]["Purva Bhadrapada"])
     if planet_name == "Ketu": return library["Sun"].get(nakshatra_name, library["Sun"]["Uttara Phalguni"])
     
-    return library.get(planet_name, {}).get(nakshatra_name, {"yoga": "Pranam", "ayurveda": "General Wellness", "poem": "Listen to the silence between the stars..."})
+    planet_data = library.get(planet_name, {})
+    return planet_data.get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "poem": "Breathe into the moment..."})
 
 # --- 3. THE CALCULATOR ---
 def get_nakshatra(degree):
-    # Precise 13°20' increments for Sidereal Nakshatras
-    nakshatras = [
-        "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
-        "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", 
-        "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", 
-        "Anuradha", "Jyeshtha", "Moola", "Purva Ashada", "Uttara Ashada", 
-        "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", 
-        "Uttara Bhadrapada", "Revati"
-    ]
-    index = int(degree / (360/27))
-    return nakshatras[index % 27]
-
-def get_zodiac_sign(degree):
-    signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
-    return signs[int(degree / 30) % 12]
+    nakshatras = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Moola", "Purva Ashada", "Uttara Ashada", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"]
+    return nakshatras[int(degree / (360/27)) % 27]
 
 # --- 4. THE INTERFACE ---
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
 with st.sidebar:
-    st.header("Birth Details")
+    st.header("Birth Sky Details")
     name = st.text_input("Name", "Leah")
     b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     
-    st.subheader("Location")
+    st.subheader("Birth Location")
     city = st.text_input("City", "Houston")
-    state = st.text_input("State/Province", "Texas")
+    state = st.text_input("State", "Texas")
     country = st.text_input("Country", "USA")
 
-if st.button("Unveil My Alignments"):
+if st.button("Unveil My Remedy"):
     full_loc = f"{city}, {state}, {country}"
-    geolocator = Nominatim(user_agent="soul_map_remedy")
+    geolocator = Nominatim(user_agent="soul_map_app")
     location = geolocator.geocode(full_loc)
     
     if location:
-        # Timezone Logic
         tf = TimezoneFinder()
         tz_name = tf.timezone_at(lng=location.longitude, lat=location.latitude)
         tz = pytz.timezone(tz_name)
         local_dt = tz.localize(datetime.combine(b_date, b_time))
         utc_dt = local_dt.astimezone(pytz.utc)
         
-        # Swiss Eph Calculation
         jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         ayan = swe.get_ayanamsa_ut(jd)
@@ -129,44 +156,33 @@ if st.button("Unveil My Alignments"):
         asc_deg = (res_h[1][0] - ayan) % 360
         asc_nak = get_nakshatra(asc_deg)
         
-        st.header(f"The Sacred Compass of {name}")
-        st.subheader(f"🏺 Foundational Container: {asc_nak}")
-        st.info(f"*{get_sacred_alignment('Ascendant', 'Rohini')['poem']}*")
-        st.divider()
+        st.header(f"The Soul Map of {name}")
+        st.info(f"**Foundational Container: {asc_nak}**\n\n*{get_sacred_alignment('Ascendant', 'Rohini')['poem']}*")
 
-        # Planet Loop
-        planets = [
-            (swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.SATURN, "Saturn"),
-            (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"), (swe.MARS, "Mars"), 
-            (swe.JUPITER, "Jupiter"), (swe.MEAN_NODE, "Rahu")
-        ]
+        # Alignment Cards
+        planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS)]
         
-        for p_id, p_name in planets:
+        for p_name, p_id in planets:
             res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
-            p_deg = res[0]
-            p_sign = get_zodiac_sign(p_deg)
-            p_nak = get_nakshatra(p_deg)
+            p_nak = get_nakshatra(res[0])
             
-            # Manual Override check for user's specific confirmed placements
-            if p_name == "Moon": p_nak = "Purva Bhadrapada"
+            # Correction Overrides for your known placements
             if p_name == "Sun": p_nak = "Uttara Phalguni"
+            if p_name == "Moon": p_nak = "Purva Bhadrapada"
             if p_name == "Saturn": p_nak = "Bharani"
             
             med = get_sacred_alignment(p_name, p_nak)
             
-            with st.expander(f"{p_name} in {p_nak} ({p_sign})", expanded=True):
-                st.markdown("### Sacred Invitation")
-                st.write(f"*{med['poem']}*")
+            with st.expander(f"✨ {p_name} Alignment: {p_nak}", expanded=True):
+                st.markdown(f"*{med['poem']}*")
+                st.write(f"🧘 **Yoga Pose:** {med['pose']}")
+                st.write(f"📍 **Body Focus:** {med['focus']}")
                 
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.write(f"🧘 **Yoga Asana:** {med['yoga']}")
-                    simple_pose = med['yoga'].split(" (")[0]
-                    if simple_pose in TEACHER_GUIDE:
-                        with st.expander("📖 Alignment Steps"):
-                            for step in TEACHER_GUIDE[simple_pose]['steps']:
-                                st.write(f"• {step}")
-                with c2:
-                    st.write(f"🍃 **Ayurvedic Alignment:** {med['ayurveda']}")
-
-st.caption("Calculated using Sidereal Lahiri Ayanamsa | Soul Map Remedy Library")
+                if med['pose'] in TEACHER_GUIDE:
+                    with st.expander(f"📖 Guided Practice: How to perform {med['pose']}"):
+                        st.write(f"**Sanskrit Name:** {TEACHER_GUIDE[med['pose']]['sanskrit']}")
+                        st.write(f"**Why this works:** {TEACHER_GUIDE[med['pose']]['why']}")
+                        st.markdown("**Steps:**")
+                        for step in TEACHER_GUIDE[med['pose']]['steps']:
+                            st.write(f"• {step}")
+        st.divider()
