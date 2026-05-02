@@ -5,16 +5,13 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import pytz
 
-# --- 1. THE COSMIC PHARMACOPEIA ENGINE ---
-def get_holistic_medicine(planet_name, nakshatra_name, sign_name):
+# --- 1. THE COMPLETE COSMIC PHARMACOPEIA LIBRARY ---
+def get_holistic_medicine(planet_name, nakshatra_name):
     """
-    Master library integrating Vedic Astrology, Soulful Prescriptions, 
+    A master library integrating Vedic Astrology, Soulful Prescriptions, 
     Yoga Asanas, and Ayurvedic Alignments.
     """
-    
-    # PLANET-SPECIFIC OVERRIDES
-    # This dictionary maps [Planet][Nakshatra] to your specific prescriptions.
-    planet_library = {
+    library = {
         "Mars": {
             "Ashwini": {"yoga": "Savasana with Eye Pillow", "ayurveda": "Cranial Pressure", "poem": "Heal the ghost of the old self before you outrun it."},
             "Bharani": {"yoga": "Baddha Konasana", "ayurveda": "Pelvic Inflammation", "poem": "Carry the weight until it turns into a wing."},
@@ -97,27 +94,20 @@ def get_holistic_medicine(planet_name, nakshatra_name, sign_name):
         }
     }
 
-    # 2. UNIVERSAL FALLBACK (From your provided code block)
-    universal_library = {
-        "Ashwini": {"yoga": "Virabhadrasana III", "ayurveda": "Calm the Head and Skull", "poem": "Heal the ghost of the old self..."},
-        "Bharani": {"yoga": "Malasana", "ayurveda": "Support Reproductive Vitality", "poem": "Carry the weight of your becoming..."},
-        "Krittika": {"yoga": "Utkatasana", "ayurveda": "Purify the Blood", "poem": "Burn away the brush until only the gold has room..."},
-        # ... (This continues for all 27 using the definitions in your code block)
-    }
+    # Planet-specific lookup with Mars-based fallback
+    planet_data = library.get(planet_name, {})
+    medicine = planet_data.get(nakshatra_name)
+    
+    if not medicine:
+        medicine = library["Mars"].get(nakshatra_name, {
+            "yoga": "Gentle Mindfulness", 
+            "ayurveda": "Elemental Balance", 
+            "poem": "The stars are forming a new medicine for this placement..."
+        })
+    return medicine
 
-    # LOGIC: Check Planet-specific first, then fall back to Universal
-    p_data = planet_library.get(planet_name, {}).get(nakshatra_name)
-    if not p_data:
-        # If no specific planet medicine, use the universal one (handles the Ascendant too)
-        # For brevity in this snippet, I am defaulting to the "Mars" version as a high-quality fallback
-        # because your Mars list is the most complete in the prompt.
-        p_data = planet_library.get("Mars", {}).get(nakshatra_name, {"yoga": "N/A", "ayurveda": "N/A", "poem": "Medicine ripening..."})
-
-    return p_data
-
-# --- 2. THE SIDEREAL ENGINE ---
+# --- 2. THE SIDEREAL ASTRONOMY ENGINE ---
 def get_nakshatra_name(sign, degree):
-    # Mapping logic for degrees to Nakshatra names
     ranges = {
         "Aries": [(13.333, "Ashwini"), (26.666, "Bharani"), (30.0, "Krittika")],
         "Taurus": [(10.0, "Krittika"), (23.333, "Rohini"), (30.0, "Mrigashira")],
@@ -138,7 +128,6 @@ def get_nakshatra_name(sign, degree):
 
 def calculate_soul_map(year, month, day, hour, minute, lat, lon):
     swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
-    # Timezone handling
     tf = TimezoneFinder()
     tz_name = tf.timezone_at(lng=lon, lat=lat)
     timezone = pytz.timezone(tz_name or "UTC")
@@ -167,9 +156,19 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
         p_deg = p_long % 30
         p_nak = get_nakshatra_name(p_sign, p_deg)
         
-        # Call the Pharmacopeia
-        med = get_holistic_medicine(p_name, p_nak, p_sign)
-        
+        # Determine Ketu (directly opposite Rahu)
+        if p_name == "Rahu":
+            k_long = (p_long + 180) % 360
+            k_sign = signs[int(k_long / 30)]
+            k_deg = k_long % 30
+            k_nak = get_nakshatra_name(k_sign, k_deg)
+            k_med = get_holistic_medicine("Ketu", k_nak)
+            birth_planets.append({
+                "name": "Ketu", "sign": k_sign, "deg": k_deg, "nakshatra": k_nak,
+                "poem": k_med["poem"], "yoga": k_med["yoga"], "ayurveda": k_med["ayurveda"]
+            })
+
+        med = get_holistic_medicine(p_name, p_nak)
         birth_planets.append({
             "name": p_name, "sign": p_sign, "deg": p_deg, "nakshatra": p_nak,
             "poem": med["poem"], "yoga": med["yoga"], "ayurveda": med["ayurveda"]
@@ -179,60 +178,64 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
 
 # --- 3. STREAMLIT INTERFACE ---
 st.set_page_config(page_title="Soul Map Sanctuary", layout="wide")
-st.title("✨ The Real-Sky Soul Map: Eternal Edition")
+st.title("✨ The Real-Sky Soul Map")
+st.markdown("---")
 
 with st.sidebar:
     st.header("Birth Calibration")
-    seeker = st.text_input("Seeker Name", "Leah G")
+    seeker = st.text_input("Seeker Name", "Danny R Slater")
     b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     address = st.text_input("Birth Location", "Houston, USA")
     
-    # BUSY SERVICE OVERRIDE
     st.divider()
-    with st.expander("Manual Coordinates (Service Busy Fallback)"):
+    with st.expander("Manual Coordinates (Use if Map is Busy)"):
         m_lat = st.number_input("Lat", value=29.7604)
         m_lon = st.number_input("Lon", value=-95.3698)
         use_manual = st.checkbox("Use Manual Override")
 
-# Geolocation
+# Geolocation Processing
 lat, lon = None, None
 if use_manual:
     lat, lon = m_lat, m_lon
 elif address:
     try:
-        geolocator = Nominatim(user_agent="soul_map_v4_leah")
+        geolocator = Nominatim(user_agent="soul_map_v4")
         loc = geolocator.geocode(address, timeout=10)
         if loc: lat, lon = loc.latitude, loc.longitude
     except:
-        st.sidebar.error("Map service busy. Use manual coordinates.")
+        st.sidebar.error("Geolocation service busy. Please use manual override.")
 
 if lat and lon and st.button("Generate Soul Map"):
     data = calculate_soul_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, lat, lon)
     
+    # Header Information
     st.header(f"Soul Map for {seeker}")
     st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']} in {data['asc_nak']}")
     
-    # Ascendant Intro
-    asc_med = get_holistic_medicine("Mars", data['asc_nak'], data['asc_sign'])
-    st.info(asc_med['poem'])
+    # Ascendant Intro Poem (uses Mars/Foundation fallback)
+    asc_med = get_holistic_medicine("Mars", data['asc_nak'])
+    st.info(f"🌿 **Ascendant Guidance:** {asc_med['poem']}")
 
     t1, t2 = st.tabs(["The Planetary Council", "The Holistic Body"])
     
     with t1:
-        cols = st.columns(4)
-        for i, p in enumerate(data['planets']):
-            with cols[i % 4]:
-                st.markdown(f"**{p['name']}**")
-                st.caption(f"{p['nakshatra']} ({p['sign']})")
-                with st.expander("Read Prescription"):
-                    st.write(p['poem'])
+        st.subheader("Planetary Prescriptions")
+        for p in data['planets']:
+            with st.expander(f"{p['name']} — {p['nakshatra']} in {p['sign']}"):
+                st.markdown(f"*{p['poem']}*")
 
     with t2:
-        st.subheader("Yoga & Ayurvedic Prescriptions")
+        st.subheader("Yoga & Ayurvedic Alignments")
+        # Creating a neat table for the physical body
+        body_data = []
         for p in data['planets']:
-            with st.expander(f"{p['name']} Medicine"):
-                st.markdown(f"🧘 **Yoga:** {p['yoga']}")
-                st.markdown(f"🍃 **Ayurveda:** {p['ayurveda']}")
+            body_data.append({
+                "Planet": p['name'],
+                "Nakshatra": p['nakshatra'],
+                "Yoga Asana": p['yoga'],
+                "Ayurvedic Focus": p['ayurveda']
+            })
+        st.table(body_data)
 
-st.caption("Universal Sidereal | Swiss Ephemeris | Holistic Guide")
+st.caption("A Sidereal Astrology Project | Built with Swiss Ephemeris")
