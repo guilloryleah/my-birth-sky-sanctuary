@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import swisseph as swe
 from datetime import datetime, date
@@ -43,6 +41,21 @@ TEACHER_GUIDE = {
         "sanskrit": "Balasana",
         "focus": "Third Eye & Surrender",
         "steps": ["Kneel on the floor, big toes touching.", "Sit on your heels and separate your knees.", "Fold forward, resting forehead on the mat.", "Breathe into your back."]
+    },
+    "Triangle Pose": {
+        "sanskrit": "Trikonasana",
+        "focus": "Mental Agility",
+        "steps": ["Step feet wide.", "Turn one foot out and reach down.", "Keep the chest open as you reach high."]
+    },
+    "Warrior I": {
+        "sanskrit": "Virabhadrasana I",
+        "focus": "Focus & Resolve",
+        "steps": ["Step forward into a lunge.", "Square hips to the front.", "Reach arms high."]
+    },
+     "Warrior II": {
+        "sanskrit": "Virabhadrasana II",
+        "focus": "Strength & Endurance",
+        "steps": ["Step feet wide.", "Arms parallel to the floor.", "Gaze over front hand."]
     }
 }
 
@@ -100,16 +113,33 @@ def get_sidereal_sign(degree):
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
+# --- THE WOBBLE POEM ---
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
-*You might notice your signs look a bit 'out of line,' compared to the horoscopes you read all the time. 
-See, the Earth is a dancer, a spinning glass top, but she **wobbles** a bit, and she never will stop!*
+> *You might notice your signs look a bit 'out of line,'*  
+> *Compared to the horoscopes you read all the time.*  
+>  
+> *See, the Earth is a dancer, a spinning glass top,*  
+> *But she **wobbles** a bit, and she never will stop!*  
+>  
+> *Over thousands of years, she’s tilted her head,*  
+> *The stars shifted left while the calendar sped.*  
+>  
+> *While others look back at where stars used to be,*  
+> *We look at the sky as it is—**actually.***  
+>  
+> *So if you've moved back by a sign or a space,*  
+> *Don't worry, dear heart, you're in the right place.*  
+>  
+> *It’s not a mistake, or a glitch, or a lie—*  
+> *It’s just how we dance with the **real, living sky.***
 """)
 
 with st.sidebar:
     st.header("Birth Sky Details")
     target_name = st.text_input("Name", "Leah")
-    b_date = st.date_input("Birth Date", value=date(1969, 9, 24), min_value=date(1, 1, 1), max_value=date(2099, 12, 31))
+    # Date range open for all generations
+    b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     st.subheader("Birth Location")
     city = st.text_input("City", "Houston")
@@ -132,11 +162,12 @@ if st.button("Unveil My Remedy"):
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         ayan = swe.get_ayanamsa_ut(jd)
         
-        # --- ASCENDANT CALCULATION & OVERRIDE ---
+        # --- ASCENDANT CALCULATION ---
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
         asc_deg = (res_h[1][0] - ayan) % 360
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
         
+        # Override for specific verified placements
         if target_name.lower() == "danny":
             asc_nak, asc_sign = "Rohini", "Taurus"
         
@@ -186,4 +217,3 @@ st.markdown("""
 The suggestions provided in this Soul Map are intended for **educational and spiritual alignment purposes only**. I am an **astrologer and educator**, not a medical doctor. Consult with your physician before beginning any new exercise or dietary routine.
 """)
 st.caption("Sidereal Lahiri System | The Soul Map Remedy")
-
