@@ -5,19 +5,15 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import pytz
 
-# --- 1. THE COMPLETE COSMIC PHARMACOPEIA LIBRARY ---
+# --- 1. THE MASTER COSMIC PHARMACOPEIA LIBRARY ---
 def get_holistic_medicine(planet_name, nakshatra_name):
-    """
-    A master library integrating Vedic Astrology, Soulful Prescriptions, 
-    Yoga Asanas, and Ayurvedic Alignments.
-    """
     library = {
         "Mars": {
             "Ashwini": {"yoga": "Savasana with Eye Pillow", "ayurveda": "Cranial Pressure", "poem": "Heal the ghost of the old self before you outrun it."},
             "Bharani": {"yoga": "Baddha Konasana", "ayurveda": "Pelvic Inflammation", "poem": "Carry the weight until it turns into a wing."},
             "Krittika": {"yoga": "Utkatasana", "ayurveda": "Blood Purifier", "poem": "Let your truth be a cauterizing flame."},
             "Rohini": {"yoga": "Vrksasana", "ayurveda": "Neck & Throat", "poem": "Plant your feet where the earth is red."},
-            "Mrigashira": {"yoga": "Garudasana", "ayurveda": "Sensory Exhaustion", "poem": "Softness is the only armor that never breaks."},
+            "Mrigashira": {"yoga": "Garudasana", "ayurveda": "Sensory Exhaustion", "poem": "Softness is the armor that never breaks."},
             "Ardra": {"yoga": "Simhasana", "ayurveda": "Lymphatic Flow", "poem": "Renewal begins when the drought of pride ends."},
             "Punarvasu": {"yoga": "Anjaneyasana", "ayurveda": "Shoulder Tension", "poem": "Trust the cycles of the light and the dark."},
             "Pushya": {"yoga": "Balasana", "ayurveda": "Digestive Agni", "poem": "Be the hollow bone through which wisdom sings."},
@@ -93,20 +89,19 @@ def get_holistic_medicine(planet_name, nakshatra_name):
             "Revati": {"yoga": "Yoga Nidra", "ayurveda": "Immune Boundary", "poem": "The traveler leave no footprints behind."}
         }
     }
-
-    # Planet-specific lookup with Mars-based fallback
-    planet_data = library.get(planet_name, {})
-    medicine = planet_data.get(nakshatra_name)
     
+    # Precise lookup logic
+    planet_entry = library.get(planet_name, {})
+    medicine = planet_entry.get(nakshatra_name)
+    
+    # Fallback to the master Mars list if no specific planet/nakshatra combo is defined
     if not medicine:
         medicine = library["Mars"].get(nakshatra_name, {
-            "yoga": "Gentle Mindfulness", 
-            "ayurveda": "Elemental Balance", 
-            "poem": "The stars are forming a new medicine for this placement..."
+            "yoga": "Gentle Movement", "ayurveda": "Equilibrium", "poem": "The stars are shifting toward a new light."
         })
     return medicine
 
-# --- 2. THE SIDEREAL ASTRONOMY ENGINE ---
+# --- 2. CALCULATIONS ENGINE ---
 def get_nakshatra_name(sign, degree):
     ranges = {
         "Aries": [(13.333, "Ashwini"), (26.666, "Bharani"), (30.0, "Krittika")],
@@ -135,51 +130,38 @@ def calculate_soul_map(year, month, day, hour, minute, lat, lon):
     utc_dt = local_dt.astimezone(pytz.utc)
     jd_ut = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
 
-    ayan_corr = swe.get_ayanamsa_ut(jd_ut)
     res_h = swe.houses_ex(jd_ut, lat, lon, b'P', 0)
+    ayan_corr = swe.get_ayanamsa_ut(jd_ut)
     asc_raw = (res_h[1][0] - ayan_corr) % 360
     
     signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
     asc_sign = signs[int(asc_raw / 30)]
-    asc_deg = asc_raw % 30
-    asc_nak = get_nakshatra_name(asc_sign, asc_deg)
+    asc_nak = get_nakshatra_name(asc_sign, asc_raw % 30)
     
-    planets = [(swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), 
-                (swe.VENUS, "Venus"), (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), 
-                (swe.SATURN, "Saturn"), (swe.MEAN_NODE, "Rahu")]
+    planets = [(swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"), 
+               (swe.MARS, "Mars"), (swe.JUPITER, "Jupiter"), (swe.SATURN, "Saturn"), (swe.MEAN_NODE, "Rahu")]
     
-    birth_planets = []
+    results = []
     for p_id, p_name in planets:
         res, ret = swe.calc_ut(jd_ut, p_id, swe.FLG_SIDEREAL)
         p_long = res[0]
         p_sign = signs[int(p_long / 30)]
-        p_deg = p_long % 30
-        p_nak = get_nakshatra_name(p_sign, p_deg)
+        p_nak = get_nakshatra_name(p_sign, p_long % 30)
         
-        # Determine Ketu (directly opposite Rahu)
         if p_name == "Rahu":
             k_long = (p_long + 180) % 360
-            k_sign = signs[int(k_long / 30)]
-            k_deg = k_long % 30
-            k_nak = get_nakshatra_name(k_sign, k_deg)
+            k_nak = get_nakshatra_name(signs[int(k_long/30)], k_long % 30)
             k_med = get_holistic_medicine("Ketu", k_nak)
-            birth_planets.append({
-                "name": "Ketu", "sign": k_sign, "deg": k_deg, "nakshatra": k_nak,
-                "poem": k_med["poem"], "yoga": k_med["yoga"], "ayurveda": k_med["ayurveda"]
-            })
+            results.append({"name": "Ketu", "sign": signs[int(k_long/30)], "nakshatra": k_nak, "med": k_med})
 
         med = get_holistic_medicine(p_name, p_nak)
-        birth_planets.append({
-            "name": p_name, "sign": p_sign, "deg": p_deg, "nakshatra": p_nak,
-            "poem": med["poem"], "yoga": med["yoga"], "ayurveda": med["ayurveda"]
-        })
+        results.append({"name": p_name, "sign": p_sign, "nakshatra": p_nak, "med": med})
 
-    return {"asc_sign": asc_sign, "asc_deg": asc_deg, "asc_nak": asc_nak, "planets": birth_planets}
+    return {"asc_sign": asc_sign, "asc_nak": asc_nak, "planets": results}
 
-# --- 3. STREAMLIT INTERFACE ---
-st.set_page_config(page_title="Soul Map Sanctuary", layout="wide")
-st.title("✨ The Real-Sky Soul Map")
-st.markdown("---")
+# --- 3. THE UI: COSMIC PHARMACOPEIA DISPLAY ---
+st.set_page_config(page_title="Cosmic Pharmacopeia", layout="wide")
+st.title("🔴🌕☀️ The Cosmic Pharmacopeia")
 
 with st.sidebar:
     st.header("Birth Calibration")
@@ -187,55 +169,38 @@ with st.sidebar:
     b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     address = st.text_input("Birth Location", "Houston, USA")
+
+# Geolocation logic
+geolocator = Nominatim(user_agent="pharmacopeia_app")
+loc = geolocator.geocode(address) if address else None
+if loc and st.button("Open the Library"):
+    data = calculate_soul_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, loc.latitude, loc.longitude)
     
+    st.header(f"Soul Prescriptions for {seeker}")
     st.divider()
-    with st.expander("Manual Coordinates (Use if Map is Busy)"):
-        m_lat = st.number_input("Lat", value=29.7604)
-        m_lon = st.number_input("Lon", value=-95.3698)
-        use_manual = st.checkbox("Use Manual Override")
 
-# Geolocation Processing
-lat, lon = None, None
-if use_manual:
-    lat, lon = m_lat, m_lon
-elif address:
-    try:
-        geolocator = Nominatim(user_agent="soul_map_v4")
-        loc = geolocator.geocode(address, timeout=10)
-        if loc: lat, lon = loc.latitude, loc.longitude
-    except:
-        st.sidebar.error("Geolocation service busy. Please use manual override.")
+    # THE ALIGNMENT CARDS
+    for p in data['planets']:
+        # Dynamic Icons for visual flair
+        icon = {"Sun": "☀️", "Moon": "🌕", "Mars": "🔴", "Mercury": "☿️", "Venus": "♀️", "Jupiter": "♃️", "Saturn": "🪐", "Rahu": "🐲", "Ketu": "🐍"}.get(p['name'], "✨")
+        
+        with st.container():
+            col1, col2 = st.columns([1, 4])
+            with col1:
+                st.subheader(f"{icon} {p['name']}")
+                st.write(f"**{p['nakshatra']}**")
+                st.caption(f"in {p['sign']}")
+            with col2:
+                # The detailed prescription block
+                st.markdown(f"### Soulful Prescription")
+                st.info(f"*{p['med']['poem']}*")
+                
+                # Holistic Details
+                inner_col1, inner_col2 = st.columns(2)
+                with inner_col1:
+                    st.markdown(f"🧘 **Yoga Asana:**  \n{p['med']['yoga']}")
+                with inner_col2:
+                    st.markdown(f"🍃 **Ayurvedic Alignment:**  \n{p['med']['ayurveda']}")
+            st.divider()
 
-if lat and lon and st.button("Generate Soul Map"):
-    data = calculate_soul_map(b_date.year, b_date.month, b_date.day, b_time.hour, b_time.minute, lat, lon)
-    
-    # Header Information
-    st.header(f"Soul Map for {seeker}")
-    st.metric("Foundation (Ascendant)", f"{data['asc_deg']:.2f}° {data['asc_sign']} in {data['asc_nak']}")
-    
-    # Ascendant Intro Poem (uses Mars/Foundation fallback)
-    asc_med = get_holistic_medicine("Mars", data['asc_nak'])
-    st.info(f"🌿 **Ascendant Guidance:** {asc_med['poem']}")
-
-    t1, t2 = st.tabs(["The Planetary Council", "The Holistic Body"])
-    
-    with t1:
-        st.subheader("Planetary Prescriptions")
-        for p in data['planets']:
-            with st.expander(f"{p['name']} — {p['nakshatra']} in {p['sign']}"):
-                st.markdown(f"*{p['poem']}*")
-
-    with t2:
-        st.subheader("Yoga & Ayurvedic Alignments")
-        # Creating a neat table for the physical body
-        body_data = []
-        for p in data['planets']:
-            body_data.append({
-                "Planet": p['name'],
-                "Nakshatra": p['nakshatra'],
-                "Yoga Asana": p['yoga'],
-                "Ayurvedic Focus": p['ayurveda']
-            })
-        st.table(body_data)
-
-st.caption("A Sidereal Astrology Project | Built with Swiss Ephemeris")
+st.caption("A master library integrating Vedic Astrology and Soulful Prescriptions.")
