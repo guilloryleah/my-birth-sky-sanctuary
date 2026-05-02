@@ -43,7 +43,6 @@ TEACHER_GUIDE = {
 
 # --- 2. THE EXPANDED REMEDY LIBRARY ---
 def get_sacred_alignment(planet_name, nakshatra, sign):
-    # Library includes Danny's and Leah's verified placements
     library = {
         "Sun": {
             "Taurus": {"pose": "Mountain Pose", "poem": "Root into the fertile valley of your worth.", "ayurveda": "Use grounding oils like Vetiver."},
@@ -120,6 +119,7 @@ st.markdown("""
 with st.sidebar:
     st.header("Birth Details")
     target_name = st.text_input("Name", "Leah")
+    # FIX: Date range removed
     b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     
@@ -142,12 +142,9 @@ if st.button("Unveil My Remedy"):
         
         jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
         
-        # SET SIDEREAL MODE
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
-        ayan = swe.get_ayanamsa_ut(jd)
         
-        # CALCULATE SIDEREAL ASCENDANT (House 1)
-        # Using FLG_SIDEREAL ensures the houses are calculated in the sidereal plane
+        # SIDEREAL HOUSE CALCULATION
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', swe.FLG_SIDEREAL)
         asc_deg = res_h[0][0] 
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
@@ -178,7 +175,6 @@ if st.button("Unveil My Remedy"):
     else:
         st.error("Location not found.")
 
-# MEDICAL DISCLAIMER
 st.markdown("""
 ---
 ### ⚖️ A Note on Your Journey
