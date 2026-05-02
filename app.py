@@ -234,33 +234,33 @@ REMEDY_LIBRARY = {
         },
     },
     "Ascendant": {
-        "Ashwini":        {"pose": "Warrior I",           "focus": "Swift Beginnings",    "ayurveda": "Morning movement before sunrise.",           "poem": "You arrived running. Trust the speed of your own spirit."},
-        "Bharani":        {"pose": "Bound Angle Pose",    "focus": "Creative Patience",   "ayurveda": "Drink CCF tea.",                              "poem": "What you carry is heavy — and sacred."},
-        "Krittika":       {"pose": "Warrior II",          "focus": "Purifying Fire",      "ayurveda": "Warm lemon water each morning.",              "poem": "You are the flame that burns away what is not true."},
-        "Rohini":         {"pose": "Stillness",           "focus": "Earthing",            "ayurveda": "Bare feet on the earth for 10 minutes.",      "poem": "Sink your feet into the red earth and listen to the pulse of the soil."},
-        "Mrigashira":     {"pose": "Triangle Pose",       "focus": "Seeking Heart",       "ayurveda": "Rosehip tea for the heart.",                  "poem": "The deer seeks what the forest has always held. Look within."},
-        "Ardra":          {"pose": "Child's Pose",        "focus": "Grief & Release",     "ayurveda": "Steam inhalation with eucalyptus.",           "poem": "Let the storm move through you. You are the sky, not the rain."},
-        "Punarvasu":      {"pose": "Warrior I",           "focus": "Renewal",             "ayurveda": "Turmeric golden milk before bed.",            "poem": "Return again and again. Each sunrise is your second chance."},
-        "Pushya":         {"pose": "Bridge Pose",         "focus": "Nourishment",         "ayurveda": "Cook for yourself with love.",                "poem": "You are the flower that blooms in winter. Nourish what is tender."},
-        "Ashlesha":       {"pose": "Stillness",           "focus": "Inner Wisdom",        "ayurveda": "Meditate near water.",                       "poem": "The serpent knows the secrets of the deep. So do you."},
-        "Magha":          {"pose": "Mountain Pose",       "focus": "Ancestral Power",     "ayurveda": "Warm sesame oil massage.",                    "poem": "You stand on the shoulders of kings. Rise accordingly."},
-        "Purva Phalguni": {"pose": "Bound Angle Pose",    "focus": "Creative Joy",        "ayurveda": "Favor sweet, juicy fruits.",                  "poem": "Rest is not laziness. Bloom in the afternoon sun."},
-        "Uttara Phalguni":{"pose": "Bridge Pose",         "focus": "Service & Steadiness","ayurveda": "Eat warm, cooked root vegetables.",           "poem": "The sun does not ask permission to shine. Serve with your whole self."},
-        "Hasta":          {"pose": "Crow Pose",           "focus": "Skillful Hands",      "ayurveda": "Practice Nasya (nasal oiling).",              "poem": "Everything you need is already in your hands."},
-        "Chitra":         {"pose": "Triangle Pose",       "focus": "Beauty & Craft",      "ayurveda": "Rose water for the skin.",                   "poem": "You are the artist. The world is your unfinished canvas."},
-        "Swati":          {"pose": "Stillness",           "focus": "Independence",        "ayurveda": "Breathe outdoor air for 20 minutes.",        "poem": "The wind bends the grass but never breaks it. Be supple."},
-        "Vishakha":       {"pose": "Warrior II",          "focus": "Focused Ambition",    "ayurveda": "Sip tulsi tea.",                              "poem": "Fix your gaze and walk. The goal is already yours."},
-        "Anuradha":       {"pose": "Bound Angle Pose",    "focus": "Devotion",            "ayurveda": "Lotus seed or saffron milk.",                 "poem": "True friendship is the rarest star. You carry it in your chest."},
-        "Jyeshtha":       {"pose": "Mountain Pose",       "focus": "Elder Wisdom",        "ayurveda": "Warm, nourishing soups.",                    "poem": "You have earned your authority. Now use it gently."},
-        "Moola":          {"pose": "Downward-Facing Dog", "focus": "Root & Release",      "ayurveda": "Daily brisk walking in nature.",              "poem": "Dig until you find the root. Then let it breathe."},
-        "Purva Ashada":   {"pose": "Forearm Stand",       "focus": "Invincible Spirit",   "ayurveda": "Coconut water for vitality.",                 "poem": "You have not yet been defeated. Rise and declare yourself."},
-        "Uttara Ashada":  {"pose": "Warrior I",           "focus": "Final Victory",       "ayurveda": "Sesame seeds with honey.",                   "poem": "The battle is long but the victory is certain. Stay."},
-        "Shravana":       {"pose": "Child's Pose",        "focus": "Listening & Learning","ayurveda": "Oil the ears before sleep.",                 "poem": "The wisest among us learned to listen before they learned to speak."},
-        "Dhanishta":      {"pose": "Bridge Pose",         "focus": "Abundance & Rhythm",  "ayurveda": "Drum or move to music daily.",               "poem": "Your life is a song. Play it loud."},
-        "Shatabhisha":    {"pose": "Stillness",           "focus": "Healing Vision",      "ayurveda": "Star-gazing meditation at night.",           "poem": "You hold a hundred medicines within you."},
-        "Purva Bhadrapada":{"pose": "Forearm Stand",     "focus": "Sacred Fire",         "ayurveda": "Cooling rose or sandalwood oil.",            "poem": "You are the bridge between the seen and unseen. Walk it bravely."},
-        "Uttara Bhadrapada":{"pose": "Child's Pose",     "focus": "Oceanic Depth",       "ayurveda": "Warm baths with sea salt.",                  "poem": "Still water runs deep. Trust the wisdom beneath your silence."},
-        "Revati":         {"pose": "Child's Pose",        "focus": "Gentle Completion",   "ayurveda": "Jasmine or lotus flower offering.",          "poem": "You are the last light before the dawn. Rest, and begin again."},
+        "Ashwini":             {"pose": "Warrior I",           "focus": "Swift Beginnings",     "ayurveda": "Morning movement before sunrise.",          "poem": "You arrived running. Trust the speed of your own spirit."},
+        "Bharani":             {"pose": "Bound Angle Pose",    "focus": "Creative Patience",    "ayurveda": "Drink CCF tea.",                             "poem": "What you carry is heavy — and sacred."},
+        "Krittika":            {"pose": "Warrior II",          "focus": "Purifying Fire",       "ayurveda": "Warm lemon water each morning.",             "poem": "You are the flame that burns away what is not true."},
+        "Rohini":              {"pose": "Stillness",           "focus": "Earthing",             "ayurveda": "Bare feet on the earth for 10 minutes.",     "poem": "Sink your feet into the red earth and listen to the pulse of the soil."},
+        "Mrigashira":          {"pose": "Triangle Pose",       "focus": "Seeking Heart",        "ayurveda": "Rosehip tea for the heart.",                 "poem": "The deer seeks what the forest has always held. Look within."},
+        "Ardra":               {"pose": "Child's Pose",        "focus": "Grief & Release",      "ayurveda": "Steam inhalation with eucalyptus.",          "poem": "Let the storm move through you. You are the sky, not the rain."},
+        "Punarvasu":           {"pose": "Warrior I",           "focus": "Renewal",              "ayurveda": "Turmeric golden milk before bed.",           "poem": "Return again and again. Each sunrise is your second chance."},
+        "Pushya":              {"pose": "Bridge Pose",         "focus": "Nourishment",          "ayurveda": "Cook for yourself with love.",               "poem": "You are the flower that blooms in winter. Nourish what is tender."},
+        "Ashlesha":            {"pose": "Stillness",           "focus": "Inner Wisdom",         "ayurveda": "Meditate near water.",                      "poem": "The serpent knows the secrets of the deep. So do you."},
+        "Magha":               {"pose": "Mountain Pose",       "focus": "Ancestral Power",      "ayurveda": "Warm sesame oil massage.",                   "poem": "You stand on the shoulders of kings. Rise accordingly."},
+        "Purva Phalguni":      {"pose": "Bound Angle Pose",    "focus": "Creative Joy",         "ayurveda": "Favor sweet, juicy fruits.",                 "poem": "Rest is not laziness. Bloom in the afternoon sun."},
+        "Uttara Phalguni":     {"pose": "Bridge Pose",         "focus": "Service & Steadiness", "ayurveda": "Eat warm, cooked root vegetables.",          "poem": "The sun does not ask permission to shine. Serve with your whole self."},
+        "Hasta":               {"pose": "Crow Pose",           "focus": "Skillful Hands",       "ayurveda": "Practice Nasya (nasal oiling).",             "poem": "Everything you need is already in your hands."},
+        "Chitra":              {"pose": "Triangle Pose",       "focus": "Beauty & Craft",       "ayurveda": "Rose water for the skin.",                  "poem": "You are the artist. The world is your unfinished canvas."},
+        "Swati":               {"pose": "Stillness",           "focus": "Independence",         "ayurveda": "Breathe outdoor air for 20 minutes.",       "poem": "The wind bends the grass but never breaks it. Be supple."},
+        "Vishakha":            {"pose": "Warrior II",          "focus": "Focused Ambition",     "ayurveda": "Sip tulsi tea.",                             "poem": "Fix your gaze and walk. The goal is already yours."},
+        "Anuradha":            {"pose": "Bound Angle Pose",    "focus": "Devotion",             "ayurveda": "Lotus seed or saffron milk.",                "poem": "True friendship is the rarest star. You carry it in your chest."},
+        "Jyeshtha":            {"pose": "Mountain Pose",       "focus": "Elder Wisdom",         "ayurveda": "Warm, nourishing soups.",                   "poem": "You have earned your authority. Now use it gently."},
+        "Moola":               {"pose": "Downward-Facing Dog", "focus": "Root & Release",       "ayurveda": "Daily brisk walking in nature.",             "poem": "Dig until you find the root. Then let it breathe."},
+        "Purva Ashada":        {"pose": "Forearm Stand",       "focus": "Invincible Spirit",    "ayurveda": "Coconut water for vitality.",                "poem": "You have not yet been defeated. Rise and declare yourself."},
+        "Uttara Ashada":       {"pose": "Warrior I",           "focus": "Final Victory",        "ayurveda": "Sesame seeds with honey.",                  "poem": "The battle is long but the victory is certain. Stay."},
+        "Shravana":            {"pose": "Child's Pose",        "focus": "Listening & Learning", "ayurveda": "Oil the ears before sleep.",                "poem": "The wisest among us learned to listen before they learned to speak."},
+        "Dhanishta":           {"pose": "Bridge Pose",         "focus": "Abundance & Rhythm",   "ayurveda": "Drum or move to music daily.",              "poem": "Your life is a song. Play it loud."},
+        "Shatabhisha":         {"pose": "Stillness",           "focus": "Healing Vision",       "ayurveda": "Star-gazing meditation at night.",          "poem": "You hold a hundred medicines within you."},
+        "Purva Bhadrapada":    {"pose": "Forearm Stand",       "focus": "Sacred Fire",          "ayurveda": "Cooling rose or sandalwood oil.",           "poem": "You are the bridge between the seen and unseen. Walk it bravely."},
+        "Uttara Bhadrapada":   {"pose": "Child's Pose",        "focus": "Oceanic Depth",        "ayurveda": "Warm baths with sea salt.",                 "poem": "Still water runs deep. Trust the wisdom beneath your silence."},
+        "Revati":              {"pose": "Child's Pose",        "focus": "Gentle Completion",    "ayurveda": "Jasmine or lotus flower offering.",         "poem": "You are the last light before the dawn. Rest, and begin again."},
     },
 }
 
@@ -275,10 +275,7 @@ def get_sacred_alignment(planet_name, nakshatra, sign):
     """Look up remedy by nakshatra first, then sign, then default."""
     if planet_name == "Ketu":
         return REMEDY_LIBRARY["Ketu"]["General"]
-
     planet_data = REMEDY_LIBRARY.get(planet_name, {})
-
-    # Try nakshatra first, then sign, then default
     return planet_data.get(nakshatra) or planet_data.get(sign) or DEFAULT_REMEDY
 
 # --- 3. THE CALCULATOR ENGINE ---
@@ -393,7 +390,7 @@ if st.button("Unveil My Remedy"):
                         st.write(f"• {step}")
             st.divider()
 
-            # --- PLANETS (including Ketu as South Node) ---
+            # --- PLANETS ---
             planets = [
                 ("Sun",     swe.SUN),
                 ("Moon",    swe.MOON),
