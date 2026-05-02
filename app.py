@@ -33,7 +33,7 @@ TEACHER_GUIDE = {
     },
     "Triangle Pose": {
         "sanskrit": "Trikonasana",
-        "steps": ["Feet wide, reach one hand to your xhin or floor.", "Extend the other arm up.", "Keep the chest open."]
+        "steps": ["Feet wide, reach one hand to your shin or floor.", "Extend the other arm up.", "Keep the chest open."]
     },
     "Bound Angle Pose": {
         "sanskrit": "Baddha Konasana",
@@ -123,7 +123,7 @@ with st.sidebar:
     st.header("Birth Details")
     target_name = st.text_input("Name", "Leah")
     
-    # --- CRITICAL FIX: No min_value or max_value allowed ---
+    # FIXED: Date input no longer restricted to 1959-1979
     b_date = st.date_input("Birth Date", value=date(1969, 9, 24))
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     
@@ -149,7 +149,7 @@ if st.button("Unveil My Remedy"):
         # Sidereal Lahiri Setup
         swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
         
-        # Calculate Ascendant accurately for Danny's Taurus placement
+        # Correct Ascendant calculation for Danny's placement
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', swe.FLG_SIDEREAL)
         asc_deg = res_h[0][0] 
         asc_nak, asc_sign = get_nakshatra(asc_deg), get_sidereal_sign(asc_deg)
