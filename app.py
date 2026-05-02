@@ -1,6 +1,6 @@
 import streamlit as st
 import swisseph as swe
-from datetime import datetime
+from datetime import datetime, date
 from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 import pytz
@@ -71,27 +71,27 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             }
         },
         "Mercury": {
-            "Hasta": {
+            "Aries": {
                 "pose": "Crow Pose", 
                 "focus": "Mental Precision", 
                 "ayurveda": "Practice Nasya (nasal oiling) and minimize screen time before noon.",
-                "poem": "Manifest your dreams through the work of your hands. The magic you seek is hidden in the mastery of small details."
+                "poem": "Speak with the sharpness of a needle but the intent of a healer. Your words carve the path for your future."
             }
         },
         "Venus": {
-            "Magha": {
+            "Taurus": {
                 "pose": "Mountain Pose", 
                 "focus": "Heart Center & Lineage", 
                 "ayurveda": "Perform Abhyanga (self-massage) with warm sesame oil to honor your lineage.",
-                "poem": "You are the living prayer of those who came before you. Honor your bloodline by breaking the old cycles."
+                "poem": "Beauty is found in the stillness of the stone and the bloom of the flower. Root yourself in what is truly valuable."
             }
         },
         "Mars": {
-            "Moola": {
+            "Gemini": {
                 "pose": "Downward-Facing Dog", 
                 "focus": "Psoas & Root Tension", 
                 "ayurveda": "Engage in daily brisk walking in nature and use warming spices like ginger.",
-                "poem": "If you want to see the truth, you must be willing to burn the lie. Dig until you find the root of your pain."
+                "poem": "Your strength is not just in your muscles, but in the agility of your mind. Direct your fire toward clarity."
             }
         },
         "Saturn": {
@@ -123,6 +123,7 @@ def get_sacred_alignment(planet_name, nakshatra_name):
     if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, library["Moon"]["Purva Bhadrapada"])
     if planet_name == "Ketu": return library["Ketu"]["General"]
     
+    # Generic mapping if specific override isn't present
     return library.get(planet_name, {}).get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "ayurveda": "Breathe deeply.", "poem": "Breathe into the silence..."})
 
 # --- 3. THE CALCULATOR ENGINE ---
@@ -138,7 +139,6 @@ def get_sidereal_sign(degree):
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
-# THE EDUCATIONAL POEM
 st.markdown("""
 ### 🌀 The Song of the Shifting Sky
 *A little secret for the curious soul...*
@@ -162,7 +162,15 @@ It’s just how we dance with the **real, living sky.**
 with st.sidebar:
     st.header("Birth Sky Details")
     name = st.text_input("Name", "Leah")
-    b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
+    
+    # ADJUSTED DATE RANGE FOR HISTORY & FUTURE
+    b_date = st.date_input(
+        "Birth Date", 
+        value=datetime(1969, 9, 24),
+        min_value=date(1, 1, 1), 
+        max_value=date(2099, 12, 31)
+    )
+    
     b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
     st.subheader("Birth Location")
     city, state, country = st.text_input("City", "Houston"), st.text_input("State", "Texas"), st.text_input("Country", "USA")
@@ -206,12 +214,20 @@ if st.button("Unveil My Remedy"):
             p_deg = res[0]
             p_nak, p_sign = get_nakshatra(p_deg), get_sidereal_sign(p_deg)
             
-            # Known Placements Overrides
-            if p_name == "Sun": p_nak = "Uttara Phalguni"
-            if p_name == "Moon": p_nak = "Purva Bhadrapada"
+            # --- PERSONALIZED OVERRIDES ---
+            if p_name == "Sun": p_nak, p_sign = "Uttara Phalguni", "Taurus"
+            if p_name == "Moon": p_nak, p_sign = "Purva Bhadrapada", "Pisces"
             if p_name == "Saturn": p_nak = "Bharani"
+            if name == "Danny":
+                if p_name == "Sun": p_sign = "Taurus"
+                if p_name == "Venus": p_sign = "Taurus"
+                if p_name == "Mercury": p_sign = "Aries"
+                if p_name == "Mars": p_sign = "Gemini"
             
-            med = get_sacred_alignment(p_name, p_nak)
+            # Get remedy based on planet and sign/nakshatra
+            # We check for sign-based remedies for the specific overrides
+            med = get_sacred_alignment(p_name, p_sign if name == "Danny" else p_nak)
+            
             with st.expander(f"✨ {p_name} Alignment: {p_nak} in {p_sign}", expanded=True):
                 st.markdown(f"*{med['poem']}*")
                 st.write(f"🧘 **Yoga Pose:** {med['pose']} | 📍 **Focus:** {med['focus']}")
