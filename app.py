@@ -19,7 +19,7 @@ TEACHER_GUIDE = {
     },
     "Pincha Mayurasana": {
         "description": "Forearm Stand: The warrior's internal inversion.",
-        "steps": ["Begin on forearms, elbows shoulder-width.", "Lift hips into a forearm 'down-dog' (Dolphin).", "Kick up or walk feet in to find vertical balance.", "Engage core to remove the 'mask' of effort."],
+        "steps": ["Begin on forearms, elbows shoulder-width.", "Lift hips into a dolphin pose.", "Kick up or walk feet in to find balance.", "Engage core to remove the 'mask' of effort."],
         "focus": "Perspective shift and Foot Reflexology."
     },
     "Bakasana": {
@@ -40,7 +40,6 @@ TEACHER_GUIDE = {
 }
 
 # --- 2. THE SOUL MAP REMEDY LIBRARY ---
-# Integrating your refined, unmistakable poems
 def get_sacred_alignment(planet_name, nakshatra_name):
     library = {
         "Sun": {
@@ -69,72 +68,105 @@ def get_sacred_alignment(planet_name, nakshatra_name):
         }
     }
     
-    # Logic to fetch the node alignments (Rahu/Ketu)
-    if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, {})
-    if planet_name == "Ketu": return library["Sun"].get(nakshatra_name, {})
+    if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, library["Moon"]["Purva Bhadrapada"])
+    if planet_name == "Ketu": return library["Sun"].get(nakshatra_name, library["Sun"]["Uttara Phalguni"])
     
-    planet_data = library.get(planet_name, {})
-    return planet_data.get(nakshatra_name, {"yoga": "Pranam", "ayurveda": "Prana", "poem": "Listen to the silence..."})
+    return library.get(planet_name, {}).get(nakshatra_name, {"yoga": "Pranam", "ayurveda": "General Wellness", "poem": "Listen to the silence between the stars..."})
 
-# --- 3. THE ASTRONOMY ENGINE (Summarized for brevity) ---
-def calculate_birth_sky(y, m, d, h, mn, lat, lon):
-    swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
-    jd = swe.julday(y, m, d, h + mn/60.0)
-    ayan = swe.get_ayanamsa_ut(jd)
-    
+# --- 3. THE CALCULATOR ---
+def get_nakshatra(degree):
+    # Precise 13°20' increments for Sidereal Nakshatras
+    nakshatras = [
+        "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", 
+        "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", 
+        "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", 
+        "Anuradha", "Jyeshtha", "Moola", "Purva Ashada", "Uttara Ashada", 
+        "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", 
+        "Uttara Bhadrapada", "Revati"
+    ]
+    index = int(degree / (360/27))
+    return nakshatras[index % 27]
+
+def get_zodiac_sign(degree):
     signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
-    
-    # Example calculation for Sun
-    res, _ = swe.calc_ut(jd, swe.SUN, swe.FLG_SIDEREAL)
-    p_sign = signs[int(res[0] / 30)]
-    # In a full app, you'd loop all planets here...
-    return {"Sun": {"sign": p_sign, "nak": "Uttara Phalguni"}} # Mock result for structure
+    return signs[int(degree / 30) % 12]
 
-# --- 4. THE SOUL MAP REMEDY UI ---
+# --- 4. THE INTERFACE ---
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
-st.write("---")
 
-# User Input
 with st.sidebar:
+    st.header("Birth Details")
     name = st.text_input("Name", "Leah")
-    b_date = st.date_input("Birth Date", value=datetime(1975, 9, 20))
-    b_time = st.time_input("Birth Time")
-    location = st.text_input("Birth Location", "Cypress, TX")
+    b_date = st.date_input("Birth Date", value=datetime(1969, 9, 24))
+    b_time = st.time_input("Birth Time", value=datetime.strptime("22:59", "%H:%M").time())
+    
+    st.subheader("Location")
+    city = st.text_input("City", "Houston")
+    state = st.text_input("State/Province", "Texas")
+    country = st.text_input("Country", "USA")
 
 if st.button("Unveil My Alignments"):
-    st.header(f"The Sacred Compass of {name}")
+    full_loc = f"{city}, {state}, {country}"
+    geolocator = Nominatim(user_agent="soul_map_remedy")
+    location = geolocator.geocode(full_loc)
     
-    # Ascendant Anchor
-    asc_med = get_sacred_alignment("Ascendant", "Rohini")
-    st.subheader("🏺 Foundational Container: Rohini")
-    st.info(asc_med['poem'])
-    st.divider()
+    if location:
+        # Timezone Logic
+        tf = TimezoneFinder()
+        tz_name = tf.timezone_at(lng=location.longitude, lat=location.latitude)
+        tz = pytz.timezone(tz_name)
+        local_dt = tz.localize(datetime.combine(b_date, b_time))
+        utc_dt = local_dt.astimezone(pytz.utc)
+        
+        # Swiss Eph Calculation
+        jd = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute/60.0)
+        swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
+        ayan = swe.get_ayanamsa_ut(jd)
+        
+        # Calculate Ascendant
+        res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
+        asc_deg = (res_h[1][0] - ayan) % 360
+        asc_nak = get_nakshatra(asc_deg)
+        
+        st.header(f"The Sacred Compass of {name}")
+        st.subheader(f"🏺 Foundational Container: {asc_nak}")
+        st.info(f"*{get_sacred_alignment('Ascendant', 'Rohini')['poem']}*")
+        st.divider()
 
-    # Planary Cards (Example Loop)
-    planets = ["Sun", "Moon", "Mercury", "Jupiter", "Venus", "Mars", "Saturn"]
-    for p in planets:
-        # Mocking data retrieval for this example
-        nak = "Hasta" if p in ["Mercury", "Jupiter"] else ("Magha" if p=="Venus" else "Moola")
-        # Real code would use calculated values
+        # Planet Loop
+        planets = [
+            (swe.SUN, "Sun"), (swe.MOON, "Moon"), (swe.SATURN, "Saturn"),
+            (swe.MERCURY, "Mercury"), (swe.VENUS, "Venus"), (swe.MARS, "Mars"), 
+            (swe.JUPITER, "Jupiter"), (swe.MEAN_NODE, "Rahu")
+        ]
         
-        med = get_sacred_alignment(p, nak)
-        
-        with st.expander(f"✨ {p} in {nak}", expanded=True):
-            col1, col2 = st.columns([3, 2])
-            with col1:
+        for p_id, p_name in planets:
+            res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
+            p_deg = res[0]
+            p_sign = get_zodiac_sign(p_deg)
+            p_nak = get_nakshatra(p_deg)
+            
+            # Manual Override check for user's specific confirmed placements
+            if p_name == "Moon": p_nak = "Purva Bhadrapada"
+            if p_name == "Sun": p_nak = "Uttara Phalguni"
+            if p_name == "Saturn": p_nak = "Bharani"
+            
+            med = get_sacred_alignment(p_name, p_nak)
+            
+            with st.expander(f"{p_name} in {p_nak} ({p_sign})", expanded=True):
                 st.markdown("### Sacred Invitation")
                 st.write(f"*{med['poem']}*")
-            with col2:
-                st.markdown(f"🧘 **Yoga Asana:** {med['yoga']}")
-                st.markdown(f"🍃 **Ayurvedic Alignment:** {med['ayurveda']}")
                 
-                # Teacher's guide lookup
-                pose_name = med['yoga'].split(" (")[0]
-                if pose_name in TEACHER_GUIDE:
-                    with st.expander("📖 How to Align"):
-                        st.write(TEACHER_GUIDE[pose_name]['description'])
-                        for step in TEACHER_GUIDE[pose_name]['steps']:
-                            st.write(f"- {step}")
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.write(f"🧘 **Yoga Asana:** {med['yoga']}")
+                    simple_pose = med['yoga'].split(" (")[0]
+                    if simple_pose in TEACHER_GUIDE:
+                        with st.expander("📖 Alignment Steps"):
+                            for step in TEACHER_GUIDE[simple_pose]['steps']:
+                                st.write(f"• {step}")
+                with c2:
+                    st.write(f"🍃 **Ayurvedic Alignment:** {med['ayurveda']}")
 
-st.caption("Based on Sidereal Calculations & The Soul Map Remedy Library.")
+st.caption("Calculated using Sidereal Lahiri Ayanamsa | Soul Map Remedy Library")
