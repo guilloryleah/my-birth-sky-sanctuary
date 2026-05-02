@@ -6,12 +6,11 @@ from timezonefinder import TimezoneFinder
 import pytz
 
 # --- 1. THE TEACHER'S GUIDED PRACTICE ---
-# Making the "vague" terms understandable with clear steps.
 TEACHER_GUIDE = {
     "Downward-Facing Dog": {
         "sanskrit": "Adho Mukha Svanasana",
-        "focus": "Psoas Release (Deep Hip/Lower Back Connection)",
-        "why": "This releases deep-seated tension and 'digs' to the root of physical discomfort.",
+        "focus": "Psoas Release (Deep Hip & Lower Back Connection)",
+        "why": "Releases deep-seated tension and 'digs' to the root of physical discomfort.",
         "steps": [
             "Start on your hands and knees, wrists under shoulders.",
             "Tuck your toes and lift your hips toward the ceiling to form an 'V' shape.",
@@ -47,7 +46,7 @@ TEACHER_GUIDE = {
     "Crow Pose": {
         "sanskrit": "Bakasana",
         "focus": "Mental Focus & Wrist Strength",
-        "why": "Teaches the mastery of small details and finding balance in the 'dirt'.",
+        "why": "Teaches the mastery of small details and finding balance in difficult moments.",
         "steps": [
             "Come into a low squat with feet together and knees wide.",
             "Place your hands flat on the floor, shoulder-width apart.",
@@ -83,7 +82,6 @@ TEACHER_GUIDE = {
 }
 
 # --- 2. THE SOUL MAP REMEDY LIBRARY ---
-# Updated with common names and the refined poems
 def get_sacred_alignment(planet_name, nakshatra_name):
     library = {
         "Sun": {
@@ -108,19 +106,23 @@ def get_sacred_alignment(planet_name, nakshatra_name):
             "Rohini": {"poem": "Stop searching for meaning in the noise of the screen. Sink your bare feet into the red earth and listen to the pulse of the soil. Nurture the world with slow hands."}
         }
     }
-    # Logic to fetch node alignments (Rahu/Ketu)
+    
     if planet_name == "Rahu": return library["Moon"].get(nakshatra_name, library["Moon"]["Purva Bhadrapada"])
     if planet_name == "Ketu": return library["Sun"].get(nakshatra_name, library["Sun"]["Uttara Phalguni"])
     
     planet_data = library.get(planet_name, {})
-    return planet_data.get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "poem": "Breathe into the moment..."})
+    return planet_data.get(nakshatra_name, {"pose": "Stillness", "focus": "Breath", "poem": "Breathe into the silence between the stars..."})
 
-# --- 3. THE CALCULATOR ---
+# --- 3. THE CALCULATOR ENGINE ---
 def get_nakshatra(degree):
     nakshatras = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Moola", "Purva Ashada", "Uttara Ashada", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"]
     return nakshatras[int(degree / (360/27)) % 27]
 
-# --- 4. THE INTERFACE ---
+def get_sidereal_sign(degree):
+    signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
+    return signs[int(degree / 30) % 12]
+
+# --- 4. THE USER INTERFACE ---
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
 st.title("🌌 The Soul Map Remedy")
 
@@ -155,25 +157,27 @@ if st.button("Unveil My Remedy"):
         res_h = swe.houses_ex(jd, location.latitude, location.longitude, b'P', 0)
         asc_deg = (res_h[1][0] - ayan) % 360
         asc_nak = get_nakshatra(asc_deg)
+        asc_sign = get_sidereal_sign(asc_deg)
         
         st.header(f"The Soul Map of {name}")
-        st.info(f"**Foundational Container: {asc_nak}**\n\n*{get_sacred_alignment('Ascendant', 'Rohini')['poem']}*")
+        st.info(f"**Foundational Container: {asc_nak} in {asc_sign}**\n\n*{get_sacred_alignment('Ascendant', 'Rohini')['poem']}*")
 
-        # Alignment Cards
         planets = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Saturn", swe.SATURN), ("Mercury", swe.MERCURY), ("Venus", swe.VENUS), ("Mars", swe.MARS)]
         
         for p_name, p_id in planets:
             res, _ = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
-            p_nak = get_nakshatra(res[0])
+            p_deg = res[0]
+            p_nak = get_nakshatra(p_deg)
+            p_sign = get_sidereal_sign(p_deg)
             
-            # Correction Overrides for your known placements
+            # Application of specific natal overrides
             if p_name == "Sun": p_nak = "Uttara Phalguni"
             if p_name == "Moon": p_nak = "Purva Bhadrapada"
             if p_name == "Saturn": p_nak = "Bharani"
             
             med = get_sacred_alignment(p_name, p_nak)
             
-            with st.expander(f"✨ {p_name} Alignment: {p_nak}", expanded=True):
+            with st.expander(f"✨ {p_name} Alignment: {p_nak} in {p_sign}", expanded=True):
                 st.markdown(f"*{med['poem']}*")
                 st.write(f"🧘 **Yoga Pose:** {med['pose']}")
                 st.write(f"📍 **Body Focus:** {med['focus']}")
@@ -186,3 +190,7 @@ if st.button("Unveil My Remedy"):
                         for step in TEACHER_GUIDE[med['pose']]['steps']:
                             st.write(f"• {step}")
         st.divider()
+    else:
+        st.error("Could not find birth location. Please check the City, State, and Country fields.")
+
+st.caption("Calculated using Sidereal Lahiri Ayanamsa | The Soul Map Remedy Library")
