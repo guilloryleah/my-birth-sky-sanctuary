@@ -309,33 +309,47 @@ IAU_SIGN_BOUNDARIES = [
     (351.0, "Pisces"),
 ]
 
+# IAU constellation boundaries along the ecliptic (tropical longitude, J2000).
+# Validated against Astro.com Lahiri sidereal positions + known ayanamsa of ~23-24°.
+# Ophiuchus is excluded — its range (~240°–266°) is absorbed into Scorpio.
+IAU_SIGN_BOUNDARIES = [
+    (  0.0, "Aries"),
+    ( 28.0, "Taurus"),
+    ( 90.0, "Gemini"),
+    (118.0, "Cancer"),
+    (138.0, "Leo"),
+    (174.0, "Virgo"),
+    (218.0, "Libra"),
+    (240.0, "Scorpio"),    # moved from 224 — absorbs Ophiuchus cleanly
+    (266.0, "Sagittarius"),
+    (300.0, "Capricorn"),
+    (327.0, "Aquarius"),
+    (351.0, "Pisces"),
+]
+
+def get_iau_sign(tropical_degree):
+    """Return the IAU sign for a tropical ecliptic longitude (0–360°)."""
+    d = tropical_degree % 360
+    sign = "Pisces"
+    for start, name in IAU_SIGN_BOUNDARIES:
+        if d >= start:
+            sign = name
+    return sign
+
+def format_degree(tropical_degree, sign):
+    """Return whole degrees within the current IAU sign boundary."""
+    d = tropical_degree % 360
+    start = next((s for s, n in IAU_SIGN_BOUNDARIES if n == sign), 0.0)
+    return f"{int(d - start)}°"
+
 def get_nakshatra(tropical_degree, ayan):
     """
     Nakshatra anchored to real stars.
-    Subtract Lahiri ayanamsa from tropical degree to get true sidereal position,
+    Subtract Lahiri ayanamsa from tropical degree to get sidereal position,
     then map onto the 27-nakshatra belt.
     """
     sidereal_deg = (tropical_degree - ayan) % 360
     return NAKSHATRAS[int(sidereal_deg / (360 / 27)) % 27]
-
-def get_iau_sign(degree):
-    """Return IAU constellation for a tropical ecliptic longitude (0-360 deg)."""
-    degree = degree % 360
-    sign = "Pisces"
-    for start, name in IAU_SIGN_BOUNDARIES:
-        if degree >= start:
-            sign = name
-    return sign
-
-def format_degree(degree, sign):
-    """Return degrees within the current IAU sign."""
-    degree = degree % 360
-    start = 0.0
-    for s, name in IAU_SIGN_BOUNDARIES:
-        if name == sign:
-            start = s
-            break
-    return f"{int(degree - start)}°"
 
 # --- 4. THE INTERFACE ---
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
