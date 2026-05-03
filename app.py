@@ -290,41 +290,22 @@ NAKSHATRAS = [
     "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati",
 ]
 
-# IAU constellation boundaries along the ecliptic (J2000), excluding Ophiuchus.
-# Each tuple is (ecliptic_longitude_start, sign_name).
-# Ophiuchus (roughly 234-266 deg) is absorbed into Scorpio for traditional 12-sign system.
-# Source: IAU boundary data as used by TheSkyLive and JPL.
+# Accurate IAU constellation boundaries along the ecliptic (tropical longitude, J2000).
+# Sources: cantab.net/users/davidasher and universalworkshop.com
+# Ophiuchus (241.16°–266.63°) absorbed into Scorpio for traditional 12-sign system.
 IAU_SIGN_BOUNDARIES = [
-    (0.0,   "Aries"),
-    (28.0,  "Taurus"),
-    (90.0,  "Gemini"),
-    (118.0, "Cancer"),
-    (138.0, "Leo"),
-    (174.0, "Virgo"),
-    (218.0, "Libra"),
-    (224.0, "Scorpio"),
-    (266.0, "Sagittarius"),
-    (300.0, "Capricorn"),
-    (327.0, "Aquarius"),
-    (351.0, "Pisces"),
-]
-
-# IAU constellation boundaries along the ecliptic (tropical longitude, J2000).
-# Validated against Astro.com Lahiri sidereal positions + known ayanamsa of ~23-24°.
-# Ophiuchus is excluded — its range (~240°–266°) is absorbed into Scorpio.
-IAU_SIGN_BOUNDARIES = [
-    (  0.0, "Aries"),
-    ( 28.0, "Taurus"),
-    ( 90.0, "Gemini"),
-    (118.0, "Cancer"),
-    (138.0, "Leo"),
-    (174.0, "Virgo"),
-    (218.0, "Libra"),
-    (240.0, "Scorpio"),    # moved from 224 — absorbs Ophiuchus cleanly
-    (266.0, "Sagittarius"),
-    (300.0, "Capricorn"),
-    (327.0, "Aquarius"),
-    (351.0, "Pisces"),
+    (  0.0,   "Aries"),
+    ( 27.85,  "Taurus"),
+    ( 57.85,  "Gemini"),
+    ( 90.63,  "Cancer"),
+    (118.23,  "Leo"),
+    (173.85,  "Virgo"),
+    (217.81,  "Libra"),
+    (241.16,  "Scorpio"),
+    (266.63,  "Sagittarius"),
+    (299.70,  "Capricorn"),
+    (327.49,  "Aquarius"),
+    (351.65,  "Pisces"),
 ]
 
 def get_iau_sign(tropical_degree):
