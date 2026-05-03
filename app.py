@@ -404,15 +404,19 @@ if st.button("Unveil My Remedy"):
                 utc_dt.year, utc_dt.month, utc_dt.day,
                 utc_dt.hour + utc_dt.minute / 60.0 + utc_dt.second / 3600.0,
             )
+
+            # Call houses BEFORE set_sid_mode — swe.houses returns tropical longitudes
+            # by default. set_sid_mode would shift the output and corrupt the ascendant.
+            cusps, ascmc = swe.houses(jd, location.latitude, location.longitude, b"W")
+            asc_tropical = ascmc[0]  # true tropical ecliptic longitude of the Ascendant
+
+            # Now set sidereal mode to get the ayanamsa for nakshatra calculation
             swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
             ayan = swe.get_ayanamsa_ut(jd)
 
             # --- ASCENDANT ---
-            # ascmc[0] is the tropical ecliptic longitude — the true real-sky position.
-            # IAU sign is read directly from it.
-            # Nakshatra is derived by subtracting Lahiri ayanamsa to anchor to actual stars.
-            cusps, ascmc = swe.houses(jd, location.latitude, location.longitude, b"W")
-            asc_tropical = ascmc[0]
+            # IAU sign from real-sky tropical longitude directly.
+            # Nakshatra from same degree minus ayanamsa, anchoring to actual stars.
             asc_nak      = get_nakshatra(asc_tropical, ayan)
             asc_sign     = get_iau_sign(asc_tropical)
             asc_deg_fmt  = format_degree(asc_tropical, asc_sign)
