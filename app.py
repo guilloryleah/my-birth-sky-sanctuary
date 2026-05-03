@@ -290,47 +290,22 @@ NAKSHATRAS = [
     "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati",
 ]
 
-# Accurate IAU constellation boundaries along the ecliptic (tropical longitude, J2000).
-# Sources: cantab.net/users/davidasher and universalworkshop.com
-# Ophiuchus (241.16°–266.63°) absorbed into Scorpio for traditional 12-sign system.
-IAU_SIGN_BOUNDARIES = [
-    (  0.0,   "Aries"),
-    ( 27.85,  "Taurus"),
-    ( 57.85,  "Gemini"),
-    ( 90.63,  "Cancer"),
-    (118.23,  "Leo"),
-    (173.85,  "Virgo"),
-    (217.81,  "Libra"),
-    (241.16,  "Scorpio"),
-    (266.63,  "Sagittarius"),
-    (299.70,  "Capricorn"),
-    (327.49,  "Aquarius"),
-    (351.65,  "Pisces"),
+SIGNS = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
 ]
 
-def get_iau_sign(tropical_degree):
-    """Return the IAU sign for a tropical ecliptic longitude (0–360°)."""
-    d = tropical_degree % 360
-    sign = "Pisces"
-    for start, name in IAU_SIGN_BOUNDARIES:
-        if d >= start:
-            sign = name
-    return sign
+def get_sign(sidereal_degree):
+    """Sign from sidereal degree using equal 30° divisions — matches Lahiri/Astro.com."""
+    return SIGNS[int(sidereal_degree / 30) % 12]
 
-def format_degree(tropical_degree, sign):
-    """Return whole degrees within the current IAU sign boundary."""
-    d = tropical_degree % 360
-    start = next((s for s, n in IAU_SIGN_BOUNDARIES if n == sign), 0.0)
-    return f"{int(d - start)}°"
+def get_nakshatra(sidereal_degree):
+    """Nakshatra from sidereal degree — 27 equal divisions of 360°."""
+    return NAKSHATRAS[int(sidereal_degree / (360 / 27)) % 27]
 
-def get_nakshatra(tropical_degree, ayan):
-    """
-    Nakshatra anchored to real stars.
-    Subtract Lahiri ayanamsa from tropical degree to get sidereal position,
-    then map onto the 27-nakshatra belt.
-    """
-    sidereal_deg = (tropical_degree - ayan) % 360
-    return NAKSHATRAS[int(sidereal_deg / (360 / 27)) % 27]
+def format_degree(sidereal_degree):
+    """Whole degrees within the current sign (0–29°)."""
+    return f"{int(sidereal_degree % 30)}°"
 
 # --- 4. THE INTERFACE ---
 st.set_page_config(page_title="The Soul Map Remedy", page_icon="🌌")
@@ -400,22 +375,20 @@ if st.button("Unveil My Remedy"):
                 utc_dt.hour + utc_dt.minute / 60.0 + utc_dt.second / 3600.0,
             )
 
-            # Call houses BEFORE set_sid_mode — swe.houses returns tropical longitudes
-            # by default. set_sid_mode would shift the output and corrupt the ascendant.
+            # Call houses BEFORE set_sid_mode to get tropical ascendant
             cusps, ascmc = swe.houses(jd, location.latitude, location.longitude, b"W")
-            asc_tropical = ascmc[0]  # true tropical ecliptic longitude of the Ascendant
+            asc_tropical = ascmc[0]
 
-            # Now set sidereal mode to get the ayanamsa for nakshatra calculation
+            # Set Lahiri sidereal mode for all planet calculations
             swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
             ayan = swe.get_ayanamsa_ut(jd)
 
-            # --- ASCENDANT ---
-            # IAU sign from real-sky tropical longitude directly.
-            # Nakshatra from same degree minus ayanamsa, anchoring to actual stars.
-            asc_nak      = get_nakshatra(asc_tropical, ayan)
-            asc_sign     = get_iau_sign(asc_tropical)
-            asc_deg_fmt  = format_degree(asc_tropical, asc_sign)
-            asc_med      = get_sacred_alignment("Ascendant", asc_nak, asc_sign)
+            # Convert ascendant to sidereal
+            asc_sid     = (asc_tropical - ayan) % 360
+            asc_nak     = get_nakshatra(asc_sid)
+            asc_sign    = get_sign(asc_sid)
+            asc_deg_fmt = format_degree(asc_sid)
+            asc_med     = get_sacred_alignment("Ascendant", asc_nak, asc_sign)
 
             display_name = target_name.strip() or "You"
             st.header(f"The Soul Map of {display_name}")
@@ -430,8 +403,6 @@ if st.button("Unveil My Remedy"):
             st.divider()
 
             # --- PLANETS ---
-            # FLG_SPEED returns tropical ecliptic longitude in res[0] —
-            # the real-sky position matching TheSkyLive.
             planets = [
                 ("Sun",     swe.SUN),
                 ("Moon",    swe.MOON),
@@ -444,14 +415,14 @@ if st.button("Unveil My Remedy"):
             ]
 
             for p_name, p_id in planets:
-                res, _    = swe.calc_ut(jd, p_id, swe.FLG_SPEED)
-                p_tropical = res[0]
-                p_nak      = get_nakshatra(p_tropical, ayan)
-                p_sign     = get_iau_sign(p_tropical)
-                p_deg_fmt  = format_degree(p_tropical, p_sign)
-                med        = get_sacred_alignment(p_name, p_nak, p_sign)
+                res, _  = swe.calc_ut(jd, p_id, swe.FLG_SIDEREAL)
+                p_sid   = res[0]
+                p_nak   = get_nakshatra(p_sid)
+                p_sign  = get_sign(p_sid)
+                p_deg   = format_degree(p_sid)
+                med     = get_sacred_alignment(p_name, p_nak, p_sign)
 
-                with st.expander(f"✨ {p_name}: {p_deg_fmt} {p_nak} in {p_sign}", expanded=True):
+                with st.expander(f"✨ {p_name}: {p_deg} {p_nak} in {p_sign}", expanded=True):
                     st.markdown(f"*{med['poem']}*")
                     st.write(f"🧘 **Yoga Pose:** {med['pose']} | 📍 **Focus:** {med['focus']}")
                     st.write(f"🌿 **Ayurveda Ritual:** {med['ayurveda']}")
@@ -461,14 +432,14 @@ if st.button("Unveil My Remedy"):
                                 st.write(f"• {step}")
 
             # --- KETU (South Node = Rahu + 180°) ---
-            rahu_res, _   = swe.calc_ut(jd, swe.MEAN_NODE, swe.FLG_SPEED)
-            ketu_tropical = (rahu_res[0] + 180) % 360
-            ketu_nak      = get_nakshatra(ketu_tropical, ayan)
-            ketu_sign     = get_iau_sign(ketu_tropical)
-            ketu_deg_fmt  = format_degree(ketu_tropical, ketu_sign)
-            ketu_med      = get_sacred_alignment("Ketu", ketu_nak, ketu_sign)
+            rahu_res, _ = swe.calc_ut(jd, swe.MEAN_NODE, swe.FLG_SIDEREAL)
+            ketu_sid    = (rahu_res[0] + 180) % 360
+            ketu_nak    = get_nakshatra(ketu_sid)
+            ketu_sign   = get_sign(ketu_sid)
+            ketu_deg    = format_degree(ketu_sid)
+            ketu_med    = get_sacred_alignment("Ketu", ketu_nak, ketu_sign)
 
-            with st.expander(f"✨ Ketu: {ketu_deg_fmt} {ketu_nak} in {ketu_sign}", expanded=True):
+            with st.expander(f"✨ Ketu: {ketu_deg} {ketu_nak} in {ketu_sign}", expanded=True):
                 st.markdown(f"*{ketu_med['poem']}*")
                 st.write(f"🧘 **Yoga Pose:** {ketu_med['pose']} | 📍 **Focus:** {ketu_med['focus']}")
                 st.write(f"🌿 **Ayurveda Ritual:** {ketu_med['ayurveda']}")
