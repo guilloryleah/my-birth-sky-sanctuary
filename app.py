@@ -375,16 +375,14 @@ if st.button("Unveil My Remedy"):
                 utc_dt.hour + utc_dt.minute / 60.0 + utc_dt.second / 3600.0,
             )
 
-            # Call houses BEFORE set_sid_mode to get tropical ascendant
-            cusps, ascmc = swe.houses(jd, location.latitude, location.longitude, b"W")
-            asc_tropical = ascmc[0]
-
-            # Set Lahiri sidereal mode for all planet calculations
+            # Set Lahiri sidereal mode ONCE for everything
             swe.set_sid_mode(swe.SIDM_LAHIRI, 0, 0)
             ayan = swe.get_ayanamsa_ut(jd)
 
-            # Convert ascendant to sidereal
-            asc_sid     = (asc_tropical - ayan) % 360
+            # Get sidereal ascendant using houses_ex with SEFLG_SIDEREAL flag
+            # This ensures the ascendant uses the same sidereal system as the planets
+            cusps, ascmc = swe.houses_ex(jd, location.latitude, location.longitude, b"W", swe.FLG_SIDEREAL)
+            asc_sid     = ascmc[0] % 360
             asc_nak     = get_nakshatra(asc_sid)
             asc_sign    = get_sign(asc_sid)
             asc_deg_fmt = format_degree(asc_sid)
