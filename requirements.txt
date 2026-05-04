@@ -1,5 +1,5 @@
 streamlit
 pyswisseph
-pandas
-python-dateutil
 pytz
+timezonefinder
+pandas
