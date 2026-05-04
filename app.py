@@ -7,24 +7,31 @@ from geopy.geocoders import Nominatim
 
 # --- THE COSMIC ENGINE ---
 def get_accurate_sidereal_data(date, time, lat, lon):
+    # Detect the timezone string for the location
     tf = TimezoneFinder()
     timezone_str = tf.timezone_at(lng=lon, lat=lat)
     local_tz = pytz.timezone(timezone_str)
     
-    # Precise conversion to UTC for historical accuracy (handles Chicago 1957 DST)
-    local_dt = local_tz.localize(datetime.datetime.combine(date, time))
+    # THE HISTORICAL LOCK: This forces the engine to look at 1957 DST rules
+    naive_dt = datetime.datetime.combine(date, time)
+    local_dt = local_tz.localize(naive_dt, is_dst=None)
     utc_dt = local_dt.astimezone(pytz.utc)
     
-    jd_utc = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, 
-                        utc_dt.hour + utc_dt.minute/60.0 + utc_dt.second/3600.0)
+    # Calculate Julian Day for the exact UTC moment
+    decimal_hour_utc = utc_dt.hour + utc_dt.minute/60.0 + utc_dt.second/3600.0
+    jd_utc = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, decimal_hour_utc)
     
-    # Strict Sidereal Mandate: Lahiri Ayanamsa
+    # Mandate: Strict Sidereal Science (Lahiri Ayanamsa)
     swe.set_sid_mode(swe.SIDM_LAHIRI)
     
-    # Horizon Logic: Placidus System
+    # Mandate: Placidus House System
     cusps, ascmc = swe.houses_ex(jd_utc, lat, lon, b'P', swe.FLG_SIDEREAL)
     
-    return {"ascendant": ascmc[0], "timezone": timezone_str}
+    return {
+        "ascendant": ascmc[0],
+        "timezone": timezone_str,
+        "is_dst": bool(local_dt.dst())
+    }
 
 # --- THE MODERN STUDIO SANCTUARY ---
 st.set_page_config(page_title="The Sidereal Sanctuary", layout="centered")
@@ -34,10 +41,10 @@ st.markdown("""
     .stApp { background-color: #2b1d16; color: #e5d3b3; }
     .stButton>button { 
         background-color: #3d2b1f; color: #e5d3b3; border: 1px solid #7b5e43; 
-        border-radius: 0px; width: 100%; letter-spacing: 0.2em;
+        border-radius: 0px; width: 100%; letter-spacing: 0.2em; font-weight: bold;
     }
     input { background-color: #3d2b1f !important; color: #e5d3b3 !important; border: 1px solid #7b5e43 !important; }
-    label { color: #a68b7c !important; text-transform: uppercase; letter-spacing: 0.1em; }
+    label { color: #a68b7c !important; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -51,11 +58,9 @@ with st.container():
     with col2:
         birth_time = st.time_input("Birth Time", value=datetime.time(4, 10))
     
-    # New City Input replacing manual coordinates
-    city_input = st.text_input("Birth City (e.g., Chicago, IL, USA)", value="Chicago, IL, USA")
+    city_input = st.text_input("Birth City", value="Chicago, IL, USA")
 
 if st.button("REVEAL THE AVATAR'S PATH"):
-    # Geocoding the city to find lat/long
     geolocator = Nominatim(user_agent="sidereal_sanctuary")
     location = geolocator.geocode(city_input)
     
@@ -64,21 +69,22 @@ if st.button("REVEAL THE AVATAR'S PATH"):
         
         signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", 
                  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]
-        sign_name = signs[int(data['ascendant'] / 30)]
+        sign_index = int(data['ascendant'] / 30)
+        sign_name = signs[sign_index]
         display_deg = data['ascendant'] % 30
 
         st.markdown(f"""
             <div style="border: 1px solid #7b5e43; padding: 30px; background-color: #3d2b1f; margin-top: 25px;">
                 <p style="text-transform: uppercase; letter-spacing: 0.3em; font-size: 0.75rem; color: #a68b7c;">The Avatar's Path</p>
-                <h1 style="color: #e5d3b3; margin-top: 0;">Ascendant: {display_deg:.2f}° {sign_name}</h1>
+                <h1 style="color: #e5d3b3; margin-top: 0; font-family: serif;">Ascendant: {display_deg:.2f}° {sign_name}</h1>
                 <hr style="border: 0; border-top: 1px solid #7b5e43; margin: 20px 0;">
                 <div style="color: #a68b7c; font-size: 0.9rem;">
-                    <p><b>Standard:</b> Sidereal (Lahiri)</p>
-                    <p><b>Horizon:</b> Placidus</p>
+                    <p><b>Standard:</b> Sidereal (Lahiri Ayanamsa)</p>
+                    <p><b>Horizon:</b> Placidus System</p>
                     <p><b>Location:</b> {location.address}</p>
-                    <p><b>Moment:</b> {data['timezone']} (Corrected)</p>
+                    <p><b>Historical Lock:</b> {data['timezone']} (DST Corrected)</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
     else:
-        st.error("The cosmos could not find that location. Please try a more specific city and state.")
+        st.error("Location not found. Please try a more specific city and state.")
