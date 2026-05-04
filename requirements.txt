@@ -2,4 +2,3 @@ streamlit
 pyswisseph
 pytz
 timezonefinder
-pandas
